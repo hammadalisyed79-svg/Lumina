@@ -14,7 +14,7 @@ export const SITE = {
 };
 
 export const ANNOUNCEMENT =
-  "Handmade to order in Britain · Secure checkout via Shopify";
+  "Handmade to order in Britain · Secure checkout with Stripe";
 
 export const NAV_MEGA = {
   lampshades: {

@@ -28,12 +28,12 @@ const FAQS = [
     a: "Many patterns are available as fabric and cushion covers. Browse Fabrics and Cushions, or contact us for matching advice.",
   },
   {
-    q: "Why can’t I complete checkout yet?",
-    a: "Online payment reconnects when Shopify Storefront credentials are configured. Until then you can browse, save wishlists and designs, and enquire via Contact, WhatsApp or Bespoke.",
+    q: "How do I pay?",
+    a: "Checkout runs on this website with Stripe. You add items to your bag, enter delivery details, then complete card payment securely. Orders stay unpaid until Stripe confirms payment.",
   },
   {
     q: "Can I design my own shade?",
-    a: "Yes — use Design your shade to explore shape, fabric, size, lining and fitting. Save the design to your account or send an enquiry while purchasing is being connected.",
+    a: "Yes — use Design your shade to explore shape, fabric, size, lining and fitting, then add the configuration to your bag or save it to your account.",
   },
   {
     q: "Do you work with interior designers?",

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatMoney } from "@/lib/utils";
 
-type ShopifyVariant = {
+type CatalogVariant = {
   id: string;
   title: string;
   sku: string;
@@ -26,21 +26,15 @@ type Props = {
     configEnabled: boolean;
     type: string;
     shapeKey?: string | null;
-    variants: ShopifyVariant[];
+    variants: CatalogVariant[];
   };
 };
 
-/**
- * Purchasable options must map to Shopify variants (shopifyVariantId).
- * Studio configurator pricing is not used for catalog Shopify products.
- */
+/** Purchasable options use local catalog prices — independent of Shopify. */
 export function ProductConfigurator({ product }: Props) {
   const { addProduct } = useCart();
   const purchasable = useMemo(
-    () =>
-      product.variants.filter(
-        (v) => v.active && v.shopifyVariantId && v.priceOverride != null
-      ),
+    () => product.variants.filter((v) => v.active),
     [product.variants]
   );
 
@@ -50,7 +44,6 @@ export function ProductConfigurator({ product }: Props) {
   const selected = purchasable.find((v) => v.id === variantId) || purchasable[0];
   const unitPrice = selected?.priceOverride ?? product.basePrice;
 
-  // Group option1 values for a simpler selector when many variants exist
   const option1Values = useMemo(() => {
     const set = new Set<string>();
     for (const v of purchasable) {
@@ -74,7 +67,7 @@ export function ProductConfigurator({ product }: Props) {
   }
 
   function add() {
-    if (!selected?.shopifyVariantId) return;
+    if (!selected) return;
     addProduct({
       productId: product.id,
       variantId: selected.id,
@@ -93,8 +86,7 @@ export function ProductConfigurator({ product }: Props) {
     return (
       <div className="border-t border-[color:var(--line)] pt-6 space-y-3">
         <p className="text-sm text-[color:var(--muted)]">
-          This product has no purchasable Shopify variants mapped yet. Checkout is
-          unavailable for this item.
+          This product has no active options yet. Contact the studio to order.
         </p>
       </div>
     );
@@ -148,17 +140,11 @@ export function ProductConfigurator({ product }: Props) {
         <p className="font-medium">{formatMoney(unitPrice)}</p>
       </div>
 
-      <button
-        type="button"
-        className="btn-primary w-full md:w-auto"
-        onClick={add}
-        disabled={!selected?.shopifyVariantId}
-      >
+      <button type="button" className="btn-primary w-full md:w-auto" onClick={add} disabled={!selected}>
         Add to bag
       </button>
       <p className="text-xs text-[color:var(--muted)]">
-        Secure payment opens on Shopify. Shipping is confirmed there; this site never marks an
-        order paid until Shopify confirms payment.
+        Secure payment with Stripe. Shipping is calculated at checkout from your studio rates.
       </p>
     </div>
   );

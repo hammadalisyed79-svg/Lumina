@@ -293,9 +293,8 @@ export default async function HomePage() {
             <p className="eyebrow text-[color:var(--champagne)] mb-3">Made for your room</p>
             <h2 className="font-display text-4xl md:text-5xl mb-4">Design your shade</h2>
             <p className="text-white/75 max-w-md mb-6">
-              Explore shape, fabric, size, lining and fitting in the studio tool. Purchasing a
-              configured shade opens once each option maps to a Shopify variant — until then,
-              save a design or enquire with the studio.
+              Explore shape, fabric, size, lining and fitting in the studio tool, then add your
+              configuration to the bag and pay securely with Stripe on this site.
             </p>
             <Link href="/design-your-shade" className="btn-primary">
               Start designing

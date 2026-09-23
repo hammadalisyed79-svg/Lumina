@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { calculateUnitPrice } from "@/lib/pricing";
 import { formatMoney } from "@/lib/utils";
+import { useCart } from "@/components/cart/CartProvider";
+import { SITE } from "@/lib/site";
 
 type Opt = { id: string; slug: string; name: string; priceMod: number; imageUrl?: string; description?: string; diameterCm?: number | null; heightCm?: number | null };
 type Shape = { key: string; name: string; basePrice: number; imageUrl?: string; description?: string };
@@ -12,6 +14,7 @@ type Shape = { key: string; name: string; basePrice: number; imageUrl?: string; 
 const STEPS = ["Shape", "Fabric", "Size", "Lining", "Fitting", "Review"] as const;
 
 export default function DesignYourShadePage() {
+  const { addConfigured, setDrawerOpen } = useCart();
   const [step, setStep] = useState(0);
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [fabrics, setFabrics] = useState<Opt[]>([]);
@@ -208,22 +211,42 @@ export default function DesignYourShadePage() {
                 <li className="font-medium pt-2">Price: {formatMoney(unitPrice)}</li>
               </ul>
               <div className="flex flex-wrap gap-3 pt-4">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => {
+                    if (!shape || !fabric || !size || !lining || !fitting) return;
+                    addConfigured({
+                      title: `Custom ${shape.name} · ${fabric.name}`,
+                      imageUrl: previewSrc,
+                      quantity: 1,
+                      config: {
+                        shapeKey: shape.key,
+                        shapeName: shape.name,
+                        fabricSlug: fabric.slug,
+                        fabricName: fabric.name,
+                        sizeSlug: size.slug,
+                        sizeName: size.name,
+                        liningSlug: lining.slug,
+                        liningName: lining.name,
+                        fittingSlug: fitting.slug,
+                        fittingName: fitting.name,
+                        unitPrice,
+                      },
+                    });
+                    setDrawerOpen(true);
+                  }}
+                >
+                  Add to bag
+                </button>
                 <Link
                   href={`/shop/lampshades?q=${encodeURIComponent(fabric?.name?.split(" ").slice(0, 3).join(" ") || "")}`}
-                  className="btn-primary"
+                  className="btn-secondary"
                 >
                   Shop matching shades
                 </Link>
-                <Link
-                  href={`/bespoke?subject=${encodeURIComponent(`Custom ${shape?.name || ""} / ${fabric?.name || ""}`)}`}
-                  className="btn-secondary"
-                >
-                  Enquire with studio
-                </Link>
                 <a
-                  href={`https://wa.me/447889451166?text=${encodeURIComponent(
-                    `Hi Lumina Hub — I'd like a custom ${shape?.name} shade in ${fabric?.name}, size ${size?.name}, ${lining?.name} lining, ${fitting?.name} fitting. Indicative price £${unitPrice.toFixed(2)}.`
-                  )}`}
+                  href={SITE.whatsapp}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-ghost"
@@ -235,9 +258,7 @@ export default function DesignYourShadePage() {
                 </button>
               </div>
               <p className="text-xs text-[color:var(--muted)]">
-                The studio tool is for exploring options. Purchases use catalogue products with
-                Shopify variants (Shop matching shades). Custom builds are fulfilled via enquiry —
-                indicative price is guidance only.
+                Pay on this site with Stripe. Studio price updates as you choose options.
               </p>
               {saved && <p className="text-sm text-[color:var(--muted)]">Design saved to your account / guest key.</p>}
             </div>

@@ -1,5 +1,5 @@
 import { requirePermission } from "@/lib/auth/guards";
-import { isCheckoutLive, isShopifyConfigured } from "@/lib/shopify";
+import { isStripeConfigured } from "@/lib/stripe";
 import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -10,18 +10,28 @@ export default async function SettingsPage() {
   const resendOk = Boolean(
     process.env.RESEND_API_KEY && !process.env.RESEND_API_KEY.includes("placeholder")
   );
-  const checkoutLive = isCheckoutLive();
-  const storefrontApi = isShopifyConfigured();
+  const stripeOk = isStripeConfigured();
 
   const rows = [
     { label: "Site name", value: SITE.name },
     { label: "Email", value: SITE.email },
     { label: "Phone", value: SITE.phone },
-    { label: "Checkout live", value: checkoutLive ? "Yes (permalink or Storefront)" : "No" },
-    { label: "Shopify Storefront API", value: storefrontApi ? "Configured" : "Not set (using cart permalink)" },
+    { label: "Checkout", value: stripeOk ? "Stripe configured" : "Set STRIPE_SECRET_KEY" },
     {
-      label: "Checkout domain",
-      value: process.env.SHOPIFY_CHECKOUT_DOMAIN || process.env.SHOPIFY_STORE_DOMAIN || "www.luminahub.co.uk",
+      label: "Stripe publishable",
+      value:
+        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY &&
+        !process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.includes("placeholder")
+          ? "Set"
+          : "Missing",
+    },
+    {
+      label: "Stripe webhook",
+      value:
+        process.env.STRIPE_WEBHOOK_SECRET &&
+        !process.env.STRIPE_WEBHOOK_SECRET.includes("placeholder")
+          ? "Set"
+          : "Missing (needed to mark orders paid)",
     },
     { label: "Resend email", value: resendOk ? "Live" : "Dev skip (set RESEND_API_KEY)" },
     { label: "Email from", value: process.env.EMAIL_FROM || "default" },
@@ -31,7 +41,8 @@ export default async function SettingsPage() {
     <div>
       <h1 className="font-display text-4xl mb-2">Settings</h1>
       <p className="text-sm text-[color:var(--muted)] mb-8">
-        Environment and commerce status. Secrets are edited in hosting env vars, not here.
+        This storefront is independent — payments run through Stripe on Lumina Hub. Secrets are
+        edited in hosting env vars.
       </p>
       <div className="border border-[color:var(--line)] bg-white/70 overflow-hidden max-w-2xl">
         <table className="w-full text-sm">
@@ -46,8 +57,8 @@ export default async function SettingsPage() {
         </table>
       </div>
       <p className="text-sm text-[color:var(--muted)] mt-6 max-w-2xl">
-        To send password-reset and order emails, set a real <code>RESEND_API_KEY</code> and verified{" "}
-        <code>EMAIL_FROM</code>. Shipping methods are managed under Admin → Shipping.
+        Point Stripe webhook to <code>/api/webhooks/stripe</code> for{" "}
+        <code>checkout.session.completed</code>. Shipping methods are under Admin → Shipping.
       </p>
     </div>
   );

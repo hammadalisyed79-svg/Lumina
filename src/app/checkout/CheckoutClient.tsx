@@ -182,7 +182,7 @@ export default function CheckoutClient() {
                 {methods.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name}
-                    {m.price > 0 ? ` — ${formatMoney(m.price)}` : " — set at Shopify checkout"}
+                    {m.price > 0 ? ` — ${formatMoney(m.price)}` : " — free / calculated"}
                   </option>
                 ))}
               </select>
@@ -204,11 +204,11 @@ export default function CheckoutClient() {
               </p>
             )}
             <button type="submit" className="btn-primary w-full" disabled={loading}>
-              {loading ? "Processing…" : "Continue to Shopify checkout"}
+              {loading ? "Processing…" : "Pay securely with Stripe"}
             </button>
             <p className="text-xs text-[color:var(--muted)]">
-              You will complete payment on Shopify. Orders stay unpaid here until Shopify confirms
-              payment via webhook (or you reconcile manually).
+              Payment is processed by Stripe on this site. Orders stay unpaid until Stripe confirms
+              payment via webhook.
             </p>
           </form>
         )}
