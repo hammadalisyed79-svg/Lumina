@@ -75,13 +75,26 @@ Seeded from env (`ADMIN_EMAIL` / `ADMIN_PASSWORD`):
 
 Demo customer: `customer@example.com` / `Customer123!`
 
-## Stripe
+## Stripe (go-live)
 
-1. Create a Stripe account and get test keys.
-2. Set `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
-3. Forward webhooks locally: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
-4. Set `STRIPE_WEBHOOK_SECRET` from the listen command.
-5. When keys are placeholders, checkout marks orders paid in **dev mode** so the flow remains testable.
+Required Vercel env vars (Production):
+
+| Variable | Example |
+|----------|---------|
+| `STRIPE_SECRET_KEY` | `sk_test_…` then `sk_live_…` |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_test_…` / `pk_live_…` |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_…` from the webhook endpoint |
+| `NEXT_PUBLIC_SITE_URL` | `https://luminahub-lyart.vercel.app` |
+
+1. Stripe Dashboard → Developers → API keys.
+2. Add the three Stripe vars in Vercel → Settings → Environment Variables → Redeploy.
+3. Stripe → Developers → Webhooks → Add endpoint  
+   `https://YOUR_DOMAIN/api/webhooks/stripe`  
+   Listen for `checkout.session.completed`. Copy signing secret → `STRIPE_WEBHOOK_SECRET`.
+4. Local: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
+5. Place a small test checkout; confirm `/admin/orders` shows **PAID** after Stripe returns.
+
+Admin → Settings shows live readiness (secret / publishable / webhook).
 
 ## Images
 

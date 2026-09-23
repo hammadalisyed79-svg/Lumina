@@ -79,9 +79,13 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "Checkout is not live. Set STRIPE_SECRET_KEY (and STRIPE_WEBHOOK_SECRET for payment confirmation).",
+          "Checkout is not live. Add Stripe keys in Vercel env (STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET) and redeploy.",
         mode: "blocked",
-        blockers: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"],
+        blockers: [
+          "STRIPE_SECRET_KEY",
+          "STRIPE_WEBHOOK_SECRET",
+          "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+        ],
       },
       { status: 503 }
     );
