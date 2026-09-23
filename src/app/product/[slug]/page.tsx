@@ -38,6 +38,7 @@ export default async function ProductPage({ params }: Props) {
 
   const gallery = product.images.filter((i) => isWebImageUrl(i.url));
   const primaryImage = gallery[0]?.url;
+  const displayTitle = shortDisplayTitle(product.title, 72);
 
   const related = product.relatedFrom
     .map((r) => {
@@ -80,111 +81,137 @@ export default async function ProductPage({ params }: Props) {
     },
   };
 
+  const fallbackImg =
+    "/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg";
+
   return (
-    <div className="container-site py-8 md:py-12">
+    <div>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <nav className="text-sm text-[color:var(--muted)] mb-4 md:mb-6">
-        <Link href="/">Home</Link>
-        <span className="mx-2">/</span>
-        <Link href="/shop/lampshades">Shop</Link>
-        <span className="mx-2">/</span>
-        <span className="text-[color:var(--ink)]">{shortDisplayTitle(product.title, 40)}</span>
-      </nav>
 
-      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-        <div className="grid grid-cols-2 gap-3">
-          {(gallery.length
-            ? gallery
-            : [{ id: "ph", url: primaryImage || "/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg", alt: product.title }]
-          ).map((img, idx) => (
-            <div
-              key={img.id}
-              className={`relative overflow-hidden bg-[color:var(--stone)] ${idx === 0 ? "col-span-2 aspect-[4/5]" : "aspect-square"}`}
-            >
-              <Image
-                src={img.url}
-                alt={img.alt || product.title}
-                fill
-                unoptimized
-                className="object-cover object-center"
-                priority={idx === 0}
-                sizes="(max-width:1024px) 100vw, 50vw"
-              />
+      <div className="container-site py-8 md:py-12">
+        <nav className="page-crumb">
+          <Link href="/">Home</Link>
+          <span className="mx-2 text-line">/</span>
+          <Link href="/shop/lampshades">Shop</Link>
+          <span className="mx-2 text-line">/</span>
+          <span className="text-ink">{shortDisplayTitle(product.title, 36)}</span>
+        </nav>
+
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
+          <div className="grid grid-cols-2 gap-3">
+            {(gallery.length
+              ? gallery
+              : [{ id: "ph", url: primaryImage || fallbackImg, alt: product.title }]
+            ).map((img, idx) => (
+              <div
+                key={img.id}
+                className={`group relative overflow-hidden bg-stone ${
+                  idx === 0 ? "col-span-2 aspect-[4/5]" : "aspect-square"
+                }`}
+              >
+                <Image
+                  src={img.url}
+                  alt={img.alt || product.title}
+                  fill
+                  unoptimized
+                  className="object-cover object-center img-zoom"
+                  priority={idx === 0}
+                  sizes="(max-width:1024px) 100vw, 50vw"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <p className="eyebrow mb-3">
+              {product.type === "LAMPSHADE"
+                ? "Lampshade"
+                : product.type === "FABRIC"
+                  ? "Fabric"
+                  : product.type === "CUSHION"
+                    ? "Cushion"
+                    : "Studio piece"}
+            </p>
+            <h1 className="font-display text-[2.15rem] sm:text-4xl md:text-5xl leading-[1.05] tracking-tight mb-3">
+              {displayTitle}
+            </h1>
+            {product.subtitle && (
+              <p className="text-muted mb-4 leading-relaxed">{product.subtitle}</p>
+            )}
+            <p className="text-lg tracking-wide mb-6">
+              From {formatMoney(product.basePrice)}
+            </p>
+            <div className="lux-rule" />
+            <p className="prose-muted mb-8 max-w-md">
+              {product.shortDesc || product.description.slice(0, 240)}
+            </p>
+
+            <ProductConfigurator
+              product={{
+                id: product.id,
+                slug: product.slug,
+                title: product.title,
+                basePrice: toNumber(product.basePrice),
+                imageUrl: primaryImage || gallery[0]?.url,
+                configEnabled: product.configEnabled,
+                type: product.type,
+                shapeKey: product.shapeKey,
+                variants: product.variants.map((v) => ({
+                  id: v.id,
+                  title: v.title,
+                  sku: v.sku,
+                  priceOverride: v.priceOverride ? toNumber(v.priceOverride) : null,
+                  shopifyVariantId: v.shopifyVariantId,
+                  option1: v.option1,
+                  option2: v.option2,
+                  option3: v.option3,
+                  active: v.active,
+                })),
+              }}
+            />
+
+            <ProductAccordions
+              description={product.description}
+              leadTimeDays={product.leadTimeDays}
+            />
+
+            <div className="mt-12 pt-2">
+              <p className="eyebrow mb-2">Reviews</p>
+              <h2 className="font-display text-3xl tracking-tight mb-6">Kind words</h2>
+              <div className="space-y-5 mb-8">
+                {product.reviews.length === 0 && (
+                  <p className="prose-muted text-sm">No reviews yet — be the first.</p>
+                )}
+                {product.reviews.map((r) => (
+                  <div key={r.id} className="border-t border-line pt-5">
+                    <p className="text-bronze text-sm tracking-widest">
+                      {"★".repeat(r.rating)}
+                    </p>
+                    {r.title && <p className="font-medium mt-2">{r.title}</p>}
+                    <p className="prose-muted text-sm mt-1.5 leading-relaxed">{r.body}</p>
+                    <p className="text-xs text-muted mt-2">{r.author}</p>
+                  </div>
+                ))}
+              </div>
+              <ReviewForm productId={product.id} />
             </div>
-          ))}
-        </div>
-
-        <div>
-          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl mb-2">
-            {shortDisplayTitle(product.title, 72)}
-          </h1>
-          {product.subtitle && (
-            <p className="text-[color:var(--muted)] mb-4">{product.subtitle}</p>
-          )}
-          <p className="text-lg mb-6">From {formatMoney(product.basePrice)}</p>
-          <p className="prose-muted mb-8">{product.shortDesc || product.description.slice(0, 220)}</p>
-
-          <ProductConfigurator
-            product={{
-              id: product.id,
-              slug: product.slug,
-              title: product.title,
-              basePrice: toNumber(product.basePrice),
-              imageUrl: primaryImage || gallery[0]?.url,
-              configEnabled: product.configEnabled,
-              type: product.type,
-              shapeKey: product.shapeKey,
-              variants: product.variants.map((v) => ({
-                id: v.id,
-                title: v.title,
-                sku: v.sku,
-                priceOverride: v.priceOverride ? toNumber(v.priceOverride) : null,
-                shopifyVariantId: v.shopifyVariantId,
-                option1: v.option1,
-                option2: v.option2,
-                option3: v.option3,
-                active: v.active,
-              })),
-            }}
-          />
-
-          <ProductAccordions
-            description={product.description}
-            leadTimeDays={product.leadTimeDays}
-          />
-
-          <div className="mt-10">
-            <h2 className="font-display text-2xl mb-4">Reviews</h2>
-            <div className="space-y-5 mb-8">
-              {product.reviews.length === 0 && (
-                <p className="prose-muted text-sm">No reviews yet — be the first.</p>
-              )}
-              {product.reviews.map((r) => (
-                <div key={r.id} className="border-t border-[color:var(--line)] pt-4">
-                  <p className="text-[color:var(--bronze)] text-sm tracking-widest">
-                    {"★".repeat(r.rating)}
-                  </p>
-                  {r.title && <p className="font-medium mt-1">{r.title}</p>}
-                  <p className="prose-muted text-sm mt-1">{r.body}</p>
-                  <p className="text-xs text-[color:var(--muted)] mt-2">{r.author}</p>
-                </div>
-              ))}
-            </div>
-            <ReviewForm productId={product.id} />
           </div>
         </div>
       </div>
 
       {related.length > 0 && (
-        <section className="mt-20">
-          <h2 className="font-display text-3xl mb-8">You may also like</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {related.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
+        <section className="border-t border-line bg-ivory/40">
+          <div className="container-site section-pad">
+            <p className="eyebrow mb-3">Continue</p>
+            <h2 className="section-title mb-8 md:mb-10">You may also like</h2>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-7">
+              {related.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
           </div>
         </section>
       )}

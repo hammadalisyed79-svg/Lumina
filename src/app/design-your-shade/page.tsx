@@ -110,199 +110,246 @@ export default function DesignYourShadePage() {
     if (res.ok) setSaved(true);
   }
 
-  return (
-    <div className="container-site py-10 md:py-14">
-      <p className="eyebrow mb-2">{COPY.designPage.eyebrow}</p>
-      <h1 className="font-display text-4xl md:text-5xl mb-3">{COPY.designPage.title}</h1>
-      <p className="prose-muted max-w-2xl mb-10">{COPY.designPage.body}</p>
+  const progress = ((step + 1) / STEPS.length) * 100;
 
-      <div className="flex flex-wrap gap-2 mb-8 md:mb-10">
-        {STEPS.map((label, i) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => setStep(i)}
-            className={`px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs tracking-wide uppercase border ${
-              step === i
-                ? "border-[color:var(--ink)] bg-[color:var(--ink)] text-white"
-                : "border-[color:var(--line)]"
-            }`}
-          >
-            <span className="sm:hidden">{i + 1}</span>
-            <span className="hidden sm:inline">
-              {i + 1}. {label}
-            </span>
-          </button>
-        ))}
+  return (
+    <div className="bg-paper">
+      <div className="border-b border-line bg-ivory/70">
+        <div className="container-site py-10 md:py-14 max-w-3xl">
+          <p className="eyebrow mb-3">{COPY.designPage.eyebrow}</p>
+          <h1 className="section-title mb-3">{COPY.designPage.title}</h1>
+          <div className="lux-rule" />
+          <p className="prose-muted">{COPY.designPage.body}</p>
+        </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-12">
-        <div className="relative aspect-[4/5] bg-[color:var(--stone)]">
-          <Image
-            src={previewSrc}
-            alt="Shade preview"
-            fill
-            unoptimized
-            className="object-cover object-center"
-            sizes="(max-width:1024px) 100vw, 50vw"
-          />
-          <div className="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/55 to-transparent text-white">
-            <p className="font-display text-3xl">{shape?.name || "Shade"}</p>
-            <p className="text-sm text-white/85">{fabric?.name}</p>
-            <p className="mt-2 text-lg">{formatMoney(unitPrice)}</p>
+      <div className="container-site py-10 md:py-14">
+        <div className="mb-8 md:mb-10">
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <p className="text-xs tracking-[0.16em] uppercase text-muted">
+              Step {step + 1} of {STEPS.length}
+            </p>
+            <p className="text-xs tracking-[0.14em] uppercase text-bronze hidden sm:block">
+              {STEPS[step]}
+            </p>
+          </div>
+          <div className="h-px bg-line overflow-hidden">
+            <div
+              className="h-full bg-bronze transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {STEPS.map((label, i) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setStep(i)}
+                className={`px-3 py-1.5 text-[11px] tracking-[0.12em] uppercase transition-colors ${
+                  step === i
+                    ? "bg-ink text-ivory"
+                    : i < step
+                      ? "bg-stone text-ink"
+                      : "text-muted hover:text-ink"
+                }`}
+              >
+                <span className="sm:hidden">{i + 1}</span>
+                <span className="hidden sm:inline">
+                  {i + 1}. {label}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
 
-        <div>
-          {step === 0 && (
-            <OptionGrid
-              label="Choose a shape"
-              options={shapes.map((s) => ({
-                id: s.key,
-                name: s.name,
-                meta: s.description,
-                image: usableImage(s.imageUrl) || undefined,
-              }))}
-              value={shapeKey}
-              onChange={setShapeKey}
-            />
-          )}
-          {step === 1 && (
-            <OptionGrid
-              label="Choose a fabric"
-              options={fabrics.map((f) => ({
-                id: f.id,
-                name: f.name,
-                meta: f.priceMod ? `+£${f.priceMod}` : "Included",
-                image: usableImage(f.imageUrl) || undefined,
-              }))}
-              value={fabricId}
-              onChange={setFabricId}
-            />
-          )}
-          {step === 2 && (
-            <OptionGrid
-              label="Choose a size"
-              options={sizes.map((s) => ({
-                id: s.id,
-                name: s.name,
-                meta: s.priceMod ? `+£${s.priceMod}` : "Base size",
-              }))}
-              value={sizeId}
-              onChange={setSizeId}
-            />
-          )}
-          {step === 3 && (
-            <OptionGrid
-              label="Choose a lining"
-              options={linings.map((l) => ({
-                id: l.id,
-                name: l.name,
-                meta: l.priceMod ? `+£${l.priceMod}` : "Included",
-              }))}
-              value={liningId}
-              onChange={setLiningId}
-            />
-          )}
-          {step === 4 && (
-            <OptionGrid
-              label="Choose a fitting"
-              options={fittings.map((f) => ({
-                id: f.id,
-                name: f.name,
-                meta: f.description || (f.priceMod ? `+£${f.priceMod}` : "Included"),
-              }))}
-              value={fittingId}
-              onChange={setFittingId}
-            />
-          )}
-          {step === 5 && (
-            <div className="space-y-4 border border-[color:var(--line)] p-6 bg-white/60">
-              <h2 className="font-display text-3xl">Your configuration</h2>
-              <ul className="space-y-2 text-[15px]">
-                <li>Shape: {shape?.name}</li>
-                <li>Fabric: {fabric?.name}</li>
-                <li>Size: {size?.name}</li>
-                <li>Lining: {lining?.name}</li>
-                <li>Fitting: {fitting?.name}</li>
-                <li className="font-medium pt-2">Price: {formatMoney(unitPrice)}</li>
-              </ul>
-              <div className="flex flex-wrap gap-3 pt-4">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <div className="relative aspect-[4/5] overflow-hidden bg-stone group">
+              <Image
+                src={previewSrc}
+                alt="Shade preview"
+                fill
+                unoptimized
+                className="object-cover object-center img-zoom"
+                sizes="(max-width:1024px) 100vw, 50vw"
+              />
+              <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 bg-gradient-to-t from-[rgba(20,17,14,0.78)] via-[rgba(20,17,14,0.35)] to-transparent text-white">
+                <p className="eyebrow text-champagne mb-2">Live preview</p>
+                <p className="font-display text-3xl md:text-4xl tracking-tight">
+                  {shape?.name || "Shade"}
+                </p>
+                <p className="text-sm text-white/80 mt-1">{fabric?.name}</p>
+                <p className="mt-3 text-lg tracking-wide">{formatMoney(unitPrice)}</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            {step === 0 && (
+              <OptionGrid
+                label="Choose a silhouette"
+                options={shapes.map((s) => ({
+                  id: s.key,
+                  name: s.name,
+                  meta: s.description,
+                  image: usableImage(s.imageUrl) || undefined,
+                }))}
+                value={shapeKey}
+                onChange={setShapeKey}
+              />
+            )}
+            {step === 1 && (
+              <OptionGrid
+                label="Choose a fabric"
+                options={fabrics.map((f) => ({
+                  id: f.id,
+                  name: f.name,
+                  meta: f.priceMod ? `+£${f.priceMod}` : "Included",
+                  image: usableImage(f.imageUrl) || undefined,
+                }))}
+                value={fabricId}
+                onChange={setFabricId}
+              />
+            )}
+            {step === 2 && (
+              <OptionGrid
+                label="Choose a size"
+                options={sizes.map((s) => ({
+                  id: s.id,
+                  name: s.name,
+                  meta: s.priceMod ? `+£${s.priceMod}` : "Base size",
+                }))}
+                value={sizeId}
+                onChange={setSizeId}
+              />
+            )}
+            {step === 3 && (
+              <OptionGrid
+                label="Choose a lining"
+                options={linings.map((l) => ({
+                  id: l.id,
+                  name: l.name,
+                  meta: l.priceMod ? `+£${l.priceMod}` : "Included",
+                }))}
+                value={liningId}
+                onChange={setLiningId}
+              />
+            )}
+            {step === 4 && (
+              <OptionGrid
+                label="Choose a fitting"
+                options={fittings.map((f) => ({
+                  id: f.id,
+                  name: f.name,
+                  meta: f.description || (f.priceMod ? `+£${f.priceMod}` : "Included"),
+                }))}
+                value={fittingId}
+                onChange={setFittingId}
+              />
+            )}
+            {step === 5 && (
+              <div className="surface-panel p-6 md:p-8 space-y-5">
+                <div>
+                  <p className="eyebrow mb-2">Review</p>
+                  <h2 className="font-display text-3xl md:text-4xl tracking-tight">
+                    Your configuration
+                  </h2>
+                  <div className="lux-rule" />
+                </div>
+                <dl className="space-y-3 text-[15px]">
+                  {[
+                    ["Shape", shape?.name],
+                    ["Fabric", fabric?.name],
+                    ["Size", size?.name],
+                    ["Lining", lining?.name],
+                    ["Fitting", fitting?.name],
+                  ].map(([k, v]) => (
+                    <div key={k} className="flex justify-between gap-4 border-b border-line/80 pb-2">
+                      <dt className="text-muted text-xs tracking-[0.12em] uppercase">{k}</dt>
+                      <dd className="text-right">{v}</dd>
+                    </div>
+                  ))}
+                  <div className="flex justify-between gap-4 pt-2 font-medium text-lg">
+                    <dt>Total</dt>
+                    <dd>{formatMoney(unitPrice)}</dd>
+                  </div>
+                </dl>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    onClick={() => {
+                      if (!shape || !fabric || !size || !lining || !fitting) return;
+                      addConfigured({
+                        title: `Custom ${shape.name} · ${fabric.name}`,
+                        imageUrl: previewSrc,
+                        quantity: 1,
+                        config: {
+                          shapeKey: shape.key,
+                          shapeName: shape.name,
+                          fabricSlug: fabric.slug,
+                          fabricName: fabric.name,
+                          sizeSlug: size.slug,
+                          sizeName: size.name,
+                          liningSlug: lining.slug,
+                          liningName: lining.name,
+                          fittingSlug: fitting.slug,
+                          fittingName: fitting.name,
+                          unitPrice,
+                        },
+                      });
+                      setDrawerOpen(true);
+                    }}
+                  >
+                    Add to bag
+                  </button>
+                  <Link
+                    href={`/shop/lampshades?q=${encodeURIComponent(fabric?.name?.split(" ").slice(0, 3).join(" ") || "")}`}
+                    className="btn-secondary"
+                  >
+                    Matching shades
+                  </Link>
+                  <a
+                    href={SITE.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-quiet"
+                  >
+                    WhatsApp
+                  </a>
+                  <button type="button" className="btn-quiet" onClick={saveDesign}>
+                    Save design
+                  </button>
+                </div>
+                <p className="text-xs text-muted leading-relaxed">
+                  Made to order in Britain. Pay securely with Stripe — shipping is calculated at
+                  checkout from studio rates.
+                </p>
+                {saved && (
+                  <p className="text-sm text-bronze">Design saved to your account.</p>
+                )}
+              </div>
+            )}
+
+            <div className="flex justify-between mt-10 pt-6 border-t border-line">
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={step === 0}
+                onClick={() => setStep((s) => Math.max(0, s - 1))}
+              >
+                Back
+              </button>
+              {step < STEPS.length - 1 && (
                 <button
                   type="button"
                   className="btn-primary"
-                  onClick={() => {
-                    if (!shape || !fabric || !size || !lining || !fitting) return;
-                    addConfigured({
-                      title: `Custom ${shape.name} · ${fabric.name}`,
-                      imageUrl: previewSrc,
-                      quantity: 1,
-                      config: {
-                        shapeKey: shape.key,
-                        shapeName: shape.name,
-                        fabricSlug: fabric.slug,
-                        fabricName: fabric.name,
-                        sizeSlug: size.slug,
-                        sizeName: size.name,
-                        liningSlug: lining.slug,
-                        liningName: lining.name,
-                        fittingSlug: fitting.slug,
-                        fittingName: fitting.name,
-                        unitPrice,
-                      },
-                    });
-                    setDrawerOpen(true);
-                  }}
+                  onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
                 >
-                  Add to bag
+                  Continue
                 </button>
-                <Link
-                  href={`/shop/lampshades?q=${encodeURIComponent(fabric?.name?.split(" ").slice(0, 3).join(" ") || "")}`}
-                  className="btn-secondary"
-                >
-                  Shop matching shades
-                </Link>
-                <a
-                  href={SITE.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-ghost"
-                >
-                  WhatsApp
-                </a>
-                <button type="button" className="btn-ghost" onClick={saveDesign}>
-                  Save design
-                </button>
-              </div>
-              <p className="text-xs text-[color:var(--muted)]">
-                Pay on this site with Stripe. Studio price updates as you choose options.
-              </p>
-              {saved && (
-                <p className="text-sm text-[color:var(--muted)]">
-                  Design saved to your account / guest key.
-                </p>
               )}
             </div>
-          )}
-
-          <div className="flex justify-between mt-8">
-            <button
-              type="button"
-              className="btn-secondary"
-              disabled={step === 0}
-              onClick={() => setStep((s) => Math.max(0, s - 1))}
-            >
-              Back
-            </button>
-            {step < STEPS.length - 1 && (
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
-              >
-                Continue
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -323,21 +370,18 @@ function OptionGrid({
 }) {
   return (
     <div>
-      <h2 className="font-display text-3xl mb-6">{label}</h2>
+      <h2 className="font-display text-3xl md:text-4xl tracking-tight mb-2">{label}</h2>
+      <div className="lux-rule" />
       <div className="grid sm:grid-cols-2 gap-3">
         {options.map((o) => (
           <button
             key={o.id}
             type="button"
             onClick={() => onChange(o.id)}
-            className={`text-left border p-4 transition-colors ${
-              value === o.id
-                ? "border-[color:var(--ink)] bg-white"
-                : "border-[color:var(--line)] hover:border-[color:var(--bronze)]"
-            }`}
+            className={`studio-option ${value === o.id ? "is-selected" : ""}`}
           >
             {o.image && (
-              <div className="relative h-24 mb-3 bg-[color:var(--stone)] overflow-hidden">
+              <div className="relative h-28 mb-3 bg-stone overflow-hidden">
                 <Image
                   src={o.image}
                   alt=""
@@ -348,8 +392,8 @@ function OptionGrid({
                 />
               </div>
             )}
-            <p className="font-medium">{o.name}</p>
-            {o.meta && <p className="text-sm text-[color:var(--muted)] mt-1">{o.meta}</p>}
+            <p className="font-medium text-[15px]">{o.name}</p>
+            {o.meta && <p className="text-sm text-muted mt-1.5 leading-snug">{o.meta}</p>}
           </button>
         ))}
       </div>

@@ -96,7 +96,7 @@ export function ProductConfigurator({ product }: Props) {
     <div className="space-y-5 border-t border-[color:var(--line)] pt-6">
       {option1Values.length > 1 && (
         <label className="block space-y-2">
-          <span className="text-sm font-medium">Option</span>
+          <span className="label">Option</span>
           <select
             className="input"
             value={option1 || ""}
@@ -112,7 +112,7 @@ export function ProductConfigurator({ product }: Props) {
       )}
 
       <label className="block space-y-2">
-        <span className="text-sm font-medium">Variant</span>
+        <span className="label">Variant</span>
         <select
           className="input"
           value={selected?.id || ""}
@@ -128,15 +128,18 @@ export function ProductConfigurator({ product }: Props) {
       </label>
 
       <div className="flex items-center gap-4">
-        <label className="flex items-center border border-[color:var(--line)]">
-          <button type="button" className="px-3 py-2" onClick={() => setQty((q) => Math.max(1, q - 1))}>
-            −
-          </button>
-          <span className="px-3">{qty}</span>
-          <button type="button" className="px-3 py-2" onClick={() => setQty((q) => q + 1)}>
-            +
-          </button>
-        </label>
+        <div>
+          <span className="label">Quantity</span>
+          <div className="qty-control">
+            <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))}>
+              −
+            </button>
+            <span>{qty}</span>
+            <button type="button" onClick={() => setQty((q) => q + 1)}>
+              +
+            </button>
+          </div>
+        </div>
         <p className="font-medium">{formatMoney(unitPrice)}</p>
       </div>
 

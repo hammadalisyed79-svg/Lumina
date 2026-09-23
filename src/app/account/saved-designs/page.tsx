@@ -52,7 +52,7 @@ export default async function SavedDesignsPage() {
                   <Link href="/design-your-shade" className="btn-secondary text-sm">
                     Open studio
                   </Link>
-                  <Link href="/bespoke" className="btn-ghost text-sm">
+                  <Link href="/bespoke" className="btn-quiet text-sm">
                     Enquire
                   </Link>
                 </div>

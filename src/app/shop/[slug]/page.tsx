@@ -57,6 +57,12 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
     CUSHION: "Cushions",
     KIT: "Kits",
   };
+  const typeEyebrows: Partial<Record<ProductType, string>> = {
+    LAMPSHADE: "Lampshade",
+    FABRIC: "Fabric",
+    CUSHION: "Cushion",
+    KIT: "Kit",
+  };
   const title =
     (type ? typeTitles[type] : null) ||
     collection?.title ||
@@ -64,17 +70,21 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
 
   const showShape = type === "LAMPSHADE" || (!type && Boolean(collection));
 
+  const eyebrow = type ? typeEyebrows[type] || "Shop" : "Collection";
+
   return (
-    <div className="container-site py-10 md:py-14">
-      <nav className="text-sm text-[color:var(--muted)] mb-6">
+    <div className="container-site section-pad">
+      <nav className="page-crumb">
         <Link href="/">Home</Link>
-        <span className="mx-2">/</span>
+        <span className="mx-2 text-line">/</span>
         <Link href="/shop/lampshades">Shop</Link>
-        <span className="mx-2">/</span>
-        <span className="text-[color:var(--ink)] capitalize">{title}</span>
+        <span className="mx-2 text-line">/</span>
+        <span className="text-ink capitalize">{title}</span>
       </nav>
-      <div className="mb-6 md:mb-8 max-w-2xl">
-        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl capitalize mb-3">{title}</h1>
+      <div className="mb-10 md:mb-14 max-w-2xl">
+        <p className="eyebrow mb-3">{eyebrow}</p>
+        <h1 className="section-title capitalize mb-3">{title}</h1>
+        <div className="lux-rule" />
         {collection?.description && !type && (
           <p className="prose-muted">{collection.description}</p>
         )}

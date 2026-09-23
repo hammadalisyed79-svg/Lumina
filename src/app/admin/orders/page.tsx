@@ -14,16 +14,16 @@ export default async function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-8">Orders</h1>
+      <h1 className="admin-h1">Orders</h1>
       <div className="space-y-4">
         {orders.map((o) => (
-          <div key={o.id} className="border border-[color:var(--line)] bg-white/70 p-4">
+          <div key={o.id} className="admin-panel">
             <div className="flex flex-wrap justify-between gap-3 mb-3">
               <div>
                 <Link href={`/order/${o.orderNumber}`} className="font-medium underline">
                   {o.orderNumber}
                 </Link>
-                <p className="text-sm text-[color:var(--muted)]">
+                <p className="admin-muted text-sm">
                   {o.email} · {o.items.length} items · {formatMoney(o.total)}
                 </p>
               </div>
@@ -33,7 +33,7 @@ export default async function AdminOrdersPage() {
                 paymentStatus={o.paymentStatus}
               />
             </div>
-            <ul className="text-xs text-[color:var(--muted)] space-y-1">
+            <ul className="admin-muted text-xs space-y-1">
               {o.items.map((i) => (
                 <li key={i.id}>
                   {i.quantity}× {i.title}

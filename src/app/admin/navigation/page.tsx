@@ -13,8 +13,8 @@ export default async function NavigationAdminPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-2">Navigation</h1>
-      <p className="text-sm text-[color:var(--muted)] mb-8">
+      <h1 className="admin-h1">Navigation</h1>
+      <p className="admin-muted mb-4">
         Primary header links. Disabled items are hidden on the storefront.
       </p>
       {!menu ? (

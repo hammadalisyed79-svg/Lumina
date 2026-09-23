@@ -14,27 +14,29 @@ export default async function AdminCollectionsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-8">Collections</h1>
+      <h1 className="admin-h1">Collections</h1>
       <CollectionCreateForm />
-      <div className="overflow-x-auto border border-[color:var(--line)] bg-white/70">
-        <table className="w-full text-sm">
+      <div className="admin-table-wrap mt-8">
+        <table className="admin-table">
           <thead>
-            <tr className="border-b border-[color:var(--line)] text-left">
-              <th className="p-3">Title</th>
-              <th className="p-3">Slug</th>
-              <th className="p-3">Sort</th>
-              <th className="p-3">Published</th>
-              <th className="p-3">Actions</th>
+            <tr>
+              <th>Title</th>
+              <th>Slug</th>
+              <th>Sort</th>
+              <th>Published</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id} className="border-b border-[color:var(--line)]">
-                <td className="p-3">{row.title}</td>
-                <td className="p-3">{row.slug}</td>
-                <td className="p-3">{row.sortOrder}</td>
-                <td className="p-3">{row.published ? "Yes" : "No"}</td>
-                <td className="p-3">
+              <tr key={row.id}>
+                <td>{row.title}</td>
+                <td>{row.slug}</td>
+                <td>{row.sortOrder}</td>
+                <td>
+                  <span className="admin-badge">{row.published ? "Yes" : "No"}</span>
+                </td>
+                <td>
                   <CollectionPublishedToggle id={row.id} published={row.published} />
                 </td>
               </tr>

@@ -15,14 +15,21 @@ export default async function AccountIndexPage() {
   ];
 
   return (
-    <div className="container-site py-12 max-w-2xl">
-      <h1 className="font-display text-4xl mb-2">Account</h1>
-      <p className="prose-muted mb-8">Signed in as {session.user.email}</p>
+    <div className="container-site section-pad max-w-2xl">
+      <p className="eyebrow mb-3">Your studio</p>
+      <h1 className="section-title mb-3">Account</h1>
+      <div className="lux-rule" />
+      <p className="prose-muted mb-10">Signed in as {session.user.email}</p>
       <ul className="space-y-3">
         {links.map((l) => (
           <li key={l.href}>
-            <Link href={l.href} className="block border border-[color:var(--line)] p-4 hover:border-[color:var(--bronze)] bg-white/50">
-              {l.label}
+            <Link
+              href={l.href}
+              className="block surface-panel p-5 transition-colors hover:border-bronze group"
+            >
+              <span className="font-display text-lg group-hover:text-bronze transition-colors">
+                {l.label}
+              </span>
             </Link>
           </li>
         ))}
@@ -30,15 +37,10 @@ export default async function AccountIndexPage() {
       {(session.user.role === "ADMIN" ||
         session.user.role === "SUPER_ADMIN" ||
         session.user.role === "STAFF") && (
-        <Link href="/admin" className="btn-primary mt-8 inline-flex">
+        <Link href="/admin" className="btn-primary mt-10 inline-flex">
           Admin dashboard
         </Link>
       )}
-      <form action="/api/auth/signout" method="POST" className="mt-6">
-        <Link href="/api/auth/signout" className="text-sm underline text-[color:var(--muted)]">
-          Sign out via menu — use the button below
-        </Link>
-      </form>
       <SignOutButton />
     </div>
   );

@@ -45,12 +45,13 @@ export default function FaqPage() {
   return (
     <div className="container-site section-pad max-w-3xl">
       <p className="eyebrow mb-3">Help</p>
-      <h1 className="font-display text-5xl mb-8">FAQ</h1>
-      <div className="space-y-8">
+      <h1 className="section-title">FAQ</h1>
+      <div className="lux-rule" />
+      <div className="space-y-8 mt-2">
         {FAQS.map((item) => (
-          <section key={item.q}>
-            <h2 className="font-display text-2xl text-[color:var(--ink)] mb-2">{item.q}</h2>
-            <p className="text-[color:var(--muted)] leading-relaxed">{item.a}</p>
+          <section key={item.q} className="border-t border-line pt-6">
+            <h2 className="font-display text-2xl tracking-tight text-ink mb-2">{item.q}</h2>
+            <p className="prose-muted">{item.a}</p>
           </section>
         ))}
       </div>

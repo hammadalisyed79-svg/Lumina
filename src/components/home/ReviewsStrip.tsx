@@ -23,7 +23,7 @@ export function ReviewsStrip({
           <Link href="/shop/lampshades" className="btn-secondary">
             Shop lampshades
           </Link>
-          <Link href="/contact" className="btn-ghost">
+          <Link href="/contact" className="btn-secondary">
             Contact
           </Link>
         </div>

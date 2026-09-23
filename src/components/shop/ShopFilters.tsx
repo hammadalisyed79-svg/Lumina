@@ -26,7 +26,7 @@ export function ShopFilters({
   const hasFilters = Boolean(current.shape || current.sort || current.min || current.max);
 
   return (
-    <div className="mb-6 md:mb-8 space-y-3">
+    <div className="mb-8 md:mb-10 space-y-3 border-y border-line py-5">
       <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
         {showShape && (
           <label className="text-sm col-span-2 sm:col-auto">

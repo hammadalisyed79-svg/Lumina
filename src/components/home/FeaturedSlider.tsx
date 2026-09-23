@@ -14,10 +14,10 @@ export function FeaturedSlider({ products }: { products: ProductCardData[] }) {
   return (
     <div className="relative">
       <div className="absolute -top-14 right-0 flex gap-2">
-        <button type="button" aria-label="Previous" className="p-2 border border-[color:var(--line)]" onClick={() => scroll(-1)}>
+        <button type="button" aria-label="Previous" className="p-2 border border-line text-ink transition-colors hover:border-bronze hover:text-bronze" onClick={() => scroll(-1)}>
           <ChevronLeft size={18} />
         </button>
-        <button type="button" aria-label="Next" className="p-2 border border-[color:var(--line)]" onClick={() => scroll(1)}>
+        <button type="button" aria-label="Next" className="p-2 border border-line text-ink transition-colors hover:border-bronze hover:text-bronze" onClick={() => scroll(1)}>
           <ChevronRight size={18} />
         </button>
       </div>

@@ -26,37 +26,39 @@ export default async function AdminInventoryPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-8">Inventory</h1>
-      <p className="text-sm text-[color:var(--muted)] mb-6">
+      <h1 className="admin-h1">Inventory</h1>
+      <p className="admin-muted mb-4">
         Track finished goods, kits, fabric and components. Adjust available counts inline; movements
         are logged automatically.
       </p>
       <InventoryCreateForm />
-      <div className="overflow-x-auto border border-[color:var(--line)] bg-white/70">
-        <table className="w-full text-sm">
+      <div className="admin-table-wrap mt-8">
+        <table className="admin-table">
           <thead>
-            <tr className="border-b border-[color:var(--line)] text-left">
-              <th className="p-3">SKU</th>
-              <th className="p-3">Name</th>
-              <th className="p-3">Kind</th>
-              <th className="p-3">Available</th>
-              <th className="p-3">Reserved</th>
-              <th className="p-3">Reorder</th>
-              <th className="p-3">Track</th>
-              <th className="p-3">Adjust</th>
+            <tr>
+              <th>SKU</th>
+              <th>Name</th>
+              <th>Kind</th>
+              <th>Available</th>
+              <th>Reserved</th>
+              <th>Reorder</th>
+              <th>Track</th>
+              <th>Adjust</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.id} className="border-b border-[color:var(--line)]">
-                <td className="p-3 font-mono text-xs">{item.sku}</td>
-                <td className="p-3">{item.name}</td>
-                <td className="p-3">{item.kind}</td>
-                <td className="p-3">{item.available}</td>
-                <td className="p-3">{item.reserved}</td>
-                <td className="p-3">{item.reorderLevel}</td>
-                <td className="p-3">{item.trackStock ? "Yes" : "No"}</td>
-                <td className="p-3">
+              <tr key={item.id}>
+                <td className="font-mono text-xs">{item.sku}</td>
+                <td>{item.name}</td>
+                <td>{item.kind}</td>
+                <td>{item.available}</td>
+                <td>{item.reserved}</td>
+                <td>{item.reorderLevel}</td>
+                <td>
+                  <span className="admin-badge">{item.trackStock ? "Yes" : "No"}</span>
+                </td>
+                <td>
                   <InventoryAdjustForm item={item} />
                 </td>
               </tr>

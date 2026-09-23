@@ -27,33 +27,35 @@ export default async function AdminShippingPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-8">Shipping</h1>
+      <h1 className="admin-h1">Shipping</h1>
       <ShippingCreateForm />
-      <div className="overflow-x-auto border border-[color:var(--line)] bg-white/70">
-        <table className="w-full text-sm">
+      <div className="admin-table-wrap mt-8">
+        <table className="admin-table">
           <thead>
-            <tr className="border-b border-[color:var(--line)] text-left">
-              <th className="p-3">Name</th>
-              <th className="p-3">Calc type</th>
-              <th className="p-3">Price</th>
-              <th className="p-3">Free above</th>
-              <th className="p-3">Est. days</th>
-              <th className="p-3">Sort</th>
-              <th className="p-3">Active</th>
-              <th className="p-3">Actions</th>
+            <tr>
+              <th>Name</th>
+              <th>Calc type</th>
+              <th>Price</th>
+              <th>Free above</th>
+              <th>Est. days</th>
+              <th>Sort</th>
+              <th>Active</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {methods.map((method) => (
-              <tr key={method.id} className="border-b border-[color:var(--line)]">
-                <td className="p-3">{method.name}</td>
-                <td className="p-3">{method.calcType}</td>
-                <td className="p-3">{formatMoney(method.price)}</td>
-                <td className="p-3">{method.freeAbove ? formatMoney(method.freeAbove) : "—"}</td>
-                <td className="p-3">{method.estimatedDays ?? "—"}</td>
-                <td className="p-3">{method.sortOrder}</td>
-                <td className="p-3">{method.active ? "Yes" : "No"}</td>
-                <td className="p-3">
+              <tr key={method.id}>
+                <td>{method.name}</td>
+                <td>{method.calcType}</td>
+                <td>{formatMoney(method.price)}</td>
+                <td>{method.freeAbove ? formatMoney(method.freeAbove) : "—"}</td>
+                <td>{method.estimatedDays ?? "—"}</td>
+                <td>{method.sortOrder}</td>
+                <td>
+                  <span className="admin-badge">{method.active ? "Yes" : "No"}</span>
+                </td>
+                <td>
                   <ShippingEditForm method={method} />
                 </td>
               </tr>

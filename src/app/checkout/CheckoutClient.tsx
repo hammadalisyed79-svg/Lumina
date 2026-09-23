@@ -147,9 +147,13 @@ export default function CheckoutClient() {
   }
 
   return (
-    <div className="container-site py-10 md:py-14 grid lg:grid-cols-2 gap-12">
+    <div className="container-site section-pad grid lg:grid-cols-2 gap-12 lg:gap-16">
       <div>
-        <h1 className="font-display text-4xl mb-8">Checkout</h1>
+        <header className="mb-8 md:mb-10">
+          <p className="eyebrow mb-3">Secure payment</p>
+          <h1 className="section-title mb-3">Checkout</h1>
+          <div className="lux-rule" />
+        </header>
         {notice && (
           <p className="text-sm border border-[color:var(--line)] bg-white/80 p-3 mb-4">
             {notice}
@@ -160,17 +164,41 @@ export default function CheckoutClient() {
             Continue shopping
           </Link>
         ) : (
-          <form onSubmit={onSubmit} className="space-y-4">
-            <input name="email" type="email" required placeholder="Email" className="input" />
-            <input name="fullName" required placeholder="Full name" className="input" />
-            <input name="line1" required placeholder="Address line 1" className="input" />
-            <input name="line2" placeholder="Address line 2" className="input" />
-            <div className="grid grid-cols-2 gap-3">
-              <input name="city" required placeholder="City" className="input" />
-              <input name="postcode" required placeholder="Postcode" className="input" />
+          <form onSubmit={onSubmit} className="space-y-5">
+            <label className="block">
+              <span className="label">Email</span>
+              <input name="email" type="email" required className="input" />
+            </label>
+            <label className="block">
+              <span className="label">Full name</span>
+              <input name="fullName" required className="input" />
+            </label>
+            <label className="block">
+              <span className="label">Address line 1</span>
+              <input name="line1" required className="input" />
+            </label>
+            <label className="block">
+              <span className="label">Address line 2</span>
+              <input name="line2" className="input" />
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <label className="block">
+                <span className="label">City</span>
+                <input name="city" required className="input" />
+              </label>
+              <label className="block">
+                <span className="label">Postcode</span>
+                <input name="postcode" required className="input" />
+              </label>
             </div>
-            <input name="county" placeholder="County" className="input" />
-            <input name="phone" placeholder="Phone" className="input" />
+            <label className="block">
+              <span className="label">County</span>
+              <input name="county" className="input" />
+            </label>
+            <label className="block">
+              <span className="label">Phone</span>
+              <input name="phone" className="input" />
+            </label>
 
             <label className="block">
               <span className="label">Shipping</span>
@@ -213,7 +241,8 @@ export default function CheckoutClient() {
           </form>
         )}
       </div>
-      <aside className="border border-[color:var(--line)] p-6 h-fit bg-white/60">
+      <aside className="surface-panel p-6 md:p-8 h-fit">
+        <p className="eyebrow mb-2">Your bag</p>
         <h2 className="font-display text-2xl mb-4">Order summary</h2>
         <ul className="space-y-3 mb-6">
           {items.map((i) => (
@@ -234,8 +263,8 @@ export default function CheckoutClient() {
           <span>Subtotal</span>
           <span>{formatMoney(subtotal)}</span>
         </div>
-        <p className="text-xs text-[color:var(--muted)] mt-4">
-          Shipping is confirmed only after Shopify checkout is live.
+        <p className="text-xs text-muted mt-4">
+          Shipping is calculated at Stripe checkout from studio rates. Tax is confirmed before payment.
         </p>
       </aside>
     </div>

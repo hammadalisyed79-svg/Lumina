@@ -11,24 +11,28 @@ export default async function AdminFittingsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-8">Fittings</h1>
-      <div className="overflow-x-auto border border-[color:var(--line)] bg-white/70">
-        <table className="w-full text-sm">
+      <h1 className="admin-h1">Fittings</h1>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr className="border-b border-[color:var(--line)] text-left">
-              <th className="p-3">name</th>
-              <th className="p-3">slug</th>
-              <th className="p-3">priceMod</th>
-              <th className="p-3">active</th>
+            <tr>
+              <th>name</th>
+              <th>slug</th>
+              <th>priceMod</th>
+              <th>active</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id} className="border-b border-[color:var(--line)]">
-                <td className="p-3">{String((row as Record<string, unknown>).name ?? "")}</td>
-                <td className="p-3">{String((row as Record<string, unknown>).slug ?? "")}</td>
-                <td className="p-3">{String((row as Record<string, unknown>).priceMod ?? "")}</td>
-                <td className="p-3">{String((row as Record<string, unknown>).active ?? "")}</td>
+              <tr key={row.id}>
+                <td>{String((row as Record<string, unknown>).name ?? "")}</td>
+                <td>{String((row as Record<string, unknown>).slug ?? "")}</td>
+                <td>{String((row as Record<string, unknown>).priceMod ?? "")}</td>
+                <td>
+                  <span className="admin-badge">
+                    {String((row as Record<string, unknown>).active ?? "")}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>

@@ -13,8 +13,8 @@ export default async function HomepageAdminPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-2">Homepage</h1>
-      <p className="text-sm text-[color:var(--muted)] mb-8">
+      <h1 className="admin-h1">Homepage</h1>
+      <p className="admin-muted mb-4">
         Edit hero and editorial copy. Storefront picks up enabled sections.{" "}
         <Link href="/" className="underline" target="_blank">
           View site

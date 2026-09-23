@@ -12,12 +12,12 @@ export const COPY = {
     "British handmade lampshades, printed fabrics and cushion covers. Design your shade or shop classic forms — velvet, linen and bespoke prints from our UK studio.",
 
   hero: {
-    eyebrow: "British atelier · Lighting for living",
-    title: "Light that feels considered",
+    eyebrow: "British atelier",
+    title: "Lumina Hub",
     subtitle:
-      "Handmade lampshades, expressive fabrics and matching textiles — stretched and finished to order so every room glows with intention.",
-    cta: "Explore lampshades",
-    secondary: "Meet the studio",
+      "Handmade lampshades and textiles, composed for how light feels in a room.",
+    cta: "Shop lampshades",
+    secondary: "Design your shade",
   },
 
   shopByShape: {
@@ -28,9 +28,9 @@ export const COPY = {
   },
 
   design: {
-    eyebrow: "Studio tool",
-    title: "Compose your own shade",
-    body: "Pair silhouette, fabric, size, lining and fitting. Add your design to the bag when you’re ready — or save it while you decide.",
+    eyebrow: "Atelier",
+    title: "Compose a shade",
+    body: "Silhouette, fabric, size, lining and fitting — configured in the studio, made to order in Britain.",
     cta: "Open the studio",
   },
 

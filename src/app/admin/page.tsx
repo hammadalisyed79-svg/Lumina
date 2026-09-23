@@ -366,7 +366,8 @@ export default async function AdminDashboard({
             {recent.length === 0 ? (
               <tr>
                 <td colSpan={5} className="admin-muted">
-                  No orders yet. Checkout remains blocked until Shopify Storefront is connected.
+                  No orders yet. Orders appear here after customers complete studio checkout via
+                  Stripe.
                 </td>
               </tr>
             ) : (

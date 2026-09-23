@@ -215,48 +215,57 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="relative min-h-[78vh] md:min-h-[88vh] flex items-center overflow-hidden bg-[color:var(--ink)]">
+      <section className="relative min-h-[86vh] md:min-h-[92vh] flex items-end md:items-center overflow-hidden bg-ink">
         <Image
           src={heroImage}
           alt="Lumina Hub handmade lampshades styled in a living room"
           fill
           priority
-          className="object-cover object-[center_40%]"
+          className="object-cover object-[center_40%] lux-ken"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[rgba(28,25,21,0.45)] via-[rgba(28,25,21,0.18)] to-transparent" />
-        <div className="relative container-site py-14 sm:py-16 md:py-24 text-white max-w-3xl">
-          <p className="eyebrow text-white/85 mb-3">
-            {heroPayload.eyebrow || COPY.hero.eyebrow}
-          </p>
-          <h1 className="font-display text-[2.5rem] leading-[1.08] sm:text-5xl md:text-7xl md:leading-[1.05] mb-3">
-            {heroSection?.title || COPY.hero.title}
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-xl mb-7 sm:mb-8">
-            {heroSection?.subtitle || COPY.hero.subtitle}
-          </p>
-          <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-            <Link href={heroSection?.ctaHref || "/shop/lampshades"} className="btn-primary w-full sm:w-auto text-center">
-              {heroSection?.ctaLabel || COPY.hero.cta}
-            </Link>
-            <Link
-              href={heroPayload.secondaryCtaHref || "/about"}
-              className="btn-ghost w-full sm:w-auto text-center"
-            >
-              {heroPayload.secondaryCtaLabel || COPY.hero.secondary}
-            </Link>
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(20,17,14,0.72)] via-[rgba(20,17,14,0.28)] to-[rgba(20,17,14,0.12)] md:bg-gradient-to-r md:from-[rgba(20,17,14,0.68)] md:via-[rgba(20,17,14,0.28)] md:to-transparent" />
+        <div className="relative container-site w-full py-16 md:py-24 text-white">
+          <div className="max-w-2xl">
+            <p className="eyebrow text-champagne lux-reveal mb-5">
+              {heroPayload.eyebrow || COPY.hero.eyebrow}
+            </p>
+            <h1 className="font-display text-[3.25rem] leading-[0.95] sm:text-6xl md:text-8xl tracking-tight lux-reveal lux-reveal-delay-1 mb-5">
+              {heroSection?.title || COPY.hero.title}
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-white/85 max-w-md leading-relaxed lux-reveal lux-reveal-delay-2 mb-8">
+              {heroSection?.subtitle || COPY.hero.subtitle}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 lux-reveal lux-reveal-delay-3">
+              <Link
+                href={heroSection?.ctaHref || "/shop/lampshades"}
+                className="btn-primary w-full sm:w-auto text-center"
+              >
+                {heroSection?.ctaLabel || COPY.hero.cta}
+              </Link>
+              <Link
+                href={heroPayload.secondaryCtaHref || "/design-your-shade"}
+                className="btn-ghost w-full sm:w-auto text-center"
+              >
+                {heroPayload.secondaryCtaLabel || COPY.hero.secondary}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="section-pad container-site">
-        <div className="flex items-end justify-between gap-4 mb-6 md:mb-8">
-          <div>
-            <p className="eyebrow mb-2">{COPY.shopByShape.eyebrow}</p>
-            <h2 className="font-display text-4xl md:text-5xl">{COPY.shopByShape.title}</h2>
-            <p className="prose-muted mt-2 max-w-lg">{COPY.shopByShape.body}</p>
+        <div className="flex items-end justify-between gap-4 mb-8 md:mb-10">
+          <div className="max-w-xl">
+            <p className="eyebrow mb-3">{COPY.shopByShape.eyebrow}</p>
+            <h2 className="section-title">{COPY.shopByShape.title}</h2>
+            <div className="lux-rule" />
+            <p className="prose-muted">{COPY.shopByShape.body}</p>
           </div>
-          <Link href="/shop/lampshades" className="text-sm underline hidden sm:inline">
+          <Link
+            href="/shop/lampshades"
+            className="text-xs tracking-[0.14em] uppercase underline underline-offset-4 hidden sm:inline hover:text-bronze"
+          >
             {COPY.shopByShape.link}
           </Link>
         </div>
@@ -264,42 +273,43 @@ export default async function HomePage() {
           {shapes.map((s) => {
             const src = categoryTiles[s.key] || shapeImages[s.key] || designImage;
             return (
-              <Link
-                key={s.id}
-                href={`/shop/lampshades?shape=${s.key}`}
-                className="group block"
-              >
-                <div className="relative aspect-square overflow-hidden bg-[color:var(--stone)] mb-2">
+              <Link key={s.id} href={`/shop/lampshades?shape=${s.key}`} className="group block">
+                <div className="relative aspect-[4/5] overflow-hidden bg-stone mb-3">
                   <Image
                     src={src}
                     alt={`${s.name} lampshade`}
                     fill
-                    className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+                    unoptimized
+                    className="object-cover object-center img-zoom"
                     sizes="(max-width:768px) 50vw, 16vw"
                   />
                 </div>
-                <p className="text-center text-sm tracking-wide">{s.name} lampshades</p>
+                <p className="text-center text-xs tracking-[0.14em] uppercase text-ink/80 group-hover:text-bronze transition-colors">
+                  {s.name}
+                </p>
               </Link>
             );
           })}
         </div>
       </section>
 
-      <section className="bg-[color:var(--charcoal)] text-[color:var(--ivory)]">
-        <div className="container-site section-pad grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+      <section className="bg-charcoal text-ivory">
+        <div className="container-site section-pad grid md:grid-cols-2 gap-10 md:gap-16 items-center">
           <div>
-            <p className="eyebrow text-[color:var(--champagne)] mb-3">{COPY.design.eyebrow}</p>
-            <h2 className="font-display text-4xl md:text-5xl mb-4">{COPY.design.title}</h2>
-            <p className="text-white/75 max-w-md mb-6">{COPY.design.body}</p>
+            <p className="eyebrow text-champagne mb-3">{COPY.design.eyebrow}</p>
+            <h2 className="section-title text-ivory">{COPY.design.title}</h2>
+            <div className="lux-rule" />
+            <p className="text-ivory/70 max-w-md mb-8 leading-relaxed">{COPY.design.body}</p>
             <Link href="/design-your-shade" className="btn-primary">
               {COPY.design.cta}
             </Link>
           </div>
-          <div className="relative aspect-[4/3] overflow-hidden bg-[color:var(--ink)]">
+          <div className="relative aspect-[4/5] md:aspect-[4/3] overflow-hidden bg-ink">
             <Image
               src={designImage}
               alt="Handmade lampshade designed in the Lumina studio"
               fill
+              unoptimized
               className="object-cover object-center"
               sizes="(max-width:768px) 100vw, 50vw"
             />
@@ -308,32 +318,37 @@ export default async function HomePage() {
       </section>
 
       <section className="section-pad container-site">
-        <div className="flex items-end justify-between gap-4 mb-6 md:mb-8">
+        <div className="flex items-end justify-between gap-4 mb-8 md:mb-10">
           <div>
-            <p className="eyebrow mb-2">{COPY.featured.eyebrow}</p>
-            <h2 className="font-display text-4xl md:text-5xl">{COPY.featured.title}</h2>
+            <p className="eyebrow mb-3">{COPY.featured.eyebrow}</p>
+            <h2 className="section-title">{COPY.featured.title}</h2>
           </div>
-          <Link href="/shop/lampshades?shape=drum" className="text-sm underline hidden sm:inline">
+          <Link
+            href="/shop/lampshades?shape=drum"
+            className="text-xs tracking-[0.14em] uppercase underline underline-offset-4 hidden sm:inline hover:text-bronze"
+          >
             {COPY.featured.link}
           </Link>
         </div>
         <FeaturedSlider products={selected} />
       </section>
 
-      <section className="container-site section-pad grid md:grid-cols-2 gap-8 md:gap-10 items-center">
-        <div className="relative aspect-[4/5] overflow-hidden bg-[color:var(--stone)]">
+      <section className="container-site section-pad grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+        <div className="relative aspect-[4/5] overflow-hidden bg-stone order-2 md:order-1">
           <Image
             src={storyImage}
             alt="Lumina Hub craftsmanship — shades bringing spaces to life"
             fill
+            unoptimized
             className="object-cover object-center"
             sizes="(max-width:768px) 100vw, 50vw"
           />
         </div>
-        <div>
+        <div className="order-1 md:order-2">
           <p className="eyebrow mb-3">{COPY.story.eyebrow}</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-4">{COPY.story.title}</h2>
-          <p className="prose-muted max-w-md mb-6">{COPY.story.body}</p>
+          <h2 className="section-title">{COPY.story.title}</h2>
+          <div className="lux-rule" />
+          <p className="prose-muted max-w-md mb-8">{COPY.story.body}</p>
           <Link href="/about" className="btn-secondary">
             {COPY.story.cta}
           </Link>
@@ -341,43 +356,47 @@ export default async function HomePage() {
       </section>
 
       {moodCards.length > 0 && (
-      <section className="section-pad bg-[color:var(--stone)]/35">
-        <div className="container-site">
-          <p className="eyebrow mb-2">{COPY.mood.eyebrow}</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">{COPY.mood.title}</h2>
-          <div className="grid md:grid-cols-3 gap-4 md:gap-5">
-            {moodCards.map((m) => (
-              <Link
-                key={m.id}
-                href={`/shop/${m.slug}`}
-                className="group relative aspect-[5/6] overflow-hidden bg-[color:var(--stone)]"
-              >
-                <Image
-                  src={m.imageUrl}
-                  alt={m.title}
-                  fill
-                  className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.04]"
-                  sizes="(max-width:768px) 100vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
-                <div className="absolute bottom-5 left-5 right-5 text-white">
-                  <p className="font-display text-3xl">{m.title}</p>
-                  {m.description && (
-                    <p className="text-sm text-white/80 mt-1 line-clamp-2">{m.description}</p>
-                  )}
-                </div>
-              </Link>
-            ))}
+        <section className="section-pad bg-stone/40">
+          <div className="container-site">
+            <p className="eyebrow mb-3">{COPY.mood.eyebrow}</p>
+            <h2 className="section-title mb-8 md:mb-10">{COPY.mood.title}</h2>
+            <div className="grid md:grid-cols-3 gap-4 md:gap-5">
+              {moodCards.map((m) => (
+                <Link
+                  key={m.id}
+                  href={`/shop/${m.slug}`}
+                  className="group relative aspect-[5/6] overflow-hidden bg-stone"
+                >
+                  <Image
+                    src={m.imageUrl}
+                    alt={m.title}
+                    fill
+                    unoptimized
+                    className="object-cover object-center img-zoom"
+                    sizes="(max-width:768px) 100vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                  <div className="absolute bottom-6 left-5 right-5 text-white">
+                    <p className="font-display text-3xl md:text-4xl tracking-tight">{m.title}</p>
+                    {m.description && (
+                      <p className="text-sm text-white/80 mt-2 line-clamp-2 leading-relaxed">
+                        {m.description}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
       )}
 
       <section className="section-pad container-site max-w-3xl text-center">
         <p className="eyebrow mb-3">{COPY.editorial.eyebrow}</p>
-        <h2 className="font-display text-4xl md:text-5xl mb-4">
+        <h2 className="section-title mb-4">
           {editorialSection?.title || COPY.editorial.title}
         </h2>
+        <div className="lux-rule mx-auto" />
         <p className="prose-muted text-lg mb-8">
           {editorialSection?.body || COPY.editorial.body}
         </p>
@@ -387,34 +406,38 @@ export default async function HomePage() {
       </section>
 
       <section className="section-pad container-site">
-        <div className="flex items-end justify-between mb-6 md:mb-8">
+        <div className="flex items-end justify-between mb-8 md:mb-10 gap-4">
           <div>
-            <p className="eyebrow mb-2">{COPY.bestsellers.eyebrow}</p>
-            <h2 className="font-display text-4xl md:text-5xl">{COPY.bestsellers.title}</h2>
+            <p className="eyebrow mb-3">{COPY.bestsellers.eyebrow}</p>
+            <h2 className="section-title">{COPY.bestsellers.title}</h2>
           </div>
-          <Link href="/shop/bestsellers" className="text-sm underline">
+          <Link
+            href="/shop/bestsellers"
+            className="text-xs tracking-[0.14em] uppercase underline underline-offset-4 hover:text-bronze"
+          >
             {COPY.bestsellers.link}
           </Link>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-7">
           {mixedBestsellers.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
         </div>
       </section>
 
-      <section className="bg-[color:var(--charcoal)] text-white">
+      <section className="bg-charcoal text-white">
         <div className="container-site section-pad">
-          <p className="eyebrow text-[color:var(--champagne)] mb-2">{COPY.homes.eyebrow}</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">{COPY.homes.title}</h2>
+          <p className="eyebrow text-champagne mb-3">{COPY.homes.eyebrow}</p>
+          <h2 className="section-title text-ivory mb-8 md:mb-10">{COPY.homes.title}</h2>
           <div className="grid md:grid-cols-3 gap-3 md:gap-4">
             {homeImages.map((src, i) => (
-              <div key={`${src}-${i}`} className="relative aspect-[4/5] overflow-hidden">
+              <div key={`${src}-${i}`} className="relative aspect-[4/5] overflow-hidden group">
                 <Image
                   src={src}
                   alt="Lumina Hub lampshade in an interior setting"
                   fill
-                  className="object-cover object-center"
+                  unoptimized
+                  className="object-cover object-center img-zoom"
                   sizes="(max-width:768px) 100vw, 33vw"
                 />
               </div>
@@ -424,8 +447,8 @@ export default async function HomePage() {
       </section>
 
       <section className="section-pad container-site">
-        <p className="eyebrow mb-2">{COPY.reviews.eyebrow}</p>
-        <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">{COPY.reviews.title}</h2>
+        <p className="eyebrow mb-3">{COPY.reviews.eyebrow}</p>
+        <h2 className="section-title mb-8 md:mb-10">{COPY.reviews.title}</h2>
         <ReviewsStrip
           reviews={reviews.map((r) => ({
             id: r.id,
@@ -438,30 +461,35 @@ export default async function HomePage() {
         />
       </section>
 
-      <section className="container-site section-pad grid md:grid-cols-2 gap-8 md:gap-10 items-center border-y border-[color:var(--line)]">
-        <div>
-          <p className="eyebrow mb-3">{COPY.trade.eyebrow}</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-4">{COPY.trade.title}</h2>
-          <p className="prose-muted max-w-md mb-6">{COPY.trade.body}</p>
-          <Link href="/trade" className="btn-secondary">
-            {COPY.trade.cta}
-          </Link>
-        </div>
-        <div className="relative aspect-[16/11] overflow-hidden bg-[color:var(--stone)]">
-          <Image
-            src={tradeImage}
-            alt="Lumina Hub trade and project shades"
-            fill
-            className="object-cover object-center"
-            sizes="(max-width:768px) 100vw, 50vw"
-          />
+      <section className="border-y border-line bg-ivory/50">
+        <div className="container-site section-pad grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+          <div>
+            <p className="eyebrow mb-3">{COPY.trade.eyebrow}</p>
+            <h2 className="section-title">{COPY.trade.title}</h2>
+            <div className="lux-rule" />
+            <p className="prose-muted max-w-md mb-8">{COPY.trade.body}</p>
+            <Link href="/trade" className="btn-secondary">
+              {COPY.trade.cta}
+            </Link>
+          </div>
+          <div className="relative aspect-[16/11] overflow-hidden bg-stone">
+            <Image
+              src={tradeImage}
+              alt="Lumina Hub trade and project shades"
+              fill
+              unoptimized
+              className="object-cover object-center"
+              sizes="(max-width:768px) 100vw, 50vw"
+            />
+          </div>
         </div>
       </section>
 
-      <section className="section-pad container-site max-w-xl text-center">
+      <section className="section-pad container-site max-w-lg text-center">
         <p className="eyebrow mb-3">{COPY.newsletter.eyebrow}</p>
-        <h2 className="font-display text-4xl mb-4">{COPY.newsletter.title}</h2>
-        <p className="prose-muted mb-6">{COPY.newsletter.body}</p>
+        <h2 className="section-title mb-4">{COPY.newsletter.title}</h2>
+        <div className="lux-rule mx-auto" />
+        <p className="prose-muted mb-7">{COPY.newsletter.body}</p>
         <NewsletterForm />
       </section>
     </>

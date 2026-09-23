@@ -39,7 +39,6 @@ export function MobileNav({ items }: { items: NavLink[] }) {
       {open && (
         <div
           className="fixed inset-0 z-[70] flex flex-col bg-ivory text-ink"
-          style={{ backgroundColor: "#f7f5f1", color: "#1c1915" }}
           role="dialog"
           aria-modal="true"
           aria-label="Site menu"

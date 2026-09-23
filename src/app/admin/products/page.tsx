@@ -13,37 +13,39 @@ export default async function AdminProductsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-4xl">Products</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="admin-h1">Products</h1>
         <Link href="/admin/products/new" className="btn-primary">
           New product
         </Link>
       </div>
-      <div className="overflow-x-auto border border-[color:var(--line)] bg-white/70">
-        <table className="w-full text-sm">
+      <div className="admin-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr className="border-b border-[color:var(--line)] text-left">
-              <th className="p-3">Title</th>
-              <th className="p-3">Type</th>
-              <th className="p-3">Price</th>
-              <th className="p-3">Variants</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Actions</th>
+            <tr>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Price</th>
+              <th>Variants</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {products.map((p) => (
-              <tr key={p.id} className="border-b border-[color:var(--line)]">
-                <td className="p-3">
+              <tr key={p.id}>
+                <td>
                   <Link href={`/admin/products/${p.id}`} className="underline">
                     {p.title}
                   </Link>
                 </td>
-                <td className="p-3">{p.type}</td>
-                <td className="p-3">{formatMoney(p.basePrice)}</td>
-                <td className="p-3">{p.variants.length}</td>
-                <td className="p-3">{p.published ? "Published" : "Draft"}</td>
-                <td className="p-3">
+                <td>{p.type}</td>
+                <td>{formatMoney(p.basePrice)}</td>
+                <td>{p.variants.length}</td>
+                <td>
+                  <span className="admin-badge">{p.published ? "Published" : "Draft"}</span>
+                </td>
+                <td>
                   <AdminProductActions id={p.id} published={p.published} />
                 </td>
               </tr>

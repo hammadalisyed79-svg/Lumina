@@ -19,26 +19,29 @@ export type ProductCardData = {
 export function ProductCard({ product }: { product: ProductCardData }) {
   const { has, toggle } = useWishlist();
   const wished = has(product.id);
+  const hasHover = Boolean(product.hoverImageUrl);
 
   return (
     <article className="group">
-      <div className="relative aspect-[4/5] bg-[color:var(--stone)] overflow-hidden">
-        <Link href={`/product/${product.slug}`}>
+      <div className="relative aspect-[4/5] bg-stone overflow-hidden">
+        <Link href={`/product/${product.slug}`} className="absolute inset-0 block">
           <Image
             src={product.imageUrl}
             alt={product.title}
             fill
             unoptimized
-            className="object-cover transition-opacity duration-500 group-hover:opacity-0"
+            className={`object-cover img-zoom transition-opacity duration-700 ${
+              hasHover ? "group-hover:opacity-0" : ""
+            }`}
             sizes="(max-width:768px) 50vw, 25vw"
           />
-          {product.hoverImageUrl && (
+          {hasHover && (
             <Image
-              src={product.hoverImageUrl}
+              src={product.hoverImageUrl!}
               alt=""
               fill
               unoptimized
-              className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              className="object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100"
               sizes="(max-width:768px) 50vw, 25vw"
             />
           )}
@@ -46,24 +49,27 @@ export function ProductCard({ product }: { product: ProductCardData }) {
         <button
           type="button"
           aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
-          className="absolute top-3 right-3 p-2 bg-[color:var(--ivory)]/90 hover:bg-white"
+          className="absolute top-3 right-3 z-[1] flex h-9 w-9 items-center justify-center bg-ivory/95 text-ink transition-colors hover:bg-white"
           onClick={() => toggle(product.id)}
         >
           <Heart
-            size={16}
+            size={15}
             strokeWidth={1.5}
-            className={wished ? "fill-[color:var(--bronze)] text-[color:var(--bronze)]" : ""}
+            className={wished ? "fill-bronze text-bronze" : ""}
           />
         </button>
       </div>
-      <div className="mt-3 space-y-1">
-        <Link href={`/product/${product.slug}`} className="font-medium leading-snug block">
+      <div className="mt-3.5 space-y-1">
+        <Link
+          href={`/product/${product.slug}`}
+          className="block font-medium leading-snug tracking-tight transition-colors hover:text-bronze"
+        >
           {shortDisplayTitle(product.title)}
         </Link>
         {product.subtitle && (
-          <p className="text-sm text-[color:var(--muted)]">{product.subtitle}</p>
+          <p className="text-sm text-muted line-clamp-1">{product.subtitle}</p>
         )}
-        <p className="text-sm">From {formatMoney(product.basePrice)}</p>
+        <p className="text-sm text-muted pt-0.5">From {formatMoney(product.basePrice)}</p>
       </div>
     </article>
   );

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export function NewsletterForm() {
+export function NewsletterForm({ dark = false }: { dark?: boolean }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "ok" | "err">("idle");
   const [message, setMessage] = useState("");
@@ -27,20 +27,34 @@ export function NewsletterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-2">
-      <input
-        type="email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Your email"
-        className="input"
-      />
-      <button type="submit" className="btn-primary whitespace-nowrap">
-        Join
-      </button>
+    <form onSubmit={onSubmit} className="flex flex-col gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Your email"
+          className={
+            dark
+              ? "input flex-1 border-white/20 bg-white/5 text-ivory placeholder:text-ivory/40 focus:border-champagne"
+              : "input flex-1"
+          }
+        />
+        <button type="submit" className="btn-primary whitespace-nowrap shrink-0">
+          Join
+        </button>
+      </div>
       {message && (
-        <p className={`text-sm sm:col-span-2 ${status === "err" ? "text-red-700" : "text-[color:var(--muted)]"}`}>
+        <p
+          className={`text-sm ${
+            status === "err"
+              ? "text-red-600"
+              : dark
+                ? "text-ivory/60"
+                : "text-muted"
+          }`}
+        >
           {message}
         </p>
       )}

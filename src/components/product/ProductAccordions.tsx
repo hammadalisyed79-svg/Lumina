@@ -13,7 +13,7 @@ export function ProductAccordions({
     { title: "Details", body: description },
     {
       title: "Lead time & shipping",
-      body: `Made to order in approximately ${leadTimeDays} working days. Delivery options and costs are confirmed at Shopify checkout once shipping rates are configured — we do not advertise free shipping until those rules are live.`,
+      body: `Made to order in approximately ${leadTimeDays} working days. Delivery options and costs are confirmed at Stripe checkout from studio rates.`,
     },
     {
       title: "Care",
@@ -28,13 +28,13 @@ export function ProductAccordions({
         <div key={item.title} className="border-b border-[color:var(--line)]">
           <button
             type="button"
-            className="w-full flex justify-between items-center py-4 text-left"
+            className="w-full flex justify-between items-center py-4 text-left group"
             onClick={() => setOpen(open === i ? -1 : i)}
           >
-            <span className="font-medium">{item.title}</span>
-            <span>{open === i ? "−" : "+"}</span>
+            <span className="eyebrow text-ink group-hover:text-bronze transition-colors">{item.title}</span>
+            <span className="text-muted text-lg leading-none">{open === i ? "−" : "+"}</span>
           </button>
-          {open === i && <p className="prose-muted pb-4 text-sm">{item.body}</p>}
+          {open === i && <p className="prose-muted pb-5 text-sm max-w-prose">{item.body}</p>}
         </div>
       ))}
     </div>

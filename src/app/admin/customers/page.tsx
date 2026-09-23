@@ -11,24 +11,28 @@ export default async function AdminCustomersPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-8">Customers</h1>
-      <div className="overflow-x-auto border border-[color:var(--line)] bg-white/70">
-        <table className="w-full text-sm">
+      <h1 className="admin-h1">Customers</h1>
+      <div className="admin-table-wrap">
+        <table className="admin-table">
           <thead>
-            <tr className="border-b border-[color:var(--line)] text-left">
-              <th className="p-3">name</th>
-              <th className="p-3">email</th>
-              <th className="p-3">role</th>
-              <th className="p-3">createdAt</th>
+            <tr>
+              <th>name</th>
+              <th>email</th>
+              <th>role</th>
+              <th>createdAt</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id} className="border-b border-[color:var(--line)]">
-                <td className="p-3">{String((row as Record<string, unknown>).name ?? "")}</td>
-                <td className="p-3">{String((row as Record<string, unknown>).email ?? "")}</td>
-                <td className="p-3">{String((row as Record<string, unknown>).role ?? "")}</td>
-                <td className="p-3">{String((row as Record<string, unknown>).createdAt ?? "")}</td>
+              <tr key={row.id}>
+                <td>{String((row as Record<string, unknown>).name ?? "")}</td>
+                <td>{String((row as Record<string, unknown>).email ?? "")}</td>
+                <td>
+                  <span className="admin-badge">
+                    {String((row as Record<string, unknown>).role ?? "")}
+                  </span>
+                </td>
+                <td>{String((row as Record<string, unknown>).createdAt ?? "")}</td>
               </tr>
             ))}
           </tbody>

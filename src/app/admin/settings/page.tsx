@@ -39,24 +39,24 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-2">Settings</h1>
-      <p className="text-sm text-[color:var(--muted)] mb-8">
+      <h1 className="admin-h1">Settings</h1>
+      <p className="admin-muted mb-4">
         This storefront is independent — payments run through Stripe on Lumina Hub. Secrets are
         edited in hosting env vars.
       </p>
-      <div className="border border-[color:var(--line)] bg-white/70 overflow-hidden max-w-2xl">
-        <table className="w-full text-sm">
+      <div className="admin-table-wrap max-w-2xl">
+        <table className="admin-table">
           <tbody>
             {rows.map((r) => (
-              <tr key={r.label} className="border-b border-[color:var(--line)]">
-                <td className="p-3 font-medium w-1/3">{r.label}</td>
-                <td className="p-3 text-[color:var(--muted)] break-all">{r.value}</td>
+              <tr key={r.label}>
+                <td className="font-medium w-1/3">{r.label}</td>
+                <td className="admin-muted break-all">{r.value}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-[color:var(--muted)] mt-6 max-w-2xl">
+      <p className="admin-muted mt-6 max-w-2xl text-sm">
         Point Stripe webhook to <code>/api/webhooks/stripe</code> for{" "}
         <code>checkout.session.completed</code>. Shipping methods are under Admin → Shipping.
       </p>

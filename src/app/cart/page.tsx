@@ -10,8 +10,12 @@ export default function CartPage() {
   const { items, subtotal, updateQty, remove } = useCart();
 
   return (
-    <div className="container-site py-10 md:py-14">
-      <h1 className="font-display text-4xl md:text-5xl mb-8">Shopping bag</h1>
+    <div className="container-site section-pad">
+      <header className="mb-10 md:mb-14 max-w-2xl">
+        <p className="eyebrow mb-3">Your order</p>
+        <h1 className="section-title mb-3">Shopping bag</h1>
+        <div className="lux-rule" />
+      </header>
       {items.length === 0 ? (
         <div className="py-16 text-center max-w-md mx-auto">
           <h2 className="font-display text-3xl mb-3">{COPY.cartEmpty.title}</h2>
@@ -38,17 +42,17 @@ export default function CartPage() {
                 <div className="flex-1">
                   <p className="font-medium">{item.title}</p>
                   {item.config && (
-                    <pre className="text-xs text-[color:var(--muted)] mt-2 whitespace-pre-wrap font-sans">
+                    <p className="text-xs text-muted mt-2 leading-relaxed">
                       {item.config.shapeName} · {item.config.fabricName} · {item.config.sizeName}
-                      {"\n"}
+                      <br />
                       {item.config.liningName} · {item.config.fittingName}
-                    </pre>
+                    </p>
                   )}
                   <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center border border-[color:var(--line)]">
-                      <button type="button" className="px-3 py-1" onClick={() => updateQty(item.id, item.quantity - 1)}>−</button>
-                      <span className="px-2">{item.quantity}</span>
-                      <button type="button" className="px-3 py-1" onClick={() => updateQty(item.id, item.quantity + 1)}>+</button>
+                    <div className="qty-control">
+                      <button type="button" onClick={() => updateQty(item.id, item.quantity - 1)}>−</button>
+                      <span>{item.quantity}</span>
+                      <button type="button" onClick={() => updateQty(item.id, item.quantity + 1)}>+</button>
                     </div>
                     <p>{formatMoney(item.unitPrice * item.quantity)}</p>
                   </div>
@@ -59,14 +63,14 @@ export default function CartPage() {
               </div>
             ))}
           </div>
-          <aside className="border border-[color:var(--line)] p-6 h-fit bg-white/60 space-y-3">
+          <aside className="surface-panel p-6 md:p-8 h-fit space-y-3">
+            <p className="eyebrow mb-2">Summary</p>
             <div className="flex justify-between text-sm">
               <span>Subtotal</span>
               <span>{formatMoney(subtotal)}</span>
             </div>
-            <p className="text-xs text-[color:var(--muted)]">
-              Shipping is calculated at Shopify checkout once rates are configured.
-              No free-shipping threshold is advertised until those rules are live.
+            <p className="text-xs text-muted">
+              Shipping is calculated at checkout from studio rates.
             </p>
             <div className="divider my-2" />
             <div className="flex justify-between font-medium">

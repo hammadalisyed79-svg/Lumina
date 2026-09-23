@@ -23,31 +23,33 @@ export default async function AdminShapesPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-8">Shapes</h1>
+      <h1 className="admin-h1">Shapes</h1>
       <ShapeCreateForm />
-      <div className="overflow-x-auto border border-[color:var(--line)] bg-white/70 mt-8">
-        <table className="w-full text-sm">
+      <div className="admin-table-wrap mt-8">
+        <table className="admin-table">
           <thead>
-            <tr className="border-b border-[color:var(--line)] text-left">
-              <th className="p-3">Name</th>
-              <th className="p-3">Key</th>
-              <th className="p-3">Base price</th>
-              <th className="p-3">Price mod</th>
-              <th className="p-3">Sort</th>
-              <th className="p-3">Active</th>
-              <th className="p-3">Actions</th>
+            <tr>
+              <th>Name</th>
+              <th>Key</th>
+              <th>Base price</th>
+              <th>Price mod</th>
+              <th>Sort</th>
+              <th>Active</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {shapes.map((shape) => (
-              <tr key={shape.id} className="border-b border-[color:var(--line)]">
-                <td className="p-3">{shape.name}</td>
-                <td className="p-3">{shape.key}</td>
-                <td className="p-3">{formatMoney(shape.basePrice)}</td>
-                <td className="p-3">{formatMoney(shape.priceMod)}</td>
-                <td className="p-3">{shape.sortOrder}</td>
-                <td className="p-3">{shape.active ? "Yes" : "No"}</td>
-                <td className="p-3">
+              <tr key={shape.id}>
+                <td>{shape.name}</td>
+                <td>{shape.key}</td>
+                <td>{formatMoney(shape.basePrice)}</td>
+                <td>{formatMoney(shape.priceMod)}</td>
+                <td>{shape.sortOrder}</td>
+                <td>
+                  <span className="admin-badge">{shape.active ? "Yes" : "No"}</span>
+                </td>
+                <td>
                   <ShapeEditForm shape={shape} />
                 </td>
               </tr>

@@ -9,9 +9,9 @@ export default async function AdminSeoPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-8">SEO</h1>
+      <h1 className="admin-h1">SEO</h1>
       <SeoSettingsForm title={value.title || ""} description={value.description || ""} />
-      <p className="text-sm text-[color:var(--muted)] mt-8">
+      <p className="admin-muted mt-8 text-sm">
         Per-product and per-collection SEO fields are editable on those records. Sitemap is available
         at <code>/sitemap.xml</code>.
       </p>

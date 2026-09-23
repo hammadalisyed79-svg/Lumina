@@ -21,11 +21,11 @@ export default async function AdminProductDetailPage({ params }: Props) {
 
   return (
     <div>
-      <Link href="/admin/products" className="text-sm text-[color:var(--muted)]">
+      <Link href="/admin/products" className="admin-muted text-sm hover:underline">
         ← Products
       </Link>
-      <h1 className="font-display text-4xl mt-3 mb-2">Edit product</h1>
-      <p className="text-sm text-[color:var(--muted)] mb-8">
+      <h1 className="admin-h1 mt-3">Edit product</h1>
+      <p className="admin-muted mb-6">
         /{product.slug} · {product.variants.length} variants
       </p>
       <AdminProductEditForm

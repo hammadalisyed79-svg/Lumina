@@ -27,29 +27,30 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="container-site py-12">
-      <div className="grid md:grid-cols-2 gap-10 md:gap-14 max-w-5xl">
+    <div className="container-site section-pad">
+      <div className="grid md:grid-cols-2 gap-12 md:gap-16 max-w-5xl">
         <div>
-          <p className="eyebrow mb-2">{COPY.contact.eyebrow}</p>
-          <h1 className="font-display text-4xl md:text-5xl mb-4">{COPY.contact.title}</h1>
-          <p className="prose-muted mb-8">{COPY.contact.body}</p>
-          <ul className="space-y-4 text-[15px]">
+          <p className="eyebrow mb-3">{COPY.contact.eyebrow}</p>
+          <h1 className="section-title">{COPY.contact.title}</h1>
+          <div className="lux-rule" />
+          <p className="prose-muted mb-10">{COPY.contact.body}</p>
+          <ul className="space-y-6 text-[15px]">
             <li>
-              <span className="eyebrow block mb-1">Email</span>
-              <a className="underline" href={`mailto:${SITE.email}`}>
+              <span className="eyebrow block mb-1.5">Email</span>
+              <a className="underline underline-offset-4 hover:text-bronze" href={`mailto:${SITE.email}`}>
                 {SITE.email}
               </a>
             </li>
             <li>
-              <span className="eyebrow block mb-1">Phone</span>
-              <a className="underline" href={`tel:${SITE.phone.replace(/\s/g, "")}`}>
+              <span className="eyebrow block mb-1.5">Phone</span>
+              <a className="underline underline-offset-4 hover:text-bronze" href={`tel:${SITE.phone.replace(/\s/g, "")}`}>
                 {SITE.phone}
               </a>
             </li>
             <li>
-              <span className="eyebrow block mb-1">WhatsApp</span>
+              <span className="eyebrow block mb-1.5">WhatsApp</span>
               <a
-                className="underline"
+                className="underline underline-offset-4 hover:text-bronze"
                 href={SITE.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -58,18 +59,27 @@ export default function ContactPage() {
               </a>
             </li>
             <li>
-              <span className="eyebrow block mb-1">Workshop</span>
+              <span className="eyebrow block mb-1.5">Workshop</span>
               <p className="prose-muted">{SITE.address}</p>
             </li>
           </ul>
         </div>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <input name="name" required placeholder="Name" className="input" />
-          <input name="email" type="email" required placeholder="Email" className="input" />
-          <textarea name="message" required rows={6} placeholder="Message" className="input" />
+        <form onSubmit={onSubmit} className="surface-panel p-6 md:p-8 space-y-4 h-fit">
+          <label className="block">
+            <span className="label">Name</span>
+            <input name="name" required className="input" />
+          </label>
+          <label className="block">
+            <span className="label">Email</span>
+            <input name="email" type="email" required className="input" />
+          </label>
+          <label className="block">
+            <span className="label">Message</span>
+            <textarea name="message" required rows={6} className="input" />
+          </label>
           {error && <p className="text-sm text-red-700">{error}</p>}
-          {message && <p className="text-sm text-[color:var(--muted)]">{message}</p>}
-          <button type="submit" className="btn-primary">
+          {message && <p className="text-sm text-muted">{message}</p>}
+          <button type="submit" className="btn-primary w-full sm:w-auto">
             Send message
           </button>
         </form>

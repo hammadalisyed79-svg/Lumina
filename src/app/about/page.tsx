@@ -5,12 +5,13 @@ import { COPY } from "@/lib/copy";
 
 export default function AboutPage() {
   return (
-    <div className="container-site py-14">
-      <div className="grid md:grid-cols-2 gap-10 md:gap-14 items-center mb-14">
+    <div className="container-site section-pad">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-16 md:mb-20">
         <div>
-          <p className="eyebrow mb-2">{COPY.about.eyebrow}</p>
-          <h1 className="font-display text-4xl md:text-5xl mb-6">{COPY.about.title}</h1>
-          <div className="space-y-5 prose-muted text-lg">
+          <p className="eyebrow mb-3">{COPY.about.eyebrow}</p>
+          <h1 className="section-title mb-3">{COPY.about.title}</h1>
+          <div className="lux-rule" />
+          <div className="space-y-5 prose-muted">
             <p>{COPY.about.p1}</p>
             <p>{COPY.about.p2}</p>
           </div>
@@ -35,11 +36,12 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8 border-t border-[color:var(--line)] pt-12">
+      <div className="grid md:grid-cols-3 gap-8 md:gap-10 border-t border-line pt-12 md:pt-16">
         {COPY.about.pillars.map((p) => (
-          <div key={p.title}>
-            <p className="eyebrow mb-2">{p.title}</p>
-            <p className="prose-muted">{p.body}</p>
+          <div key={p.title} className="surface-panel p-6 md:p-8">
+            <p className="eyebrow mb-3 text-bronze">{p.title}</p>
+            <div className="lux-rule !mt-0 !mb-4" />
+            <p className="prose-muted text-[15px]">{p.body}</p>
           </div>
         ))}
       </div>
