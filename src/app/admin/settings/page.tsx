@@ -14,10 +14,18 @@ export default async function SettingsPage() {
   const stripe = getStripeReadiness();
   const siteUrl = getSiteUrl().replace(/\/$/, "");
   const webhookUrl = `${siteUrl}/api/webhooks/stripe`;
+  const onCustomDomain =
+    siteUrl.includes("luminahub.co.uk") && !siteUrl.includes("vercel.app");
 
   const rows = [
     { label: "Site name", value: SITE.name },
-    { label: "Public URL", value: siteUrl },
+    { label: "Public URL (env)", value: siteUrl },
+    {
+      label: "Custom domain",
+      value: onCustomDomain
+        ? "Configured in env — confirm DNS points to Vercel"
+        : "Still on *.vercel.app — add luminahub.co.uk in Vercel + DNS",
+    },
     { label: "Email", value: SITE.email },
     { label: "Phone", value: SITE.phone },
     {
@@ -55,44 +63,70 @@ export default async function SettingsPage() {
     <div>
       <h1 className="admin-h1">Settings</h1>
       <p className="admin-muted mb-4">
-        Payments run through Stripe on Lumina Hub. Secrets are edited in hosting env vars (Vercel),
-        then redeployed.
+        Payments and domain are controlled by hosting env vars (Vercel). Update secrets, then
+        redeploy.
       </p>
+
+      <div className="admin-panel mb-4 max-w-2xl">
+        <h2 className="admin-h2">Go-live: Domain</h2>
+        <p className="admin-muted text-sm mb-3">
+          Today <code>luminahub.co.uk</code> / <code>www</code> still resolve to{" "}
+          <strong>Shopify</strong>. Pointing DNS at Vercel will take the old Shopify storefront off
+          that domain.
+        </p>
+        <ol className="admin-body text-sm space-y-2 list-decimal pl-5 m-0">
+          <li>
+            Vercel → Project → Settings → Domains → add{" "}
+            <code>www.luminahub.co.uk</code> and <code>luminahub.co.uk</code>. Prefer{" "}
+            <strong>www</strong> as primary; redirect apex → www.
+          </li>
+          <li>
+            At your DNS host (GoDaddy / domaincontrol NS), set:
+            <ul className="list-disc pl-5 mt-1 space-y-1">
+              <li>
+                <code>www</code> → CNAME <code>cname.vercel-dns.com</code>
+              </li>
+              <li>
+                Apex <code>@</code> → A <code>76.76.21.21</code> (or follow Vercel’s exact
+                values)
+              </li>
+            </ul>
+          </li>
+          <li>
+            Vercel env (Production):
+            <ul className="list-disc pl-5 mt-1 space-y-1">
+              <li>
+                <code>NEXT_PUBLIC_SITE_URL</code> = <code>https://www.luminahub.co.uk</code>
+              </li>
+              <li>
+                <code>AUTH_URL</code> / <code>NEXTAUTH_URL</code> = same
+              </li>
+            </ul>
+            Then redeploy.
+          </li>
+          <li>
+            Update Stripe webhook URL to{" "}
+            <code className="break-all">https://www.luminahub.co.uk/api/webhooks/stripe</code>{" "}
+            (keep the old *.vercel.app endpoint until cutover is verified).
+          </li>
+        </ol>
+      </div>
 
       <div className="admin-panel mb-4 max-w-2xl">
         <h2 className="admin-h2">Go-live: Stripe</h2>
         <ol className="admin-body text-sm space-y-2 list-decimal pl-5 m-0">
           <li>
-            In Stripe Dashboard → Developers → API keys, copy Secret and Publishable keys (use{" "}
-            <strong>test</strong> first, then live).
+            Stripe Dashboard → Developers → API keys (use <strong>test</strong> first, then live).
           </li>
           <li>
-            In Vercel → Project → Settings → Environment Variables, set:
-            <ul className="list-disc pl-5 mt-1 space-y-1">
-              <li>
-                <code>STRIPE_SECRET_KEY</code>
-              </li>
-              <li>
-                <code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> (and optionally{" "}
-                <code>STRIPE_PUBLISHABLE_KEY</code>)
-              </li>
-              <li>
-                <code>STRIPE_WEBHOOK_SECRET</code>
-              </li>
-              <li>
-                <code>NEXT_PUBLIC_SITE_URL</code> = <code>{siteUrl}</code>
-              </li>
-            </ul>
+            Vercel env: <code>STRIPE_SECRET_KEY</code>,{" "}
+            <code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code>, <code>STRIPE_WEBHOOK_SECRET</code>.
           </li>
           <li>
-            Stripe → Developers → Webhooks → Add endpoint:
-            <br />
-            <code className="break-all">{webhookUrl}</code>
-            <br />
-            Event: <code>checkout.session.completed</code>. Paste the signing secret into{" "}
-            <code>STRIPE_WEBHOOK_SECRET</code>.
+            Webhook endpoint: <code className="break-all">{webhookUrl}</code> · event{" "}
+            <code>checkout.session.completed</code>.
           </li>
-          <li>Redeploy on Vercel, then place a small test order.</li>
+          <li>Redeploy, then place a small test order.</li>
         </ol>
       </div>
 

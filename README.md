@@ -110,6 +110,21 @@ Admin → Settings shows live readiness (secret / publishable / webhook).
 4. Run seed once against production (`npm run seed`) or create admin manually.
 5. Configure Stripe webhook endpoint: `https://YOUR_DOMAIN/api/webhooks/stripe` for `checkout.session.completed`.
 
+## Domain (`luminahub.co.uk`)
+
+DNS is currently on **GoDaddy** (`domaincontrol.com`) and still points at **Shopify**
+(`www` → `shops.myshopify.com`). Cutover:
+
+1. Vercel → Settings → Domains → add `www.luminahub.co.uk` + `luminahub.co.uk` (redirect apex → www).
+2. DNS:
+   - `www` CNAME → `cname.vercel-dns.com`
+   - `@` A → `76.76.21.21` (confirm in Vercel UI)
+3. Production env:
+   - `NEXT_PUBLIC_SITE_URL=https://www.luminahub.co.uk`
+   - `AUTH_URL` / `NEXTAUTH_URL` = same
+4. Redeploy. Update Stripe webhook to the custom domain.
+5. Expect TLS + propagation to take minutes to hours. The Shopify storefront on this domain will go offline once DNS moves.
+
 ## Coupons (seeded)
 
 - `WELCOME10` — 10% off (min £50)

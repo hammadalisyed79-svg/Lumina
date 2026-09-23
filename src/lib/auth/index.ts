@@ -44,6 +44,7 @@ const credentialsSchema = z.object({
 export const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(prisma) as NextAuthConfig["adapter"],
   session: { strategy: "jwt" },
+  trustHost: true,
   pages: {
     signIn: "/account/login",
     error: "/account/login",
