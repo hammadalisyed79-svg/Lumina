@@ -157,8 +157,8 @@ export function ProductConfigurator({ product }: Props) {
         Add to bag
       </button>
       <p className="text-xs text-[color:var(--muted)]">
-        Price shown matches the selected Shopify variant. Final shipping is set at
-        Shopify checkout.
+        Price shown matches the selected catalog variant. Online checkout stays unavailable
+        until Shopify Storefront is connected — shipping is confirmed only then.
       </p>
     </div>
   );
