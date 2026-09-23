@@ -28,6 +28,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             src={product.imageUrl}
             alt={product.title}
             fill
+            unoptimized
             className="object-cover transition-opacity duration-500 group-hover:opacity-0"
             sizes="(max-width:768px) 50vw, 25vw"
           />
@@ -36,6 +37,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
               src={product.hoverImageUrl}
               alt=""
               fill
+              unoptimized
               className="object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
               sizes="(max-width:768px) 50vw, 25vw"
             />

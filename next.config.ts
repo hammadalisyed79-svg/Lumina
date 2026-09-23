@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
     contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  // Legacy import paths pointed at /catalog; files ship under /media.
+  async rewrites() {
+    return [
+      {
+        source: "/catalog/products/:path*",
+        destination: "/media/products/:path*",
+      },
+    ];
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "4mb",
