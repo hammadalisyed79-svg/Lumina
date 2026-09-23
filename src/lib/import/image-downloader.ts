@@ -72,13 +72,8 @@ export async function downloadProductImages(
       const dest = path.join(dir, filename);
       const localPath = `/catalog/products/${job.product.sourceHandle}/${filename}`;
 
-      if (urlIndex.has(urlKey)) {
-        img.localPath = urlIndex.get(urlKey);
-        img.downloadStatus = "skipped_dup";
-        deduped++;
-        continue;
-      }
-
+      // Keep a per-product copy even when CDN URL or bytes match another product.
+      // Cross-product path reuse previously attached wrong product photos to SKUs.
       if (fs.existsSync(dest) && fs.statSync(dest).size > 0) {
         const buf = fs.readFileSync(dest);
         const hash = crypto.createHash("sha256").update(buf).digest("hex").slice(0, 16);
@@ -95,23 +90,13 @@ export async function downloadProductImages(
         await downloadToFile(img.highResSrc || img.src, dest);
         const buf = fs.readFileSync(dest);
         const hash = crypto.createHash("sha256").update(buf).digest("hex").slice(0, 16);
+        // Always keep this product's own file path (do not retarget to another handle).
+        img.localPath = localPath;
+        img.contentHash = hash;
         if (hashIndex.has(hash)) {
-          // Identical binary already stored — reuse path, remove duplicate file
-          const existing = hashIndex.get(hash)!;
-          img.localPath = existing;
-          img.contentHash = hash;
           img.downloadStatus = "skipped_dup";
-          if (existing !== localPath) {
-            try {
-              fs.unlinkSync(dest);
-            } catch {
-              /* ignore */
-            }
-          }
           deduped++;
         } else {
-          img.localPath = localPath;
-          img.contentHash = hash;
           img.downloadStatus = "downloaded";
           hashIndex.set(hash, localPath);
           downloaded++;
@@ -119,7 +104,7 @@ export async function downloadProductImages(
             console.log(`  images downloaded ${downloaded}/${jobs.length}`);
           }
         }
-        urlIndex.set(urlKey, img.localPath!);
+        urlIndex.set(urlKey, localPath);
       } catch (e) {
         img.downloadStatus = "failed";
         img.downloadError = e instanceof Error ? e.message : String(e);

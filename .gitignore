@@ -54,3 +54,4 @@ data/luminahub.db
 data/catalog-zip-inspect/
 
 # optional large raw dumps (catalog JSON + media are kept)
+.env*

@@ -253,21 +253,25 @@ export async function importProductsToDatabase(
     }
     upsertedProducts++;
 
-    // Images: replace in one go
+    // Images: replace in one go. Force URL under this product's handle so a
+    // prior content-hash dedupe path never attaches another SKU's photos.
     await prisma.productImage.deleteMany({ where: { productId } });
     const imageRows = p.images
       .filter((img) => img.localPath)
-      .map((img) => ({
-        productId: productId!,
-        url: img.localPath!,
-        alt: img.alt || p.displayName,
-        sortOrder: img.position,
-        isPrimary: img.position === 1,
-        sourceUrl: img.src,
-        width: img.width,
-        height: img.height,
-        contentHash: img.contentHash,
-      }));
+      .map((img) => {
+        const filename = img.localPath!.split("/").pop()!;
+        return {
+          productId: productId!,
+          url: `/media/products/${p.sourceHandle}/${filename}`,
+          alt: img.alt || p.displayName,
+          sortOrder: img.position,
+          isPrimary: img.position === 1,
+          sourceUrl: img.src,
+          width: img.width,
+          height: img.height,
+          contentHash: img.contentHash,
+        };
+      });
     if (imageRows.length) {
       await prisma.productImage.createMany({ data: imageRows });
       upsertedImages += imageRows.length;
