@@ -208,16 +208,36 @@ export default function DesignYourShadePage() {
                 <li className="font-medium pt-2">Price: {formatMoney(unitPrice)}</li>
               </ul>
               <div className="flex flex-wrap gap-3 pt-4">
-                <Link href="/bespoke" className="btn-primary">
-                  Enquire about this design
+                <Link
+                  href={`/shop/lampshades?q=${encodeURIComponent(fabric?.name?.split(" ").slice(0, 3).join(" ") || "")}`}
+                  className="btn-primary"
+                >
+                  Shop matching shades
                 </Link>
-                <button type="button" className="btn-secondary" onClick={saveDesign}>
+                <Link
+                  href={`/bespoke?subject=${encodeURIComponent(`Custom ${shape?.name || ""} / ${fabric?.name || ""}`)}`}
+                  className="btn-secondary"
+                >
+                  Enquire with studio
+                </Link>
+                <a
+                  href={`https://wa.me/447889451166?text=${encodeURIComponent(
+                    `Hi Lumina Hub — I'd like a custom ${shape?.name} shade in ${fabric?.name}, size ${size?.name}, ${lining?.name} lining, ${fitting?.name} fitting. Indicative price £${unitPrice.toFixed(2)}.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-ghost"
+                >
+                  WhatsApp
+                </a>
+                <button type="button" className="btn-ghost" onClick={saveDesign}>
                   Save design
                 </button>
               </div>
               <p className="text-xs text-[color:var(--muted)]">
-                Add to bag is disabled until configurator options map to Shopify variants.
-                Indicative price above is for studio guidance only.
+                The studio tool is for exploring options. Purchases use catalogue products with
+                Shopify variants (Shop matching shades). Custom builds are fulfilled via enquiry —
+                indicative price is guidance only.
               </p>
               {saved && <p className="text-sm text-[color:var(--muted)]">Design saved to your account / guest key.</p>}
             </div>

@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { formatMoney } from "@/lib/utils";
-import { AdminProductActions } from "@/components/admin/AdminProductActions";
+import { toNumber } from "@/lib/pricing";
+import { AdminProductEditForm } from "@/components/admin/AdminProductEditForm";
 
 export const dynamic = "force-dynamic";
 
@@ -11,24 +12,56 @@ export default async function AdminProductDetailPage({ params }: Props) {
   const { id } = await params;
   const product = await prisma.product.findUnique({
     where: { id },
-    include: { variants: true, images: true },
+    include: {
+      variants: { orderBy: { title: "asc" } },
+      images: { orderBy: { sortOrder: "asc" } },
+    },
   });
   if (!product) notFound();
 
   return (
     <div>
-      <h1 className="font-display text-4xl mb-2">{product.title}</h1>
-      <p className="text-sm text-[color:var(--muted)] mb-6">/{product.slug}</p>
-      <p className="mb-4">{formatMoney(product.basePrice)} · {product.type}</p>
-      <AdminProductActions id={product.id} published={product.published} />
-      <h2 className="font-display text-2xl mt-10 mb-4">Variants</h2>
-      <ul className="space-y-2 text-sm">
-        {product.variants.map((v) => (
-          <li key={v.id} className="border border-[color:var(--line)] p-3 bg-white/60">
-            {v.sku} — {v.title} {v.active ? "" : "(inactive)"}
-          </li>
-        ))}
-      </ul>
+      <Link href="/admin/products" className="text-sm text-[color:var(--muted)]">
+        ← Products
+      </Link>
+      <h1 className="font-display text-4xl mt-3 mb-2">Edit product</h1>
+      <p className="text-sm text-[color:var(--muted)] mb-8">
+        /{product.slug} · {product.variants.length} variants
+      </p>
+      <AdminProductEditForm
+        product={{
+          id: product.id,
+          title: product.title,
+          slug: product.slug,
+          subtitle: product.subtitle,
+          description: product.description,
+          shortDesc: product.shortDesc,
+          basePrice: toNumber(product.basePrice),
+          published: product.published,
+          featured: product.featured,
+          bestseller: product.bestseller,
+          shopifyProductId: product.shopifyProductId,
+          shopifyHandle: product.shopifyHandle,
+          seoTitle: product.seoTitle,
+          seoDesc: product.seoDesc,
+          shapeKey: product.shapeKey,
+          images: product.images.map((i) => ({
+            id: i.id,
+            url: i.url,
+            alt: i.alt || "",
+            sortOrder: i.sortOrder,
+          })),
+          variants: product.variants.map((v) => ({
+            id: v.id,
+            title: v.title,
+            sku: v.sku,
+            priceOverride:
+              v.priceOverride != null ? String(toNumber(v.priceOverride)) : "",
+            shopifyVariantId: v.shopifyVariantId || "",
+            active: v.active,
+          })),
+        }}
+      />
     </div>
   );
 }

@@ -14,7 +14,7 @@ export const SITE = {
 };
 
 export const ANNOUNCEMENT =
-  "Handmade to order in Britain · Online checkout unavailable until Shopify is connected";
+  "Handmade to order in Britain · Secure checkout via Shopify";
 
 export const NAV_MEGA = {
   lampshades: {
@@ -39,6 +39,15 @@ export const NAV_MEGA = {
           { href: "/shop/new", label: "New arrivals" },
           { href: "/shop/linen-calm", label: "Linen calm" },
           { href: "/shop/botanical", label: "Botanical" },
+        ],
+      },
+      {
+        title: "By material",
+        links: [
+          { href: "/shop/velvet", label: "Velvet" },
+          { href: "/shop/linen", label: "Linen" },
+          { href: "/shop/printed", label: "Printed" },
+          { href: "/shop/foil", label: "Foil" },
         ],
       },
       {

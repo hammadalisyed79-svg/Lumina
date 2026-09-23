@@ -6,6 +6,7 @@ import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { StorefrontShell } from "@/components/layout/StorefrontShell";
 import { SITE } from "@/lib/site";
+import { getPrimaryNavLinks } from "@/lib/navigation";
 
 const display = Cormorant_Garamond({
   variable: "--font-display",
@@ -48,18 +49,19 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nav = await getPrimaryNavLinks();
   return (
     <html lang="en-GB">
       <body className={`${display.variable} ${body.variable} antialiased`}>
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
-              <StorefrontShell>{children}</StorefrontShell>
+              <StorefrontShell nav={nav}>{children}</StorefrontShell>
             </WishlistProvider>
           </CartProvider>
         </AuthProvider>

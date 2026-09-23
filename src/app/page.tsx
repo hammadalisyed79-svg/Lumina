@@ -104,7 +104,7 @@ async function moodImage(slug: string, fallback: string, avoid: Set<string>) {
 export default async function HomePage() {
   const shapeKeys = ["drum", "empire", "oval", "rectangular", "coolie", "square"];
 
-  const [shapes, shapeImages, curatedParts, moodMeta, reviews, lifestyle] =
+  const [shapes, shapeImages, curatedParts, moodMeta, reviews, lifestyle, homepageSections] =
     await Promise.all([
       prisma.shape.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
       shapeImageMap(shapeKeys),
@@ -132,7 +132,21 @@ export default async function HomePage() {
         orderBy: [{ featured: "desc" }, { updatedAt: "desc" }],
         take: 12,
       }),
+      prisma.homepageSection.findMany({
+        where: { enabled: true },
+        orderBy: { sortOrder: "asc" },
+      }),
     ]);
+
+  const heroSection = homepageSections.find((s) => s.type === "HERO");
+  const editorialSection = homepageSections.find((s) => s.type === "EDITORIAL");
+  const homesSection = homepageSections.find((s) => s.type === "CUSTOMER_HOMES");
+  const heroPayload = (heroSection?.payload || {}) as {
+    eyebrow?: string;
+    secondaryCtaLabel?: string;
+    secondaryCtaHref?: string;
+  };
+  const homesPayload = (homesSection?.payload || {}) as { images?: string[] };
 
   const selected = curatedParts.flat();
   const lifestyleUrls = lifestyle
@@ -146,11 +160,6 @@ export default async function HomePage() {
 
   const craftImage = lifestyleUrls[1] || designImage;
   const tradeImage = lifestyleUrls[2] || designImage;
-  const homeImages = [
-    lifestyleUrls[3] || designImage,
-    lifestyleUrls[4] || craftImage,
-    lifestyleUrls[5] || tradeImage,
-  ];
 
   const usedMoodImages = new Set<string>();
   const moodCards = [];
@@ -190,8 +199,18 @@ export default async function HomePage() {
     square: "/media/homepage/shape-3.png",
   };
 
-  const heroImage = "/media/homepage/hero-lifestyle.png";
+  const heroImage = heroSection?.imageUrl || "/media/homepage/hero-lifestyle.png";
   const storyImage = "/media/homepage/story-craft.png";
+  const cmsHomeImages =
+    homesPayload.images?.filter(Boolean) ||
+    [heroImage, storyImage, categoryTiles.rectangular || designImage].filter(Boolean);
+  const homeImages = cmsHomeImages.length
+    ? cmsHomeImages.slice(0, 3)
+    : [
+        lifestyleUrls[3] || designImage,
+        lifestyleUrls[4] || craftImage,
+        lifestyleUrls[5] || tradeImage,
+      ];
 
   return (
     <>
@@ -206,20 +225,25 @@ export default async function HomePage() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[rgba(28,25,21,0.45)] via-[rgba(28,25,21,0.18)] to-transparent" />
         <div className="relative container-site py-16 md:py-24 text-white max-w-3xl">
-          <p className="eyebrow text-white/85 mb-3">Lighting · Home decor</p>
+          <p className="eyebrow text-white/85 mb-3">
+            {heroPayload.eyebrow || "Lighting · Home decor"}
+          </p>
           <h1 className="font-display text-5xl md:text-7xl leading-[1.05] mb-3">
-            Welcome to Lumina Hub
+            {heroSection?.title || "Welcome to Lumina Hub"}
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-xl mb-8">
-            Where light meets craftsmanship — handmade lampshades, cushions and printed
-            fabrics from our UK studio.
+            {heroSection?.subtitle ||
+              "Where light meets craftsmanship — handmade lampshades, cushions and printed fabrics from our UK studio."}
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/shop/lampshades" className="btn-primary">
-              Shop now
+            <Link href={heroSection?.ctaHref || "/shop/lampshades"} className="btn-primary">
+              {heroSection?.ctaLabel || "Shop now"}
             </Link>
-            <Link href="/about" className="btn-ghost">
-              Our story
+            <Link
+              href={heroPayload.secondaryCtaHref || "/about"}
+              className="btn-ghost"
+            >
+              {heroPayload.secondaryCtaLabel || "Our story"}
             </Link>
           </div>
         </div>
@@ -361,13 +385,15 @@ export default async function HomePage() {
 
       <section className="section-pad container-site max-w-3xl text-center">
         <p className="eyebrow mb-3">Editorial</p>
-        <h2 className="font-display text-4xl md:text-5xl mb-4">Light as an interior material</h2>
+        <h2 className="font-display text-4xl md:text-5xl mb-4">
+          {editorialSection?.title || "Light as an interior material"}
+        </h2>
         <p className="prose-muted text-lg mb-8">
-          We treat fabric, frame and lining as a composition — so each shade feels considered in
-          the room, not merely functional.
+          {editorialSection?.body ||
+            "We treat fabric, frame and lining as a composition — so each shade feels considered in the room, not merely functional."}
         </p>
-        <Link href="/about" className="btn-secondary">
-          Our atelier
+        <Link href={editorialSection?.ctaHref || "/about"} className="btn-secondary">
+          {editorialSection?.ctaLabel || "Our atelier"}
         </Link>
       </section>
 

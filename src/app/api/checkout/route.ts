@@ -5,7 +5,9 @@ import { orderNumber } from "@/lib/utils";
 import { writeAuditLog } from "@/lib/security/audit";
 import { rateLimit, clientIp } from "@/lib/security/rate-limit";
 import {
+  buildCartPermalink,
   createShopifyCheckout,
+  isCheckoutLive,
   isShopifyConfigured,
   variantGid,
 } from "@/lib/shopify";
@@ -143,19 +145,16 @@ export async function POST(req: Request) {
     });
   }
 
-  // Shopify Storefront hosted checkout is the only live path.
-  // Keep checkout unavailable while Shopify is unconfigured (no Stripe substitute).
-  if (!isShopifyConfigured()) {
+  // Shopify hosted checkout: Storefront API when configured, else cart permalink.
+  if (!isCheckoutLive()) {
     return NextResponse.json(
       {
         error:
-          "Checkout is not live. Set SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN for Shopify hosted checkout.",
+          "Checkout is not live. Set SHOPIFY_CHECKOUT_DOMAIN (e.g. https://www.luminahub.co.uk) or Storefront API credentials.",
         mode: "blocked",
         blockers: [
-          "SHOPIFY_STORE_DOMAIN",
-          "SHOPIFY_STOREFRONT_TOKEN",
-          "SHOPIFY_WEBHOOK_SECRET",
-          "Verified shipping rates in Shopify",
+          "SHOPIFY_CHECKOUT_DOMAIN or SHOPIFY_STORE_DOMAIN",
+          "Optional: SHOPIFY_STOREFRONT_TOKEN for Cart API",
         ],
       },
       { status: 503 }
@@ -202,19 +201,35 @@ export async function POST(req: Request) {
       : { calcType: "FLAT" as const, price: 0, freeAbove: null },
   });
 
-  // Shopify hosted checkout (SoT). Cart creation must leave payment PENDING — never PAID.
+  // Shopify hosted checkout (SoT). Payment stays PENDING until Shopify confirms.
   try {
     const number = orderNumber();
-    const cart = await createShopifyCheckout(
-      pricedLines.map((l) => ({
-        merchandiseId: variantGid(l.shopifyVariantId!),
-        quantity: l.quantity,
-      })),
-      [
-        { key: "lumina_order_number", value: number },
-        { key: "lumina_order_email", value: data.email.toLowerCase() },
-      ]
-    );
+    let checkoutUrl: string;
+    let shopifyCartId: string | null = null;
+    let checkoutMode: "shopify" | "shopify_permalink" = "shopify_permalink";
+
+    if (isShopifyConfigured()) {
+      const cart = await createShopifyCheckout(
+        pricedLines.map((l) => ({
+          merchandiseId: variantGid(l.shopifyVariantId!),
+          quantity: l.quantity,
+        })),
+        [
+          { key: "lumina_order_number", value: number },
+          { key: "lumina_order_email", value: data.email.toLowerCase() },
+        ]
+      );
+      checkoutUrl = cart.checkoutUrl;
+      shopifyCartId = cart.id;
+      checkoutMode = "shopify";
+    } else {
+      checkoutUrl = buildCartPermalink(
+        pricedLines.map((l) => ({
+          shopifyVariantId: l.shopifyVariantId!,
+          quantity: l.quantity,
+        }))
+      );
+    }
 
     const order = await prisma.order.create({
       data: {
@@ -230,7 +245,7 @@ export async function POST(req: Request) {
         total: totals.total,
         couponCode: coupon?.code,
         shippingMethodId: shippingMethod?.id,
-        shopifyCartId: cart.id,
+        shopifyCartId,
         shippingName: data.shipping.fullName,
         shippingLine1: data.shipping.line1,
         shippingLine2: data.shipping.line2,
@@ -254,7 +269,10 @@ export async function POST(req: Request) {
         events: {
           create: {
             type: "shopify_checkout",
-            message: `Shopify cart ${cart.id} created — awaiting payment`,
+            message:
+              checkoutMode === "shopify"
+                ? `Shopify cart ${shopifyCartId} created — awaiting payment`
+                : `Shopify cart permalink issued — awaiting payment`,
           },
         },
       },
@@ -280,14 +298,14 @@ export async function POST(req: Request) {
       entity: "Order",
       entityId: order.id,
       ip,
-      meta: { orderNumber: number, mode: "shopify", paymentStatus: "PENDING" },
+      meta: { orderNumber: number, mode: checkoutMode, paymentStatus: "PENDING" },
     });
 
     return NextResponse.json({
       orderId: order.id,
       orderNumber: order.orderNumber,
-      url: cart.checkoutUrl,
-      mode: "shopify",
+      url: checkoutUrl,
+      mode: checkoutMode,
       paymentStatus: order.paymentStatus,
     });
   } catch (e) {

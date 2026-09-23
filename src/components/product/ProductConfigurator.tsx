@@ -157,8 +157,8 @@ export function ProductConfigurator({ product }: Props) {
         Add to bag
       </button>
       <p className="text-xs text-[color:var(--muted)]">
-        Price shown matches the selected catalog variant. Online checkout stays unavailable
-        until Shopify Storefront is connected — shipping is confirmed only then.
+        Secure payment opens on Shopify. Shipping is confirmed there; this site never marks an
+        order paid until Shopify confirms payment.
       </p>
     </div>
   );

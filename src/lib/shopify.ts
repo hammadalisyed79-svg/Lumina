@@ -1,13 +1,14 @@
 /**
- * Shopify Storefront API client.
- * Requires SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN.
- * When unset, helpers return null / throw ShopifyNotConfiguredError.
+ * Shopify Storefront API client + cart permalink checkout.
+ * Prefers Storefront API when SHOPIFY_STOREFRONT_TOKEN is set.
+ * Falls back to Shopify cart permalinks on the public storefront domain
+ * (works for luminahub.co.uk without a Storefront token).
  */
 
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export class ShopifyNotConfiguredError extends Error {
-  constructor(message = "Shopify Storefront API is not configured") {
+  constructor(message = "Shopify checkout is not configured") {
     super(message);
     this.name = "ShopifyNotConfiguredError";
   }
@@ -20,6 +21,21 @@ export function isShopifyConfigured() {
       token &&
       !token.includes("placeholder")
   );
+}
+
+/** Public storefront used for cart permalinks (custom domain or *.myshopify.com). */
+export function getShopifyCheckoutBaseUrl() {
+  const raw =
+    process.env.SHOPIFY_CHECKOUT_DOMAIN ||
+    process.env.SHOPIFY_STORE_DOMAIN ||
+    "https://www.luminahub.co.uk";
+  const withProtocol = raw.startsWith("http") ? raw : `https://${raw}`;
+  return withProtocol.replace(/\/$/, "");
+}
+
+/** Checkout can run via Storefront API or cart permalink. */
+export function isCheckoutLive() {
+  return isShopifyConfigured() || Boolean(getShopifyCheckoutBaseUrl());
 }
 
 function endpoint() {
@@ -71,7 +87,7 @@ mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
 }`;
 
 export type ShopifyCartLine = {
-  merchandiseId: string; // gid://shopify/ProductVariant/...
+  merchandiseId: string;
   quantity: number;
   attributes?: { key: string; value: string }[];
 };
@@ -108,6 +124,26 @@ export async function createShopifyCheckout(
 export function variantGid(numericId: string) {
   if (numericId.startsWith("gid://")) return numericId;
   return `gid://shopify/ProductVariant/${numericId}`;
+}
+
+export function variantNumericId(id: string) {
+  if (!id.startsWith("gid://")) return id.replace(/\D/g, "") || id;
+  const parts = id.split("/");
+  return parts[parts.length - 1];
+}
+
+/**
+ * Cart permalink → Shopify hosted checkout (no Storefront token required).
+ * https://shopify.dev/docs/apps/build/checkout/cart-permalinks
+ */
+export function buildCartPermalink(
+  lines: { shopifyVariantId: string; quantity: number }[]
+) {
+  const base = getShopifyCheckoutBaseUrl();
+  const path = lines
+    .map((l) => `${variantNumericId(l.shopifyVariantId)}:${Math.max(1, l.quantity)}`)
+    .join(",");
+  return `${base}/cart/${path}`;
 }
 
 export function verifyShopifyWebhookHmac(

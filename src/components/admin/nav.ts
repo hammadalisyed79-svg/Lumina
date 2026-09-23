@@ -19,6 +19,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { href: "/admin/orders", label: "Orders", permission: "orders.view" },
       { href: "/admin/customers", label: "Customers", permission: "customers.view" },
+      { href: "/admin/shipping", label: "Shipping", permission: "settings.view" },
     ],
   },
   {
@@ -75,5 +76,4 @@ export const ADMIN_NAV: AdminNavGroup[] = [
 export const ADMIN_LEGACY_REDIRECTS: Record<string, string> = {
   "/admin/coupons": "/admin/discounts",
   "/admin/cms": "/admin/content",
-  "/admin/shipping": "/admin/settings",
 };

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { PRIMARY_NAV, NAV_MEGA } from "@/lib/site";
+import { NAV_MEGA } from "@/lib/site";
+import type { NavLink } from "@/lib/navigation";
 
-export function MobileNav() {
+export function MobileNav({ items }: { items: NavLink[] }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -27,7 +28,7 @@ export function MobileNav() {
             </button>
           </div>
           <nav className="container-site py-8 space-y-5">
-            {PRIMARY_NAV.map((item) => (
+            {items.map((item) => (
               <div key={item.href}>
                 <Link
                   href={item.href}
@@ -49,12 +50,6 @@ export function MobileNav() {
                 )}
               </div>
             ))}
-            <Link href="/size-guide" className="block text-lg" onClick={() => setOpen(false)}>
-              Size guide
-            </Link>
-            <Link href="/bespoke" className="block text-lg" onClick={() => setOpen(false)}>
-              Bespoke
-            </Link>
           </nav>
         </div>
       )}

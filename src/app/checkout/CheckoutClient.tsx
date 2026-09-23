@@ -207,9 +207,8 @@ export default function CheckoutClient() {
               {loading ? "Processing…" : "Continue to Shopify checkout"}
             </button>
             <p className="text-xs text-[color:var(--muted)]">
-              Online checkout stays unavailable until Shopify Storefront credentials are
-              configured. Creating a cart never marks an order paid — payment confirmation
-              comes from Shopify webhooks only.
+              You will complete payment on Shopify. Orders stay unpaid here until Shopify confirms
+              payment via webhook (or you reconcile manually).
             </p>
           </form>
         )}
