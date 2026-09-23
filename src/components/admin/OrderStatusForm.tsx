@@ -1,26 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
-const STATUSES = [
-  "PENDING",
-  "AWAITING_PAYMENT",
-  "PAID",
-  "PROCESSING",
-  "SHIPPED",
-  "DELIVERED",
-  "CANCELLED",
-  "REFUNDED",
-] as const;
-
-const PAYMENTS = [
-  "UNPAID",
-  "PENDING",
-  "PAID",
-  "FAILED",
-  "REFUNDED",
-  "PARTIALLY_REFUNDED",
-] as const;
+import { useState } from "react";
+import { ORDER_STATUSES, PAYMENT_STATUSES } from "@/lib/admin/orders";
 
 export function OrderStatusForm({
   id,
@@ -32,11 +14,15 @@ export function OrderStatusForm({
   paymentStatus: string;
 }) {
   const router = useRouter();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError("");
+    setLoading(true);
     const fd = new FormData(e.currentTarget);
-    await fetch(`/api/admin/orders/${id}`, {
+    const res = await fetch(`/api/admin/orders/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -44,28 +30,39 @@ export function OrderStatusForm({
         paymentStatus: fd.get("paymentStatus"),
       }),
     });
+    setLoading(false);
+    if (!res.ok) {
+      setError("Update failed");
+      return;
+    }
     router.refresh();
   }
 
   return (
-    <form onSubmit={save} className="flex flex-wrap gap-2 items-center text-xs">
-      <select name="status" defaultValue={status} className="input py-1">
-        {STATUSES.map((s) => (
+    <form onSubmit={save} className="admin-actions text-xs">
+      <select name="status" defaultValue={status} className="admin-input" style={{ width: "auto" }}>
+        {ORDER_STATUSES.map((s) => (
           <option key={s} value={s}>
             {s}
           </option>
         ))}
       </select>
-      <select name="paymentStatus" defaultValue={paymentStatus} className="input py-1">
-        {PAYMENTS.map((s) => (
+      <select
+        name="paymentStatus"
+        defaultValue={paymentStatus}
+        className="admin-input"
+        style={{ width: "auto" }}
+      >
+        {PAYMENT_STATUSES.map((s) => (
           <option key={s} value={s}>
             {s}
           </option>
         ))}
       </select>
-      <button type="submit" className="btn-secondary py-1 px-3 text-xs">
-        Update
+      <button type="submit" className="btn-secondary py-1 px-3 text-xs" disabled={loading}>
+        {loading ? "…" : "Update"}
       </button>
+      {error && <span className="text-red-700">{error}</span>}
     </form>
   );
 }

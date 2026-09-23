@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import Link from "next/link";
 import {
   InventoryAdjustForm,
   InventoryCreateForm,
@@ -7,13 +8,25 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminInventoryPage() {
+type Props = {
+  searchParams: Promise<{ low?: string }>;
+};
+
+export default async function AdminInventoryPage({ searchParams }: Props) {
+  const sp = await searchParams;
+  const lowOnly = sp.low === "1";
+
   const rows = await prisma.inventoryItem.findMany({
-    orderBy: { updatedAt: "desc" },
+    where: lowOnly ? { trackStock: true } : undefined,
+    orderBy: lowOnly ? { available: "asc" } : { updatedAt: "desc" },
     take: 200,
   });
 
-  const items: InventoryRow[] = rows.map((i) => ({
+  const filtered = lowOnly
+    ? rows.filter((i) => i.available <= i.reorderLevel)
+    : rows;
+
+  const items: InventoryRow[] = filtered.map((i) => ({
     id: i.id,
     sku: i.sku,
     name: i.name,
@@ -26,13 +39,33 @@ export default async function AdminInventoryPage() {
 
   return (
     <div>
-      <h1 className="admin-h1">Inventory</h1>
-      <p className="admin-muted mb-4">
-        Track finished goods, kits, fabric and components. Adjust available counts inline; movements
-        are logged automatically.
-      </p>
-      <InventoryCreateForm />
-      <div className="admin-table-wrap mt-8">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
+        <div>
+          <h1 className="admin-h1">Inventory</h1>
+          <p className="admin-muted mb-0">
+            Track finished goods, kits, fabric and components. Adjust available counts inline;
+            movements are logged automatically.
+          </p>
+        </div>
+        <div className="admin-filters mb-0">
+          <Link
+            href="/admin/inventory"
+            className={`admin-filter-chip ${!lowOnly ? "active" : ""}`}
+          >
+            All
+          </Link>
+          <Link
+            href="/admin/inventory?low=1"
+            className={`admin-filter-chip ${lowOnly ? "active" : ""}`}
+          >
+            Low stock
+          </Link>
+        </div>
+      </div>
+
+      {!lowOnly && <InventoryCreateForm />}
+
+      <div className={`admin-table-wrap ${lowOnly ? "" : "mt-8"}`}>
         <table className="admin-table">
           <thead>
             <tr>
@@ -47,22 +80,37 @@ export default async function AdminInventoryPage() {
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
-              <tr key={item.id}>
-                <td className="font-mono text-xs">{item.sku}</td>
-                <td>{item.name}</td>
-                <td>{item.kind}</td>
-                <td>{item.available}</td>
-                <td>{item.reserved}</td>
-                <td>{item.reorderLevel}</td>
-                <td>
-                  <span className="admin-badge">{item.trackStock ? "Yes" : "No"}</span>
-                </td>
-                <td>
-                  <InventoryAdjustForm item={item} />
+            {items.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="admin-muted">
+                  {lowOnly
+                    ? "No items at or below reorder level."
+                    : "No inventory rows yet."}
                 </td>
               </tr>
-            ))}
+            ) : (
+              items.map((item) => (
+                <tr key={item.id}>
+                  <td className="font-mono text-xs">{item.sku}</td>
+                  <td>{item.name}</td>
+                  <td>{item.kind}</td>
+                  <td>
+                    {item.available}
+                    {item.trackStock && item.available <= item.reorderLevel ? (
+                      <span className="admin-badge is-danger ml-2">Low</span>
+                    ) : null}
+                  </td>
+                  <td>{item.reserved}</td>
+                  <td>{item.reorderLevel}</td>
+                  <td>
+                    <span className="admin-badge">{item.trackStock ? "Yes" : "No"}</span>
+                  </td>
+                  <td>
+                    <InventoryAdjustForm item={item} />
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

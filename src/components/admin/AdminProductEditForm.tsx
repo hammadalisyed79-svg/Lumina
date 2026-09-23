@@ -41,9 +41,7 @@ export function AdminProductEditForm({ product }: Props) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState(
-    product.images.length
-      ? product.images
-      : [{ url: "", alt: "", sortOrder: 0 }]
+    product.images.length ? product.images : [{ url: "", alt: "", sortOrder: 0 }]
   );
   const [variants, setVariants] = useState(product.variants);
 
@@ -101,108 +99,126 @@ export function AdminProductEditForm({ product }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-8 max-w-4xl">
-      <div className="grid md:grid-cols-2 gap-4">
-        <label className="block md:col-span-2">
-          <span className="label">Title</span>
-          <input name="title" required defaultValue={product.title} className="input" />
-        </label>
-        <label className="block">
-          <span className="label">Slug</span>
-          <input name="slug" required defaultValue={product.slug} className="input" />
-        </label>
-        <label className="block">
-          <span className="label">Base price (£)</span>
-          <input
-            name="basePrice"
-            type="number"
-            step="0.01"
-            required
-            defaultValue={product.basePrice}
-            className="input"
-          />
-        </label>
-        <label className="block md:col-span-2">
-          <span className="label">Subtitle</span>
-          <input name="subtitle" defaultValue={product.subtitle || ""} className="input" />
-        </label>
-        <label className="block md:col-span-2">
-          <span className="label">Short description</span>
-          <input name="shortDesc" defaultValue={product.shortDesc || ""} className="input" />
-        </label>
-        <label className="block md:col-span-2">
-          <span className="label">Description</span>
-          <textarea
-            name="description"
-            required
-            rows={6}
-            defaultValue={product.description}
-            className="input"
-          />
-        </label>
-        <label className="block">
-          <span className="label">Shape key</span>
-          <input name="shapeKey" defaultValue={product.shapeKey || ""} className="input" />
-        </label>
-        <label className="block">
-          <span className="label">Shopify product ID</span>
-          <input
-            name="shopifyProductId"
-            defaultValue={product.shopifyProductId || ""}
-            className="input"
-          />
-        </label>
-        <label className="block">
-          <span className="label">Shopify handle</span>
-          <input
-            name="shopifyHandle"
-            defaultValue={product.shopifyHandle || ""}
-            className="input"
-          />
-        </label>
-        <label className="block">
-          <span className="label">SEO title</span>
-          <input name="seoTitle" defaultValue={product.seoTitle || ""} className="input" />
-        </label>
-        <label className="block md:col-span-2">
-          <span className="label">SEO description</span>
-          <input name="seoDesc" defaultValue={product.seoDesc || ""} className="input" />
-        </label>
-      </div>
-
-      <div className="flex flex-wrap gap-6">
-        <label className="flex items-center gap-2 text-sm">
-          <input name="published" type="checkbox" defaultChecked={product.published} />
-          Published
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input name="featured" type="checkbox" defaultChecked={product.featured} />
-          Featured
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input name="bestseller" type="checkbox" defaultChecked={product.bestseller} />
-          Bestseller
-        </label>
-      </div>
-
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-2xl">Images</h2>
-          <button
-            type="button"
-            className="text-sm underline"
-            onClick={() =>
-              setImages((prev) => [...prev, { url: "", alt: "", sortOrder: prev.length }])
-            }
-          >
-            Add image
-          </button>
+    <form onSubmit={onSubmit} className="space-y-4 max-w-5xl">
+      <div className="admin-panel">
+        <h2 className="admin-h2">Core</h2>
+        <div className="admin-form-grid cols-2">
+          <label className="block" style={{ gridColumn: "1 / -1" }}>
+            <span className="admin-label">Title</span>
+            <input name="title" required defaultValue={product.title} className="admin-input" />
+          </label>
+          <label className="block">
+            <span className="admin-label">Slug</span>
+            <input name="slug" required defaultValue={product.slug} className="admin-input" />
+          </label>
+          <label className="block">
+            <span className="admin-label">Base price (£)</span>
+            <input
+              name="basePrice"
+              type="number"
+              step="0.01"
+              required
+              defaultValue={product.basePrice}
+              className="admin-input"
+            />
+          </label>
+          <label className="block" style={{ gridColumn: "1 / -1" }}>
+            <span className="admin-label">Subtitle</span>
+            <input name="subtitle" defaultValue={product.subtitle || ""} className="admin-input" />
+          </label>
+          <label className="block" style={{ gridColumn: "1 / -1" }}>
+            <span className="admin-label">Short description</span>
+            <input name="shortDesc" defaultValue={product.shortDesc || ""} className="admin-input" />
+          </label>
+          <label className="block" style={{ gridColumn: "1 / -1" }}>
+            <span className="admin-label">Description</span>
+            <textarea
+              name="description"
+              required
+              rows={6}
+              defaultValue={product.description}
+              className="admin-input"
+            />
+          </label>
+          <label className="block">
+            <span className="admin-label">Shape key</span>
+            <input name="shapeKey" defaultValue={product.shapeKey || ""} className="admin-input" />
+          </label>
         </div>
+        <div className="admin-actions mt-4">
+          <label className="flex items-center gap-2 text-sm">
+            <input name="published" type="checkbox" defaultChecked={product.published} />
+            Published
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input name="featured" type="checkbox" defaultChecked={product.featured} />
+            Featured
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input name="bestseller" type="checkbox" defaultChecked={product.bestseller} />
+            Bestseller
+          </label>
+        </div>
+      </div>
+
+      <div className="admin-panel">
+        <h2 className="admin-h2">SEO & legacy IDs</h2>
+        <div className="admin-form-grid cols-2">
+          <label className="block">
+            <span className="admin-label">SEO title</span>
+            <input name="seoTitle" defaultValue={product.seoTitle || ""} className="admin-input" />
+          </label>
+          <label className="block">
+            <span className="admin-label">Shopify product ID</span>
+            <input
+              name="shopifyProductId"
+              defaultValue={product.shopifyProductId || ""}
+              className="admin-input"
+            />
+          </label>
+          <label className="block" style={{ gridColumn: "1 / -1" }}>
+            <span className="admin-label">SEO description</span>
+            <input name="seoDesc" defaultValue={product.seoDesc || ""} className="admin-input" />
+          </label>
+          <label className="block">
+            <span className="admin-label">Shopify handle</span>
+            <input
+              name="shopifyHandle"
+              defaultValue={product.shopifyHandle || ""}
+              className="admin-input"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div className="admin-panel">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="admin-h2" style={{ margin: 0 }}>
+            Images
+          </h2>
+          <div className="admin-actions">
+            <a href="/admin/media" className="admin-filter-chip">
+              Open media library
+            </a>
+            <button
+              type="button"
+              className="admin-filter-chip"
+              onClick={() =>
+                setImages((prev) => [...prev, { url: "", alt: "", sortOrder: prev.length }])
+              }
+            >
+              Add image
+            </button>
+          </div>
+        </div>
+        <p className="admin-muted mb-3 text-sm">
+          Paste a `/media/…` URL from the media library. Alt text is used for accessibility and SEO.
+        </p>
         <div className="space-y-3">
           {images.map((img, idx) => (
             <div key={idx} className="grid md:grid-cols-[1fr_1fr_auto] gap-2">
               <input
-                className="input"
+                className="admin-input"
                 placeholder="/media/products/…"
                 value={img.url}
                 onChange={(e) => {
@@ -212,7 +228,7 @@ export function AdminProductEditForm({ product }: Props) {
                 }}
               />
               <input
-                className="input"
+                className="admin-input"
                 placeholder="Alt text"
                 value={img.alt}
                 onChange={(e) => {
@@ -231,94 +247,106 @@ export function AdminProductEditForm({ product }: Props) {
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section>
-        <h2 className="font-display text-2xl mb-3">
+      <div className="admin-panel">
+        <h2 className="admin-h2">
           Variants ({variants.length}
-          {variants.length > 40 ? " — showing first 40 editable rows" : ""})
+          {variants.length > 40 ? " — first 40 editable" : ""})
         </h2>
-        <div className="space-y-2 max-h-[420px] overflow-auto border border-[color:var(--line)] p-3 bg-white/50">
-          {variants.slice(0, 40).map((v) => (
-            <div
-              key={v.id}
-              className="grid md:grid-cols-[1.2fr_1fr_0.7fr_1fr_auto] gap-2 items-center text-sm"
-            >
-              <input
-                className="input"
-                value={v.title}
-                onChange={(e) => {
-                  setVariants((prev) =>
-                    prev.map((row) =>
-                      row.id === v.id ? { ...row, title: e.target.value } : row
-                    )
-                  );
-                }}
-              />
-              <input
-                className="input"
-                value={v.sku}
-                onChange={(e) => {
-                  setVariants((prev) =>
-                    prev.map((row) =>
-                      row.id === v.id ? { ...row, sku: e.target.value } : row
-                    )
-                  );
-                }}
-              />
-              <input
-                className="input"
-                type="number"
-                step="0.01"
-                value={v.priceOverride}
-                onChange={(e) => {
-                  setVariants((prev) =>
-                    prev.map((row) =>
-                      row.id === v.id ? { ...row, priceOverride: e.target.value } : row
-                    )
-                  );
-                }}
-              />
-              <input
-                className="input"
-                placeholder="Shopify variant ID"
-                value={v.shopifyVariantId}
-                onChange={(e) => {
-                  setVariants((prev) =>
-                    prev.map((row) =>
-                      row.id === v.id
-                        ? { ...row, shopifyVariantId: e.target.value }
-                        : row
-                    )
-                  );
-                }}
-              />
-              <label className="flex items-center gap-1 text-xs">
-                <input
-                  type="checkbox"
-                  checked={v.active}
-                  onChange={(e) => {
-                    setVariants((prev) =>
-                      prev.map((row) =>
-                        row.id === v.id ? { ...row, active: e.target.checked } : row
-                      )
-                    );
-                  }}
-                />
-                On
-              </label>
-            </div>
-          ))}
+        <div className="admin-table-wrap" style={{ maxHeight: 420, overflow: "auto" }}>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>SKU</th>
+                <th>Price override</th>
+                <th>Shopify variant</th>
+                <th>Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              {variants.slice(0, 40).map((v) => (
+                <tr key={v.id}>
+                  <td>
+                    <input
+                      className="admin-input"
+                      value={v.title}
+                      onChange={(e) => {
+                        setVariants((prev) =>
+                          prev.map((row) =>
+                            row.id === v.id ? { ...row, title: e.target.value } : row
+                          )
+                        );
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="admin-input"
+                      value={v.sku}
+                      onChange={(e) => {
+                        setVariants((prev) =>
+                          prev.map((row) =>
+                            row.id === v.id ? { ...row, sku: e.target.value } : row
+                          )
+                        );
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="admin-input"
+                      type="number"
+                      step="0.01"
+                      value={v.priceOverride}
+                      onChange={(e) => {
+                        setVariants((prev) =>
+                          prev.map((row) =>
+                            row.id === v.id ? { ...row, priceOverride: e.target.value } : row
+                          )
+                        );
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      className="admin-input"
+                      placeholder="Variant ID"
+                      value={v.shopifyVariantId}
+                      onChange={(e) => {
+                        setVariants((prev) =>
+                          prev.map((row) =>
+                            row.id === v.id
+                              ? { ...row, shopifyVariantId: e.target.value }
+                              : row
+                          )
+                        );
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={v.active}
+                      onChange={(e) => {
+                        setVariants((prev) =>
+                          prev.map((row) =>
+                            row.id === v.id ? { ...row, active: e.target.checked } : row
+                          )
+                        );
+                      }}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        {variants.length > 40 && (
-          <p className="text-xs text-[color:var(--muted)] mt-2">
-            Only the first 40 variants are editable here. Use Shopify sync for bulk updates.
-          </p>
-        )}
-      </section>
+      </div>
 
       {error && <p className="text-sm text-red-700">{error}</p>}
-      {message && <p className="text-sm text-[color:var(--muted)]">{message}</p>}
+      {message && <p className="admin-muted text-sm">{message}</p>}
       <button type="submit" className="btn-primary" disabled={loading}>
         {loading ? "Saving…" : "Save product"}
       </button>

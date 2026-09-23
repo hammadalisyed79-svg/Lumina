@@ -10,6 +10,7 @@ import {
   eachDayOfInterval,
   format,
 } from "date-fns";
+import { orderBadgeClass, paymentBadgeClass } from "@/lib/admin/orders";
 
 export const dynamic = "force-dynamic";
 
@@ -113,6 +114,10 @@ export default async function AdminDashboard({
     contactNew,
     lowStock,
     topProducts,
+    unpaidCount,
+    unpaidTotal,
+    awaitingPayment,
+    packedCount,
   ] = await Promise.all([
     prisma.order.aggregate({
       where: { paymentStatus: "PAID", createdAt: { gte: todayStart, lte: todayEnd } },
@@ -168,6 +173,28 @@ export default async function AdminDashboard({
       _sum: { quantity: true, lineTotal: true },
       orderBy: { _sum: { quantity: "desc" } },
       take: 5,
+    }),
+    prisma.order.count({
+      where: {
+        paymentStatus: { in: ["UNPAID", "PENDING", "FAILED"] },
+        status: { notIn: ["CANCELLED", "REFUNDED"] },
+      },
+    }),
+    prisma.order.aggregate({
+      where: {
+        paymentStatus: { in: ["UNPAID", "PENDING", "FAILED"] },
+        status: { notIn: ["CANCELLED", "REFUNDED"] },
+      },
+      _sum: { total: true },
+    }),
+    prisma.order.count({
+      where: {
+        status: "AWAITING_PAYMENT",
+        paymentStatus: { in: ["UNPAID", "PENDING"] },
+      },
+    }),
+    prisma.order.count({
+      where: { status: { in: ["PACKED", "QC"] } },
     }),
   ]);
 
@@ -229,6 +256,31 @@ export default async function AdminDashboard({
       </div>
 
       <p className="admin-muted mb-3">Range: {range.label}</p>
+
+      <h2 className="admin-h2">Ops</h2>
+      <div className="admin-kpi-grid">
+        <Link href="/admin/orders?payment=UNPAID" className="admin-kpi">
+          <p className="admin-kpi-label">Unpaid / pending</p>
+          <p className="admin-kpi-value">{unpaidCount}</p>
+          <p className="admin-muted text-xs mt-1">
+            {formatMoney(toNumber(unpaidTotal._sum.total || 0))} open
+          </p>
+        </Link>
+        <Link href="/admin/orders?status=AWAITING_PAYMENT" className="admin-kpi">
+          <p className="admin-kpi-label">Awaiting payment</p>
+          <p className="admin-kpi-value">{awaitingPayment}</p>
+        </Link>
+        <Link href="/admin/inventory?low=1" className="admin-kpi">
+          <p className="admin-kpi-label">Low stock</p>
+          <p className="admin-kpi-value">{lowStockFiltered.length}</p>
+          <p className="admin-muted text-xs mt-1">at or below reorder</p>
+        </Link>
+        <Link href="/admin/orders?status=PACKED" className="admin-kpi">
+          <p className="admin-kpi-label">Ready to ship</p>
+          <p className="admin-kpi-value">{packedCount}</p>
+          <p className="admin-muted text-xs mt-1">packed / QC</p>
+        </Link>
+      </div>
 
       <h2 className="admin-h2">Today</h2>
       <div className="admin-kpi-grid">
@@ -324,10 +376,17 @@ export default async function AdminDashboard({
               </Link>
             </li>
             <li>
-              Low stock rows: {lowStockFiltered.length}
+              <Link href="/admin/inventory?low=1" className="underline">
+                Low stock: {lowStockFiltered.length}
+              </Link>
               {lowStockFiltered.length === 0 && (
-                <span className="admin-muted"> (none tracked yet)</span>
+                <span className="admin-muted"> (none at reorder)</span>
               )}
+            </li>
+            <li>
+              <Link href="/admin/orders?payment=UNPAID" className="underline">
+                Unpaid orders: {unpaidCount}
+              </Link>
             </li>
           </ul>
         </div>
@@ -380,10 +439,12 @@ export default async function AdminDashboard({
                   </td>
                   <td>{o.email}</td>
                   <td>
-                    <span className="admin-badge">{o.status}</span>
+                    <span className={orderBadgeClass(o.status)}>{o.status}</span>
                   </td>
                   <td>
-                    <span className="admin-badge">{o.paymentStatus}</span>
+                    <span className={paymentBadgeClass(o.paymentStatus)}>
+                      {o.paymentStatus}
+                    </span>
                   </td>
                   <td>{formatMoney(o.total)}</td>
                 </tr>
