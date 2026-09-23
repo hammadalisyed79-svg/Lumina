@@ -73,12 +73,12 @@ async function shapeImageMap(keys: string[]) {
   return map;
 }
 
-async function moodImage(slug: string, fallback: string) {
+async function moodImage(slug: string, fallback: string, avoid: Set<string>) {
   const col = await prisma.collection.findUnique({
     where: { slug },
     include: {
       products: {
-        take: 8,
+        take: 12,
         include: {
           product: {
             include: { images: { orderBy: { sortOrder: "asc" }, take: 4 } },
@@ -87,6 +87,13 @@ async function moodImage(slug: string, fallback: string) {
       },
     },
   });
+  for (const row of col?.products || []) {
+    const url = firstWebImage(row.product.images);
+    if (url && !avoid.has(url)) {
+      avoid.add(url);
+      return url;
+    }
+  }
   for (const row of col?.products || []) {
     const url = firstWebImage(row.product.images);
     if (url) return url;
@@ -146,12 +153,14 @@ export default async function HomePage() {
     lifestyleUrls[5] || tradeImage,
   ];
 
-  const moodCards = await Promise.all(
-    moodMeta.map(async (m) => ({
+  const usedMoodImages = new Set<string>();
+  const moodCards = [];
+  for (const m of moodMeta) {
+    moodCards.push({
       ...m,
-      imageUrl: await moodImage(m.slug, designImage),
-    }))
-  );
+      imageUrl: await moodImage(m.slug, designImage, usedMoodImages),
+    });
+  }
 
   const bestsellers = (
     await prisma.product.findMany({
