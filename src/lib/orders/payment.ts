@@ -9,6 +9,7 @@ export async function markOrderPaidOnce(args: {
   orderId?: string;
   orderNumber?: string;
   shopifyOrderId?: string;
+  stripePaymentIntent?: string;
   eventMessage: string;
   meta?: Prisma.InputJsonValue;
 }) {
@@ -25,6 +26,9 @@ export async function markOrderPaidOnce(args: {
       status: "PAID" satisfies OrderStatus,
       paymentStatus: "PAID" satisfies PaymentStatus,
       ...(args.shopifyOrderId ? { shopifyOrderId: args.shopifyOrderId } : {}),
+      ...(args.stripePaymentIntent
+        ? { stripePaymentIntent: args.stripePaymentIntent }
+        : {}),
     },
   });
 

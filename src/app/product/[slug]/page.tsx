@@ -11,6 +11,7 @@ import { ProductAccordions } from "@/components/product/ProductAccordions";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ReviewForm } from "@/components/product/ReviewForm";
 import { ProductReviewsList } from "@/components/product/ProductReviewsList";
+import { ProductViewTracker } from "@/components/analytics/ProductViewTracker";
 import { SITE } from "@/lib/site";
 import {
   DEFAULT_OG_IMAGE,
@@ -116,6 +117,11 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div>
+      <ProductViewTracker
+        itemId={product.id}
+        itemName={product.title}
+        price={toNumber(product.basePrice)}
+      />
       <JsonLd data={jsonLd} />
       <JsonLd
         data={breadcrumbJsonLd([

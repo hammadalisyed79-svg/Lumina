@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { calculateOrderTotals, calculateUnitPrice, toNumber } from "@/lib/pricing";
+import { calculateOrderTotals, calculateUnitPrice, toNumber, applyCoupon } from "@/lib/pricing";
 import { prisma } from "@/lib/db";
 import { orderNumber } from "@/lib/utils";
 import { writeAuditLog } from "@/lib/security/audit";
@@ -204,28 +204,55 @@ export async function POST(req: Request) {
     }
   }
 
-  const shippingMethod = data.shippingMethodId
-    ? await prisma.shippingMethod.findUnique({ where: { id: data.shippingMethodId } })
-    : await prisma.shippingMethod.findFirst({
-        where: { active: true },
-        orderBy: { sortOrder: "asc" },
-      });
+  if (!data.shippingMethodId) {
+    return NextResponse.json(
+      { error: "Select a shipping method to continue" },
+      { status: 400 }
+    );
+  }
+
+  const shippingMethod = await prisma.shippingMethod.findFirst({
+    where: { id: data.shippingMethodId, active: true },
+  });
+  if (!shippingMethod) {
+    return NextResponse.json(
+      { error: "Shipping method unavailable. Refresh and try again." },
+      { status: 400 }
+    );
+  }
+
+  const linesForTotals = pricedLines.map((l) => ({
+    basePrice: l.unitPrice,
+    quantity: l.quantity,
+  }));
+  const subtotalPreview = linesForTotals.reduce(
+    (s, l) => s + l.basePrice * l.quantity,
+    0
+  );
+  if (coupon) {
+    const check = applyCoupon(subtotalPreview, {
+      type: coupon.type,
+      value: coupon.value,
+      minSubtotal: coupon.minSubtotal,
+    });
+    if (!check.valid) {
+      return NextResponse.json(
+        { error: check.reason || "Coupon not applicable to this order" },
+        { status: 400 }
+      );
+    }
+  }
 
   const totals = calculateOrderTotals({
-    lines: pricedLines.map((l) => ({
-      basePrice: l.unitPrice,
-      quantity: l.quantity,
-    })),
+    lines: linesForTotals,
     coupon: coupon
       ? { type: coupon.type, value: coupon.value, minSubtotal: coupon.minSubtotal }
       : null,
-    shipping: shippingMethod
-      ? {
-          calcType: shippingMethod.calcType,
-          price: shippingMethod.price,
-          freeAbove: shippingMethod.freeAbove,
-        }
-      : { calcType: "FLAT" as const, price: 0, freeAbove: null },
+    shipping: {
+      calcType: shippingMethod.calcType,
+      price: shippingMethod.price,
+      freeAbove: shippingMethod.freeAbove,
+    },
   });
 
   const stripe = getStripe()!;
@@ -354,19 +381,7 @@ export async function POST(req: Request) {
       },
     });
 
-    if (coupon) {
-      await prisma.coupon.update({
-        where: { id: coupon.id },
-        data: { usedCount: { increment: 1 } },
-      });
-      await prisma.couponRedemption.create({
-        data: {
-          couponId: coupon.id,
-          orderId: order.id,
-          userId: session?.user?.id,
-        },
-      });
-    }
+    // Coupon redemption runs on payment webhook — do not burn uses on session create.
 
     await writeAuditLog({
       userId: session?.user?.id,

@@ -7,7 +7,7 @@
   --linen: #d4cbb8;
   --ink: #14110e;
   --charcoal: #221e1a;
-  --muted: #6a6358;
+  --muted: #534e45;
   --bronze: #a07d3c;
   --champagne: #c9b896;
   --line: #ddd5c6;
@@ -983,4 +983,38 @@ a {
   .skel {
     animation: none;
   }
+}
+
+/* A11y + error colour */
+.text-error {
+  color: #8b2e2e;
+}
+
+:focus-visible {
+  outline: 2px solid var(--bronze);
+  outline-offset: 3px;
+}
+
+.focus-ring:focus {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--bronze);
+  outline-offset: 3px;
+}
+
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.input:focus-visible {
+  outline: none;
+}
+
+.qty-control button:focus-visible {
+  outline: 2px solid var(--bronze);
+  outline-offset: 2px;
 }

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { NAV_MEGA, SITE } from "@/lib/site";
 import type { NavLink } from "@/lib/navigation";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 const EXTRA_LINKS = [
   { href: "/design-your-shade", label: "Design your shade" },
@@ -15,6 +16,9 @@ const EXTRA_LINKS = [
 
 export function MobileNav({ items }: { items: NavLink[] }) {
   const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const close = useCallback(() => setOpen(false), []);
+  useFocusTrap(open, panelRef, close);
 
   useEffect(() => {
     if (!open) return;
@@ -31,13 +35,14 @@ export function MobileNav({ items }: { items: NavLink[] }) {
         type="button"
         aria-label="Open menu"
         aria-expanded={open}
-        className="flex h-10 w-10 items-center justify-center text-ink"
+        className="flex h-10 w-10 items-center justify-center text-ink focus-ring"
         onClick={() => setOpen(true)}
       >
         <Menu size={22} strokeWidth={1.75} />
       </button>
       {open && (
         <div
+          ref={panelRef}
           className="fixed inset-0 z-[70] flex flex-col bg-ivory text-ink"
           role="dialog"
           aria-modal="true"
@@ -49,8 +54,8 @@ export function MobileNav({ items }: { items: NavLink[] }) {
               <button
                 type="button"
                 aria-label="Close menu"
-                className="flex h-10 w-10 items-center justify-center text-ink"
-                onClick={() => setOpen(false)}
+                className="flex h-10 w-10 items-center justify-center text-ink focus-ring"
+                onClick={close}
               >
                 <X size={22} strokeWidth={1.75} />
               </button>
@@ -62,8 +67,8 @@ export function MobileNav({ items }: { items: NavLink[] }) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="block py-3 font-display text-2xl text-ink"
-                    onClick={() => setOpen(false)}
+                    className="block py-3 font-display text-2xl text-ink focus-ring"
+                    onClick={close}
                   >
                     {item.label}
                   </Link>
@@ -74,8 +79,8 @@ export function MobileNav({ items }: { items: NavLink[] }) {
                           <li key={l.href}>
                             <Link
                               href={l.href}
-                              className="block py-1.5 text-[15px] text-muted"
-                              onClick={() => setOpen(false)}
+                              className="block py-1.5 text-[15px] text-muted focus-ring"
+                              onClick={close}
                             >
                               {l.label}
                             </Link>
@@ -88,21 +93,19 @@ export function MobileNav({ items }: { items: NavLink[] }) {
               ))}
             </ul>
             <div className="mt-6 border-t border-line pt-4 space-y-1">
-              {EXTRA_LINKS.filter(
-                (l) => !items.some((i) => i.href === l.href)
-              ).map((l) => (
+              {EXTRA_LINKS.filter((l) => !items.some((i) => i.href === l.href)).map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="block py-2.5 text-[15px] tracking-wide text-ink"
-                  onClick={() => setOpen(false)}
+                  className="block py-2.5 text-[15px] tracking-wide text-ink focus-ring"
+                  onClick={close}
                 >
                   {l.label}
                 </Link>
               ))}
             </div>
             <p className="mt-8 text-sm text-muted">
-              <a href={`mailto:${SITE.email}`} className="underline text-ink">
+              <a href={`mailto:${SITE.email}`} className="underline text-ink focus-ring">
                 {SITE.email}
               </a>
             </p>

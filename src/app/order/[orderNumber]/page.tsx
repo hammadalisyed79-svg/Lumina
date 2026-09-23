@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { formatMoney } from "@/lib/utils";
 import { toNumber } from "@/lib/pricing";
 import { CommerceTrust } from "@/components/commerce/CommerceTrust";
+import { PurchaseTracker } from "@/components/analytics/PurchaseTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -41,9 +42,21 @@ export default async function OrderConfirmationPage({ params, searchParams }: Pr
   if (!order) notFound();
 
   const paid = order.paymentStatus === "PAID";
+  const firePurchase = Boolean(sp.success) || paid;
 
   return (
     <div className="container-site section-pad max-w-2xl">
+      <PurchaseTracker
+        fire={firePurchase}
+        orderNumber={order.orderNumber}
+        value={toNumber(order.total)}
+        items={order.items.map((i) => ({
+          item_id: i.productId || i.sku || i.id,
+          item_name: i.title,
+          price: toNumber(i.unitPrice),
+          quantity: i.quantity,
+        }))}
+      />
       <header className="mb-10">
         <p className="eyebrow mb-3 text-bronze">
           {sp.success || paid ? "Confirmed" : "Order received"}

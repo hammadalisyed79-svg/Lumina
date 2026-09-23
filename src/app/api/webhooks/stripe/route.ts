@@ -4,9 +4,39 @@ import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { orderConfirmationHtml, sendEmail } from "@/lib/email";
 import { formatMoney } from "@/lib/utils";
 import { toNumber } from "@/lib/pricing";
+import { markOrderPaidOnce } from "@/lib/orders/payment";
 import Stripe from "stripe";
 
 export const runtime = "nodejs";
+
+async function redeemCouponForPaidOrder(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    select: { id: true, couponCode: true, userId: true },
+  });
+  if (!order?.couponCode) return;
+
+  const coupon = await prisma.coupon.findUnique({
+    where: { code: order.couponCode },
+  });
+  if (!coupon) return;
+
+  try {
+    await prisma.couponRedemption.create({
+      data: {
+        couponId: coupon.id,
+        orderId: order.id,
+        userId: order.userId,
+      },
+    });
+    await prisma.coupon.update({
+      where: { id: coupon.id },
+      data: { usedCount: { increment: 1 } },
+    });
+  } catch {
+    // Unique [couponId, orderId] — already redeemed for this order
+  }
+}
 
 export async function POST(req: Request) {
   if (!isStripeConfigured()) {
@@ -27,11 +57,10 @@ export async function POST(req: Request) {
   } catch (err) {
     return NextResponse.json(
       { error: `Webhook signature failed: ${(err as Error).message}` },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
-  // Idempotency
   const existing = await prisma.stripeWebhookEvent.findUnique({
     where: { eventId: event.id },
   });
@@ -39,57 +68,72 @@ export async function POST(req: Request) {
     return NextResponse.json({ received: true, duplicate: true });
   }
 
-  await prisma.stripeWebhookEvent.create({
-    data: {
-      eventId: event.id,
-      type: event.type,
-      payload: event as object,
-    },
-  });
-
+  // Process BEFORE recording the event so a mid-flight failure can retry.
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const orderId = session.metadata?.orderId;
     if (orderId) {
-      const order = await prisma.order.update({
-        where: { id: orderId },
-        data: {
-          status: "PAID",
-          paymentStatus: "PAID",
-          stripePaymentIntent:
-            typeof session.payment_intent === "string"
-              ? session.payment_intent
-              : session.payment_intent?.id,
-          events: {
-            create: { type: "paid", message: "Payment confirmed via Stripe" },
-          },
-        },
-        include: { items: true },
+      const paymentIntent =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id;
+
+      const result = await markOrderPaidOnce({
+        orderId,
+        eventMessage: "Payment confirmed via Stripe",
+        stripePaymentIntent: paymentIntent,
+        meta: { stripeSessionId: session.id, eventId: event.id },
       });
 
-      const itemsHtml = order.items
-        .map(
-          (i) =>
-            `<p>${i.quantity}× ${i.title} — ${formatMoney(toNumber(i.lineTotal))}${
-              i.configJson
-                ? `<br/><small>${JSON.stringify(i.configJson)}</small>`
-                : ""
-            }</p>`,
-        )
-        .join("");
+      if (result.updated) {
+        await redeemCouponForPaidOrder(orderId);
 
-      await sendEmail({
-        to: order.email,
-        subject: `Order confirmed ${order.orderNumber}`,
-        html: orderConfirmationHtml({
-          orderNumber: order.orderNumber,
-          email: order.email,
-          total: formatMoney(toNumber(order.total)),
-          itemsHtml,
-          configNote: "Configuration details are included with your order.",
-        }),
-      });
+        const order = await prisma.order.findUnique({
+          where: { id: orderId },
+          include: { items: true },
+        });
+        if (order) {
+          const itemsHtml = order.items
+            .map(
+              (i) =>
+                `<p>${i.quantity}× ${i.title} — ${formatMoney(toNumber(i.lineTotal))}${
+                  i.configJson
+                    ? `<br/><small>${JSON.stringify(i.configJson)}</small>`
+                    : ""
+                }</p>`
+            )
+            .join("");
+
+          try {
+            await sendEmail({
+              to: order.email,
+              subject: `Order confirmed ${order.orderNumber}`,
+              html: orderConfirmationHtml({
+                orderNumber: order.orderNumber,
+                email: order.email,
+                total: formatMoney(toNumber(order.total)),
+                itemsHtml,
+                configNote: "Configuration details are included with your order.",
+              }),
+            });
+          } catch {
+            // Email must not block payment confirmation or webhook ack
+          }
+        }
+      }
     }
+  }
+
+  try {
+    await prisma.stripeWebhookEvent.create({
+      data: {
+        eventId: event.id,
+        type: event.type,
+        payload: event as object,
+      },
+    });
+  } catch {
+    // Concurrent duplicate insert — safe to treat as success
   }
 
   return NextResponse.json({ received: true });

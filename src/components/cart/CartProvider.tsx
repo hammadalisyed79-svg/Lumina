@@ -15,6 +15,7 @@ import {
   type ShadeConfig,
 } from "@/lib/cart/types";
 import { roundMoney } from "@/lib/pricing";
+import { trackAddToCart } from "@/lib/analytics";
 
 type CartContextValue = {
   items: CartLine[];
@@ -61,6 +62,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, hydrated]);
 
   const addProduct: CartContextValue["addProduct"] = useCallback((line) => {
+    const qty = line.quantity || 1;
     setItems((prev) => {
       const existing = prev.find(
         (p) =>
@@ -72,7 +74,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map((p) =>
           p.id === existing.id
-            ? { ...p, quantity: p.quantity + (line.quantity || 1) }
+            ? { ...p, quantity: p.quantity + qty }
             : p,
         );
       }
@@ -82,14 +84,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
           ...line,
           id: uid(),
           kind: line.kind ?? "product",
-          quantity: line.quantity || 1,
+          quantity: qty,
         },
       ];
+    });
+    trackAddToCart({
+      item_id: line.productId || line.variantId,
+      item_name: line.title,
+      price: line.unitPrice,
+      quantity: qty,
     });
     setDrawerOpen(true);
   }, []);
 
   const addConfigured: CartContextValue["addConfigured"] = useCallback((input) => {
+    const qty = input.quantity ?? 1;
     setItems((prev) => [
       ...prev,
       {
@@ -97,11 +106,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
         kind: "configured",
         title: input.title,
         imageUrl: input.imageUrl,
-        quantity: input.quantity ?? 1,
+        quantity: qty,
         unitPrice: input.config.unitPrice,
         config: input.config,
       },
     ]);
+    trackAddToCart({
+      item_name: input.title,
+      price: input.config.unitPrice,
+      quantity: qty,
+    });
     setDrawerOpen(true);
   }, []);
 

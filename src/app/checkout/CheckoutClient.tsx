@@ -8,6 +8,7 @@ import { formatMoney } from "@/lib/utils";
 import { COPY } from "@/lib/copy";
 import { EmptyState } from "@/components/commerce/EmptyState";
 import { CommerceTrust } from "@/components/commerce/CommerceTrust";
+import { track } from "@/lib/analytics";
 
 type ShippingMethod = { id: string; name: string; price: number; description?: string };
 
@@ -18,20 +19,34 @@ export default function CheckoutClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [methods, setMethods] = useState<ShippingMethod[]>([]);
+  const [shippingLoaded, setShippingLoaded] = useState(false);
   const [shippingMethodId, setShippingMethodId] = useState("");
   const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState<{
+    code: string;
+    discount: number;
+  } | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [noticeKind, setNoticeKind] = useState<"warn" | "error">("warn");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    track({ event: "begin_checkout", value: subtotal, items: items.length });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fire once on mount
+  }, []);
+
+  useEffect(() => {
     fetch("/api/shipping")
       .then((r) => r.json())
       .then((d) => {
-        setMethods(d.methods || []);
-        setShippingMethodId(d.methods?.[0]?.id || "");
-      });
+        const list = d.methods || [];
+        setMethods(list);
+        setShippingMethodId(list[0]?.id || "");
+      })
+      .finally(() => setShippingLoaded(true));
   }, []);
 
   useEffect(() => {
@@ -74,16 +89,48 @@ export default function CheckoutClient() {
       });
   }, [searchParams]);
 
+  async function applyCoupon() {
+    setCouponError("");
+    setCouponApplied(null);
+    const code = couponCode.trim();
+    if (!code) {
+      setCouponError("Enter a coupon code");
+      return;
+    }
+    setCouponLoading(true);
+    const res = await fetch("/api/coupons/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, subtotal }),
+    });
+    const data = await res.json();
+    setCouponLoading(false);
+    if (!res.ok || !data.ok) {
+      setCouponError(data.error || "Coupon could not be applied");
+      return;
+    }
+    setCouponCode(data.code);
+    setCouponApplied({ code: data.code, discount: data.discount });
+  }
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setNotice("");
+    if (!shippingMethodId) {
+      setError(
+        shippingLoaded && methods.length === 0
+          ? "Shipping is not configured yet. Please contact the studio to complete your order."
+          : "Select a shipping method to continue."
+      );
+      return;
+    }
     setLoading(true);
     const fd = new FormData(e.currentTarget);
     const payload = {
       email: String(fd.get("email")),
-      couponCode: couponCode || undefined,
-      shippingMethodId: shippingMethodId || undefined,
+      couponCode: couponApplied?.code || couponCode || undefined,
+      shippingMethodId,
       shipping: {
         fullName: String(fd.get("fullName")),
         line1: String(fd.get("line1")),
@@ -154,6 +201,8 @@ export default function CheckoutClient() {
     );
   }
 
+  const noShipping = shippingLoaded && methods.length === 0;
+
   return (
     <div className="container-site section-pad grid lg:grid-cols-2 gap-12 lg:gap-16">
       <div>
@@ -212,34 +261,80 @@ export default function CheckoutClient() {
               <input name="phone" className="input" autoComplete="tel" />
             </label>
 
-            <label className="block">
+            <div>
               <span className="label">Shipping</span>
-              <select
-                className="input"
-                value={shippingMethodId}
-                onChange={(e) => setShippingMethodId(e.target.value)}
-              >
-                {methods.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                    {m.price > 0 ? ` — ${formatMoney(m.price)}` : " — calculated"}
-                  </option>
-                ))}
-              </select>
-            </label>
+              {noShipping ? (
+                <p className="notice-panel is-error mt-1">
+                  Shipping is not available online right now.{" "}
+                  <Link href="/contact" className="underline">
+                    Contact the studio
+                  </Link>{" "}
+                  to complete your order.
+                </p>
+              ) : (
+                <select
+                  className="input"
+                  value={shippingMethodId}
+                  onChange={(e) => setShippingMethodId(e.target.value)}
+                  required
+                  disabled={!shippingLoaded}
+                >
+                  {!shippingLoaded && <option value="">Loading…</option>}
+                  {methods.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                      {m.price > 0 ? ` — ${formatMoney(m.price)}` : " — calculated"}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
 
-            <label className="block">
+            <div>
               <span className="label">Coupon</span>
-              <input
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-                placeholder="Optional code"
-                className="input"
-              />
-            </label>
+              <div className="flex gap-2">
+                <input
+                  value={couponCode}
+                  onChange={(e) => {
+                    setCouponCode(e.target.value);
+                    setCouponApplied(null);
+                    setCouponError("");
+                  }}
+                  placeholder="Optional code"
+                  className="input"
+                  aria-invalid={Boolean(couponError)}
+                />
+                <button
+                  type="button"
+                  className="btn-secondary shrink-0"
+                  onClick={applyCoupon}
+                  disabled={couponLoading}
+                >
+                  {couponLoading ? "…" : "Apply"}
+                </button>
+              </div>
+              {couponError && (
+                <p className="text-sm text-error mt-2" role="alert">
+                  {couponError}
+                </p>
+              )}
+              {couponApplied && (
+                <p className="text-sm text-muted mt-2">
+                  {couponApplied.code} applied — save {formatMoney(couponApplied.discount)}
+                </p>
+              )}
+            </div>
 
-            {error && <p className="notice-panel is-error whitespace-pre-wrap">{error}</p>}
-            <button type="submit" className="btn-primary w-full" disabled={loading}>
+            {error && (
+              <p className="notice-panel is-error whitespace-pre-wrap" role="alert">
+                {error}
+              </p>
+            )}
+            <button
+              type="submit"
+              className="btn-primary w-full"
+              disabled={loading || noShipping}
+            >
               {loading ? "Processing…" : "Pay securely with Stripe"}
             </button>
             <CommerceTrust />
@@ -268,9 +363,15 @@ export default function CheckoutClient() {
           <span>Subtotal</span>
           <span>{formatMoney(subtotal)}</span>
         </div>
+        {couponApplied && (
+          <div className="flex justify-between text-sm text-muted mt-2">
+            <span>Discount ({couponApplied.code})</span>
+            <span>−{formatMoney(couponApplied.discount)}</span>
+          </div>
+        )}
         <p className="text-xs text-muted mt-4 leading-relaxed">
           Shipping and tax are confirmed before you pay. Orders stay unpaid until Stripe confirms
-          payment.
+          payment. Coupons only redeem after successful payment.
         </p>
       </aside>
     </div>

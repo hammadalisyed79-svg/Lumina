@@ -31,38 +31,47 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="container-site py-16 max-w-md">
-      <h1 className="font-display text-4xl mb-4">Reset password</h1>
-      <p className="text-sm text-[color:var(--muted)] mb-8">
+    <div className="container-site section-pad max-w-md">
+      <p className="eyebrow mb-3">Account</p>
+      <h1 className="section-title">Forgot password</h1>
+      <div className="lux-rule" />
+      <p className="prose-muted text-sm mb-6">
         Enter your account email. If it exists, we will send a reset link when email delivery is
         configured.
       </p>
       {sent ? (
-        <p className="text-sm">
-          If an account exists for that email, a reset link has been prepared. Check your inbox
-          (or ask the studio if email is not yet live).
-        </p>
+        <div className="surface-panel p-6 md:p-8">
+          <p className="text-sm leading-relaxed">
+            If an account exists for that email, a reset link has been prepared. Check your inbox
+            (or ask the studio if email is not yet live).
+          </p>
+        </div>
       ) : (
-        <form onSubmit={onSubmit} className="space-y-4">
-          <label className="block text-sm">
-            Email
+        <form onSubmit={onSubmit} className="surface-panel p-6 md:p-8 space-y-4">
+          <label className="block">
+            <span className="label">Email</span>
             <input
               type="email"
               required
-              className="mt-1 w-full border border-[color:var(--line)] px-3 py-2 bg-white"
+              className="input"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </label>
-          {error && <p className="text-sm text-red-700">{error}</p>}
-          <button type="submit" className="btn-primary" disabled={loading}>
+          {error && (
+            <p className="text-sm text-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button type="submit" className="btn-primary w-full" disabled={loading}>
             {loading ? "Sending…" : "Send reset link"}
           </button>
         </form>
       )}
-      <p className="mt-6 text-sm">
-        <Link href="/account/login" className="underline">
-          Back to login
+      <p className="text-sm text-muted mt-6">
+        <Link href="/account/login" className="underline underline-offset-4 hover:text-bronze">
+          Back to sign in
         </Link>
       </p>
     </div>

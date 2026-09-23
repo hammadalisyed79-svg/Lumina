@@ -5,6 +5,7 @@ import { CartProvider } from "@/components/cart/CartProvider";
 import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { StorefrontShell } from "@/components/layout/StorefrontShell";
+import { AnalyticsScript } from "@/components/analytics/AnalyticsScript";
 import { SITE } from "@/lib/site";
 import { COPY } from "@/lib/copy";
 import { getPrimaryNavLinks } from "@/lib/navigation";
@@ -74,6 +75,7 @@ export default async function RootLayout({
   return (
     <html lang="en-GB">
       <body className={`${display.variable} ${body.variable} antialiased`}>
+        <AnalyticsScript />
         <JsonLd data={organizationJsonLd()} />
         <JsonLd data={websiteJsonLd()} />
         <AuthProvider>

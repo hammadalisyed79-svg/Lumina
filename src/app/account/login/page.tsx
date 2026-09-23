@@ -51,7 +51,7 @@ function LoginForm() {
             autoComplete="current-password"
           />
         </label>
-        {error && <p className="text-sm text-red-700">{error}</p>}
+        {error && <p className="text-sm text-error" role="alert">{error}</p>}
         <button type="submit" className="btn-primary w-full" disabled={loading}>
           {loading ? "Signing in…" : "Sign in"}
         </button>
