@@ -1,7 +1,7 @@
 # Lumina Hub — delivery report (preview)
 
 **Preview URL:** https://luminahub-lyart.vercel.app/  
-**Commit:** `b458d25` on `origin/main`  
+**Commit:** `c9592be` on `origin/main`  
 **Authority note:** Catalog import is **preliminary** (public `products.json` → `data/shopify-catalog.json`). Shopify Admin API + Storefront token required before calling commerce complete. **Do not describe checkout as working** until a Shopify hosted test checkout succeeds end to end.
 
 ## 1. Reconciliation (source → target)
