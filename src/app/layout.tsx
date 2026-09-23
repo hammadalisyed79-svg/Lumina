@@ -22,7 +22,18 @@ const body = Figtree({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+function resolveSiteUrl() {
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000")
+    .trim()
+    .replace(/^["']|["']$/g, "");
+  try {
+    return new URL(raw).toString().replace(/\/$/, "");
+  } catch {
+    return "http://localhost:3000";
+  }
+}
+
+const siteUrl = resolveSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
