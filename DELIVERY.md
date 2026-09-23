@@ -1,6 +1,6 @@
 # Lumina Hub — delivery report
 
-**Commit:** `21a1ca7` on `origin/main`  
+**Commit:** `8e98e3a` on `origin/main`  
 **Production URL:** https://luminahub-lyart.vercel.app/  
 **Also:** `lumina` Vercel project (same repo)  
 **Do not mark checkout complete** — Shopify Storefront tokens are not configured; checkout returns **503**.
