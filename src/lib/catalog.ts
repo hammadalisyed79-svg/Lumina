@@ -125,6 +125,7 @@ export async function getProductBySlug(slug: string) {
         where: { status: "APPROVED" },
         orderBy: { createdAt: "desc" },
         take: 20,
+        include: { images: { orderBy: { sortOrder: "asc" }, take: 3 } },
       },
       relatedFrom: {
         include: {

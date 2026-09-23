@@ -34,6 +34,11 @@ export function Footer() {
                 WhatsApp the studio
               </a>
             </li>
+            <li className="text-ivory/55 pt-2 leading-relaxed">
+              Studio hours · {SITE.hours.weekdays}
+              <br />
+              {SITE.hours.saturday}
+            </li>
             <li className="pt-1">{SITE.address}</li>
           </ul>
         </div>

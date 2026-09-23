@@ -124,7 +124,10 @@ export default async function HomePage() {
       }),
       prisma.review.findMany({
         where: { status: "APPROVED" },
-        include: { product: true },
+        include: {
+          product: true,
+          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+        },
         take: 6,
         orderBy: { createdAt: "desc" },
       }),
@@ -457,6 +460,8 @@ export default async function HomePage() {
             title: r.title,
             body: r.body,
             productTitle: shortDisplayTitle(r.product.title, 40),
+            verifiedPurchase: r.verifiedPurchase,
+            imageUrl: r.images[0]?.url ?? null,
           }))}
         />
       </section>

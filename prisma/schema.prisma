@@ -626,22 +626,36 @@ model ShopifyWebhookEvent {
 }
 
 model Review {
-  id        String       @id @default(cuid())
-  productId String
-  userId    String?
-  author    String
-  email     String?
-  rating    Int
-  title     String?
-  body      String       @db.Text
-  status    ReviewStatus @default(PENDING)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user      User?        @relation(fields: [userId], references: [id])
+  id               String        @id @default(cuid())
+  productId        String
+  userId           String?
+  author           String
+  email            String?
+  rating           Int
+  title            String?
+  body             String        @db.Text
+  status           ReviewStatus  @default(PENDING)
+  verifiedPurchase Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  product          Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user             User?         @relation(fields: [userId], references: [id])
+  images           ReviewImage[]
 
   @@index([productId, status])
   @@index([status])
+}
+
+model ReviewImage {
+  id        String   @id @default(cuid())
+  reviewId  String
+  url       String
+  alt       String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
 }
 
 model Coupon {

@@ -10,6 +10,7 @@ import { ProductConfigurator } from "@/components/product/ProductConfigurator";
 import { ProductAccordions } from "@/components/product/ProductAccordions";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ReviewForm } from "@/components/product/ReviewForm";
+import { ProductReviewsList } from "@/components/product/ProductReviewsList";
 import { SITE } from "@/lib/site";
 import {
   DEFAULT_OG_IMAGE,
@@ -97,6 +98,17 @@ export default async function ProductPage({ params }: Props) {
       price: toNumber(product.basePrice).toFixed(2),
       availability: "https://schema.org/InStock",
     },
+    ...(product.reviews.length
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: (
+              product.reviews.reduce((s, r) => s + r.rating, 0) / product.reviews.length
+            ).toFixed(1),
+            reviewCount: product.reviews.length,
+          },
+        }
+      : {}),
   };
 
   const fallbackImg =
@@ -209,20 +221,8 @@ export default async function ProductPage({ params }: Props) {
             <div className="mt-12 pt-2">
               <p className="eyebrow mb-2">Reviews</p>
               <h2 className="font-display text-3xl tracking-tight mb-6">Kind words</h2>
-              <div className="space-y-5 mb-8">
-                {product.reviews.length === 0 && (
-                  <p className="prose-muted text-sm">No reviews yet — be the first.</p>
-                )}
-                {product.reviews.map((r) => (
-                  <div key={r.id} className="border-t border-line pt-5">
-                    <p className="text-bronze text-sm tracking-widest">
-                      {"★".repeat(r.rating)}
-                    </p>
-                    {r.title && <p className="font-medium mt-2">{r.title}</p>}
-                    <p className="prose-muted text-sm mt-1.5 leading-relaxed">{r.body}</p>
-                    <p className="text-xs text-muted mt-2">{r.author}</p>
-                  </div>
-                ))}
+              <div className="mb-8">
+                <ProductReviewsList reviews={product.reviews} />
               </div>
               <ReviewForm productId={product.id} />
             </div>

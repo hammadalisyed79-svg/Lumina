@@ -7,6 +7,11 @@ export const SITE = {
   phone: "+44 7889 451166",
   whatsapp: "https://wa.me/447889451166",
   address: "Electric Parade, Seven Kings, Ilford IG3 8BS, United Kingdom",
+  hours: {
+    weekdays: "Mon–Fri 9:30–17:30",
+    saturday: "Sat by appointment",
+    note: "WhatsApp preferred for quick shade questions",
+  },
   currency: "gbp" as const,
   locale: "en-GB" as const,
   maxContent: "max-w-[1440px]",
