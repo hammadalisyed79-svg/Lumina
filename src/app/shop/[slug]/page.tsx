@@ -5,6 +5,7 @@ import { listProductsForShop, getCollectionBySlug } from "@/lib/catalog";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ShopFilters } from "@/components/shop/ShopFilters";
 import { ShopPagination } from "@/components/shop/ShopPagination";
+import { EmptyState } from "@/components/commerce/EmptyState";
 import { ProductType } from "@prisma/client";
 import { COPY } from "@/lib/copy";
 import {
@@ -159,28 +160,25 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
           <p className="prose-muted">{COPY.shopIntros[type]}</p>
         )}
       </div>
-      <ShopFilters slug={slug} current={sp} showShape={showShape} />
-      <p className="text-sm text-muted mb-4">
-        {total} {total === 1 ? "piece" : "pieces"}
-        {total > pageSize ? ` · showing ${products.length} on this page` : null}
-      </p>
+      <ShopFilters slug={slug} current={sp} showShape={showShape} total={total} />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
       </div>
       {products.length === 0 && (
-        <div className="py-16 text-center space-y-4">
-          <p className="prose-muted">No products match these filters.</p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link href={`/shop/${slug}`} className="btn-secondary">
-              Clear filters
-            </Link>
-            <Link href="/shop/lampshades" className="btn-primary">
-              Browse lampshades
-            </Link>
-          </div>
-        </div>
+        <EmptyState
+          eyebrow="No matches"
+          title="Nothing in this selection"
+          body="Try another shape or price range, or clear filters to see the full catalogue."
+          primary={{ href: `/shop/${slug}`, label: "Clear filters" }}
+          secondary={{ href: "/shop/lampshades", label: "Browse lampshades" }}
+        />
+      )}
+      {products.length > 0 && total > pageSize && (
+        <p className="text-sm text-muted mt-6 mb-2 text-center">
+          Showing {products.length} of {total} on this page
+        </p>
       )}
       <ShopPagination
         slug={slug}
