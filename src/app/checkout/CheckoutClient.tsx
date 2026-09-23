@@ -193,7 +193,7 @@ export default function CheckoutClient() {
               <input
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
-                placeholder="WELCOME10"
+                placeholder="Coupon code"
                 className="input"
               />
             </label>

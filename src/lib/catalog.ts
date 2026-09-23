@@ -16,10 +16,13 @@ export async function getCollectionBySlug(slug: string) {
   return prisma.collection.findUnique({ where: { slug } });
 }
 
+const PAGE_SIZE = 48;
+
 export async function listProductsForShop(opts: {
   collectionSlug?: string;
   type?: ProductType;
   query?: ShopQuery;
+  page?: number;
 }) {
   const where: Prisma.ProductWhereInput = { published: true };
   if (opts.type) where.type = opts.type;
@@ -42,7 +45,7 @@ export async function listProductsForShop(opts: {
     const collection = await prisma.collection.findUnique({
       where: { slug: opts.collectionSlug },
     });
-    if (!collection) return { collection: null, products: [] };
+    if (!collection) return { collection: null, products: [], total: 0, page: 1, pageSize: PAGE_SIZE };
     where.collections = { some: { collectionId: collection.id } };
   }
 
@@ -64,14 +67,22 @@ export async function listProductsForShop(opts: {
       orderBy = { bestseller: "desc" };
   }
 
-  const products = await prisma.product.findMany({
-    where,
-    include: { images: { orderBy: { sortOrder: "asc" } } },
-    orderBy,
-    take: 48,
-  });
+  const page = Math.max(1, Number(opts.page) || 1);
+  const [total, products] = await Promise.all([
+    prisma.product.count({ where }),
+    prisma.product.findMany({
+      where,
+      include: { images: { orderBy: { sortOrder: "asc" } } },
+      orderBy,
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
+    }),
+  ]);
 
   return {
+    total,
+    page,
+    pageSize: PAGE_SIZE,
     products: products
       .map((p) => {
         const imageUrl =

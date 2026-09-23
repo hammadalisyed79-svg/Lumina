@@ -37,8 +37,8 @@ export const NAV_MEGA = {
         links: [
           { href: "/shop/bestsellers", label: "Bestsellers" },
           { href: "/shop/new", label: "New arrivals" },
-          { href: "/shop/mood/linen-calm", label: "Linen calm" },
-          { href: "/shop/mood/botanical", label: "Botanical" },
+          { href: "/shop/linen-calm", label: "Linen calm" },
+          { href: "/shop/botanical", label: "Botanical" },
         ],
       },
       {

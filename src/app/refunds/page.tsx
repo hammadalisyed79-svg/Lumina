@@ -13,9 +13,8 @@ export default function RefundsPage() {
       <h1 className="font-display text-5xl mb-8">Refunds &amp; returns</h1>
       <div className="space-y-6 text-[color:var(--muted)] leading-relaxed">
         <p>
-          Due to the handmade and custom nature of our products, the following
-          policy applies (source: luminahub.co.uk refund policy — confirm with
-          the business before public launch).
+          Due to the handmade and custom nature of our products, the following returns policy
+          applies.
         </p>
         <section>
           <h2 className="font-display text-2xl text-[color:var(--ink)] mb-2">

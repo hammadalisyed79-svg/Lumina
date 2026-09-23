@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function ReviewsStrip({
   reviews,
 }: {
@@ -10,6 +12,25 @@ export function ReviewsStrip({
     productTitle: string;
   }[];
 }) {
+  if (reviews.length === 0) {
+    return (
+      <div className="border border-[color:var(--line)] p-8 md:p-10 text-center max-w-xl mx-auto">
+        <p className="prose-muted mb-4">
+          Customer reviews will appear here once approved. Meanwhile, explore the catalogue or ask
+          the studio about a piece.
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link href="/shop/lampshades" className="btn-secondary">
+            Shop lampshades
+          </Link>
+          <Link href="/contact" className="btn-ghost">
+            Contact
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid md:grid-cols-3 gap-8">
       {reviews.map((r) => (

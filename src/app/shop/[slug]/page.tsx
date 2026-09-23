@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listProductsForShop, getCollectionBySlug } from "@/lib/catalog";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ShopFilters } from "@/components/shop/ShopFilters";
+import { ShopPagination } from "@/components/shop/ShopPagination";
 import { ProductType } from "@prisma/client";
 import type { Metadata } from "next";
 
@@ -33,10 +34,12 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
   const sp = await searchParams;
   const collection = await getCollectionBySlug(slug);
   const type = TYPE_MAP[slug];
-  // Prefer product-type routes (lampshades/fabrics/…) over sparse seeded collections.
-  const { products } = await listProductsForShop({
+  const page = Math.max(1, Number(sp.page) || 1);
+
+  const { products, total, pageSize } = await listProductsForShop({
     collectionSlug: !type && collection ? slug : undefined,
     type,
+    page,
     query: {
       shape: sp.shape,
       sort: sp.sort,
@@ -47,7 +50,6 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
     },
   });
 
-  // mood routes like linen-calm, botanical, bestsellers, new
   const typeTitles: Partial<Record<ProductType, string>> = {
     LAMPSHADE: "Lampshades",
     FABRIC: "Fabrics",
@@ -59,10 +61,14 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
     collection?.title ||
     slug.replace(/-/g, " ");
 
+  const showShape = type === "LAMPSHADE" || (!type && Boolean(collection));
+
   return (
     <div className="container-site py-10 md:py-14">
       <nav className="text-sm text-[color:var(--muted)] mb-6">
         <Link href="/">Home</Link>
+        <span className="mx-2">/</span>
+        <Link href="/shop/lampshades">Shop</Link>
         <span className="mx-2">/</span>
         <span className="text-[color:var(--ink)] capitalize">{title}</span>
       </nav>
@@ -84,9 +90,10 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
           <p className="prose-muted">Lampshade kits for makers.</p>
         )}
       </div>
-      <ShopFilters slug={slug} current={sp} showShape={slug === "lampshades" || !!TYPE_MAP[slug] === false} />
+      <ShopFilters slug={slug} current={sp} showShape={showShape} />
       <p className="text-sm text-[color:var(--muted)] mb-4">
-        {products.length} {products.length === 1 ? "piece" : "pieces"}
+        {total} {total === 1 ? "piece" : "pieces"}
+        {total > pageSize ? ` · showing ${products.length} on this page` : null}
       </p>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {products.map((p) => (
@@ -94,8 +101,25 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
         ))}
       </div>
       {products.length === 0 && (
-        <p className="prose-muted py-16 text-center">No products match these filters.</p>
+        <div className="py-16 text-center space-y-4">
+          <p className="prose-muted">No products match these filters.</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href={`/shop/${slug}`} className="btn-secondary">
+              Clear filters
+            </Link>
+            <Link href="/shop/lampshades" className="btn-primary">
+              Browse lampshades
+            </Link>
+          </div>
+        </div>
       )}
+      <ShopPagination
+        slug={slug}
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        current={sp}
+      />
     </div>
   );
 }

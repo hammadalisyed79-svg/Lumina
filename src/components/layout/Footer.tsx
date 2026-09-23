@@ -12,6 +12,32 @@ export function Footer() {
             Handmade lampshades and interior textiles, made to order in Britain. Quiet materials,
             considered proportions, lasting light.
           </p>
+          <ul className="mt-5 space-y-1 text-sm text-[color:var(--muted)]">
+            <li>
+              <a href={`mailto:${SITE.email}`} className="hover:text-[color:var(--ink)]">
+                {SITE.email}
+              </a>
+            </li>
+            <li>
+              <a
+                href={`tel:${SITE.phone.replace(/\s/g, "")}`}
+                className="hover:text-[color:var(--ink)]"
+              >
+                {SITE.phone}
+              </a>
+            </li>
+            <li>
+              <a
+                href={SITE.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[color:var(--ink)]"
+              >
+                WhatsApp the studio
+              </a>
+            </li>
+            <li>{SITE.address}</li>
+          </ul>
           <div className="mt-8 max-w-md">
             <p className="eyebrow mb-3">Newsletter</p>
             <NewsletterForm />
@@ -20,29 +46,54 @@ export function Footer() {
         <div>
           <p className="eyebrow mb-4">Shop</p>
           <ul className="space-y-2 text-[15px]">
-            <li><Link href="/shop/lampshades">Lampshades</Link></li>
-            <li><Link href="/shop/fabrics">Fabrics</Link></li>
-            <li><Link href="/shop/cushions">Cushions</Link></li>
-            <li><Link href="/design-your-shade">Design your shade</Link></li>
-            <li><Link href="/size-guide">Size guide</Link></li>
+            <li>
+              <Link href="/shop/lampshades">Lampshades</Link>
+            </li>
+            <li>
+              <Link href="/shop/fabrics">Fabrics</Link>
+            </li>
+            <li>
+              <Link href="/shop/cushions">Cushions</Link>
+            </li>
+            <li>
+              <Link href="/shop/kits">Kits</Link>
+            </li>
+            <li>
+              <Link href="/design-your-shade">Design your shade</Link>
+            </li>
+            <li>
+              <Link href="/size-guide">Size guide</Link>
+            </li>
           </ul>
         </div>
         <div>
           <p className="eyebrow mb-4">Studio</p>
           <ul className="space-y-2 text-[15px]">
-            <li><Link href="/about">About</Link></li>
-            <li><Link href="/faq">FAQ</Link></li>
-            <li><Link href="/care">Care</Link></li>
-            <li><Link href="/size-guide">Size &amp; fitting</Link></li>
-            <li><Link href="/trade">Trade</Link></li>
-            <li><Link href="/bespoke">Bespoke</Link></li>
-            <li><Link href="/contact">Contact</Link></li>
-            <li><a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+            <li>
+              <Link href="/about">About</Link>
+            </li>
+            <li>
+              <Link href="/faq">FAQ</Link>
+            </li>
+            <li>
+              <Link href="/care">Care</Link>
+            </li>
+            <li>
+              <Link href="/trade">Trade</Link>
+            </li>
+            <li>
+              <Link href="/bespoke">Bespoke</Link>
+            </li>
+            <li>
+              <Link href="/contact">Contact</Link>
+            </li>
           </ul>
         </div>
       </div>
       <div className="container-site py-6 border-t border-[color:var(--line)] flex flex-col md:flex-row gap-3 justify-between text-sm text-[color:var(--muted)]">
-        <p>© {new Date().getFullYear()} {SITE.legalName}. All rights reserved.</p>
+        <p>
+          © {new Date().getFullYear()} {SITE.legalName}. All rights reserved.
+        </p>
         <div className="flex flex-wrap gap-4">
           <Link href="/shipping">Shipping</Link>
           <Link href="/refunds">Refunds</Link>

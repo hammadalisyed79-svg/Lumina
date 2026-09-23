@@ -117,7 +117,9 @@ export default async function ProductPage({ params }: Props) {
         </div>
 
         <div>
-          <h1 className="font-display text-4xl md:text-5xl mb-2">{product.title}</h1>
+          <h1 className="font-display text-4xl md:text-5xl mb-2">
+            {shortDisplayTitle(product.title, 72)}
+          </h1>
           {product.subtitle && (
             <p className="text-[color:var(--muted)] mb-4">{product.subtitle}</p>
           )}

@@ -326,6 +326,7 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {moodCards.length > 0 && (
       <section className="section-pad bg-[color:var(--stone)]/35">
         <div className="container-site">
           <p className="eyebrow mb-2">Atmospheres</p>
@@ -356,14 +357,18 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       <section className="section-pad container-site max-w-3xl text-center">
         <p className="eyebrow mb-3">Editorial</p>
         <h2 className="font-display text-4xl md:text-5xl mb-4">Light as an interior material</h2>
-        <p className="prose-muted text-lg">
+        <p className="prose-muted text-lg mb-8">
           We treat fabric, frame and lining as a composition — so each shade feels considered in
           the room, not merely functional.
         </p>
+        <Link href="/about" className="btn-secondary">
+          Our atelier
+        </Link>
       </section>
 
       <section className="section-pad container-site">

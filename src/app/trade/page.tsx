@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function TradePage() {
   const [message, setMessage] = useState("");
@@ -26,14 +27,40 @@ export default function TradePage() {
   }
 
   return (
-    <div className="container-site py-12 max-w-2xl">
+    <div className="container-site py-12 max-w-4xl">
       <p className="eyebrow mb-2">Professionals</p>
       <h1 className="font-display text-4xl md:text-5xl mb-4">Trade programme</h1>
-      <p className="prose-muted mb-10">
+      <p className="prose-muted mb-10 max-w-2xl">
         Interior designers, architects and retailers are welcome to apply. Approved accounts receive
         trade guidance, project support and priority communication.
       </p>
-      <form onSubmit={onSubmit} className="space-y-4">
+
+      <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="border-t border-[color:var(--line)] pt-4">
+          <p className="font-medium mb-2">Project support</p>
+          <p className="prose-muted text-sm">
+            Help matching fabrics, shapes and sizes across rooms and schemes.
+          </p>
+        </div>
+        <div className="border-t border-[color:var(--line)] pt-4">
+          <p className="font-medium mb-2">Priority lead times</p>
+          <p className="prose-muted text-sm">
+            Clearer scheduling for client deadlines once your account is approved.
+          </p>
+        </div>
+        <div className="border-t border-[color:var(--line)] pt-4">
+          <p className="font-medium mb-2">Bespoke options</p>
+          <p className="prose-muted text-sm">
+            Custom sizes and fabrics via{" "}
+            <Link href="/bespoke" className="underline">
+              bespoke enquiry
+            </Link>
+            .
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={onSubmit} className="space-y-4 max-w-2xl">
         <input name="businessName" required placeholder="Business name" className="input" />
         <input name="contactName" required placeholder="Contact name" className="input" />
         <input name="email" type="email" required placeholder="Email" className="input" />

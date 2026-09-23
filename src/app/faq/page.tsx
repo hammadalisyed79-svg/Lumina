@@ -27,6 +27,18 @@ const FAQS = [
     q: "Can I order fabric or a cushion to match?",
     a: "Many patterns are available as fabric and cushion covers. Browse Fabrics and Cushions, or contact us for matching advice.",
   },
+  {
+    q: "Why can’t I complete checkout yet?",
+    a: "Online payment reconnects when Shopify Storefront credentials are configured. Until then you can browse, save wishlists and designs, and enquire via Contact, WhatsApp or Bespoke.",
+  },
+  {
+    q: "Can I design my own shade?",
+    a: "Yes — use Design your shade to explore shape, fabric, size, lining and fitting. Save the design to your account or send an enquiry while purchasing is being connected.",
+  },
+  {
+    q: "Do you work with interior designers?",
+    a: "Yes. Apply via the Trade programme for project support and priority communication.",
+  },
 ];
 
 export default function FaqPage() {
@@ -37,9 +49,7 @@ export default function FaqPage() {
       <div className="space-y-8">
         {FAQS.map((item) => (
           <section key={item.q}>
-            <h2 className="font-display text-2xl text-[color:var(--ink)] mb-2">
-              {item.q}
-            </h2>
+            <h2 className="font-display text-2xl text-[color:var(--ink)] mb-2">{item.q}</h2>
             <p className="text-[color:var(--muted)] leading-relaxed">{item.a}</p>
           </section>
         ))}
