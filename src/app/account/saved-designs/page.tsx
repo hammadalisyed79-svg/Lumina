@@ -1,8 +1,13 @@
 import { requireUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import Image from "next/image";
 import { formatMoney } from "@/lib/utils";
 import { toNumber } from "@/lib/pricing";
+import { EmptyState } from "@/components/commerce/EmptyState";
+import { AddSavedDesignButton } from "@/components/studio/AddSavedDesignButton";
+import { buildStudioSharePath } from "@/lib/studio/fabric-family";
+import type { ShadeConfig } from "@/lib/cart/types";
 
 export const dynamic = "force-dynamic";
 
@@ -15,52 +20,120 @@ export default async function SavedDesignsPage() {
   });
 
   return (
-    <div className="container-site py-12 max-w-3xl">
-      <Link href="/account" className="text-sm text-[color:var(--muted)]">
-        ← Account
-      </Link>
-      <h1 className="font-display text-4xl mt-4 mb-8">Saved designs</h1>
-      {designs.length === 0 && (
-        <p className="prose-muted">
-          No saved designs.{" "}
-          <Link href="/design-your-shade" className="underline">
-            Design your shade
-          </Link>
+    <div className="container-site section-pad max-w-3xl">
+      <nav className="page-crumb">
+        <Link href="/account">Account</Link>
+        <span className="mx-2 text-line">/</span>
+        <span className="text-ink">Saved designs</span>
+      </nav>
+      <header className="mb-10">
+        <p className="eyebrow mb-3">Studio</p>
+        <h1 className="section-title mb-3">Saved designs</h1>
+        <div className="lux-rule" />
+        <p className="prose-muted max-w-md">
+          Reopen a configuration in the atelier, or add it straight to your bag.
         </p>
+      </header>
+
+      {designs.length === 0 ? (
+        <EmptyState
+          eyebrow="Atelier"
+          title="No saved designs yet"
+          body="Compose a shade in the studio, then save it to revisit or order later."
+          primary={{ href: "/design-your-shade", label: "Design your shade" }}
+          secondary={{ href: "/shop/lampshades", label: "Browse lampshades" }}
+        />
+      ) : (
+        <ul className="space-y-4">
+          {designs.map((d) => {
+            const parts = [
+              d.shape?.name,
+              d.fabric?.name,
+              d.size?.name,
+              d.lining?.name,
+              d.fitting?.name,
+            ].filter(Boolean);
+            const imageUrl = d.fabric?.imageUrl || d.fabric?.swatchUrl || d.shape?.imageUrl;
+            const studioHref = buildStudioSharePath({
+              shapeKey: d.shape?.key,
+              fabricSlug: d.fabric?.slug,
+              sizeSlug: d.size?.slug,
+              liningSlug: d.lining?.slug,
+              fittingSlug: d.fitting?.slug,
+              step: 5,
+            });
+
+            const canBag =
+              d.shape?.key &&
+              d.fabric?.slug &&
+              d.size?.slug &&
+              d.lining?.slug &&
+              d.fitting?.slug;
+
+            const config: ShadeConfig | null = canBag
+              ? {
+                  shapeKey: d.shape!.key,
+                  shapeName: d.shape!.name,
+                  fabricSlug: d.fabric!.slug,
+                  fabricName: d.fabric!.name,
+                  sizeSlug: d.size!.slug,
+                  sizeName: d.size!.name,
+                  liningSlug: d.lining!.slug,
+                  liningName: d.lining!.name,
+                  fittingSlug: d.fitting!.slug,
+                  fittingName: d.fitting!.name,
+                  unitPrice: toNumber(d.unitPrice),
+                }
+              : null;
+
+            return (
+              <li key={d.id} className="surface-panel p-4 md:p-5">
+                <div className="flex gap-4">
+                  <div className="relative h-24 w-20 shrink-0 bg-stone overflow-hidden">
+                    {imageUrl && (
+                      <Image
+                        src={imageUrl}
+                        alt=""
+                        fill
+                        unoptimized
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-lg">{d.name || "Custom shade"}</p>
+                        <p className="text-sm text-muted mt-1 leading-relaxed">{parts.join(" · ")}</p>
+                        <p className="mt-2 font-medium">{formatMoney(toNumber(d.unitPrice))}</p>
+                        <p className="text-xs text-muted mt-2">
+                          Saved {d.createdAt.toLocaleDateString("en-GB")}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {config && (
+                          <AddSavedDesignButton
+                            title={d.name || `Custom ${d.shape?.name} · ${d.fabric?.name}`}
+                            imageUrl={imageUrl}
+                            config={config}
+                          />
+                        )}
+                        <Link href={studioHref} className="btn-secondary text-sm">
+                          Open studio
+                        </Link>
+                        <Link href="/bespoke" className="btn-quiet text-sm">
+                          Enquire
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
-      <ul className="space-y-4">
-        {designs.map((d) => {
-          const parts = [
-            d.shape?.name,
-            d.fabric?.name,
-            d.size?.name,
-            d.lining?.name,
-            d.fitting?.name,
-          ].filter(Boolean);
-          return (
-            <li key={d.id} className="border border-[color:var(--line)] p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-medium text-lg">{d.name || "Custom shade"}</p>
-                  <p className="text-sm text-[color:var(--muted)] mt-1">{parts.join(" · ")}</p>
-                  <p className="mt-2">{formatMoney(toNumber(d.unitPrice))}</p>
-                  <p className="text-xs text-[color:var(--muted)] mt-2">
-                    Saved {d.createdAt.toLocaleDateString("en-GB")}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link href="/design-your-shade" className="btn-secondary text-sm">
-                    Open studio
-                  </Link>
-                  <Link href="/bespoke" className="btn-quiet text-sm">
-                    Enquire
-                  </Link>
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
     </div>
   );
 }

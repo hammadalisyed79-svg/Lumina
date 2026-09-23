@@ -66,8 +66,9 @@ export default function SizeGuidePage() {
 
   return (
     <div className="container-site py-10 md:py-14 max-w-3xl">
-      <p className="eyebrow mb-2">Fit</p>
-      <h1 className="font-display text-4xl md:text-5xl mb-3">Size guide</h1>
+      <p className="eyebrow mb-3">Fit</p>
+      <h1 className="section-title mb-3">Size guide</h1>
+      <div className="lux-rule" />
       <p className="prose-muted mb-8">
         A short interactive wizard to suggest shade diameter and form. Toggle centimetres or inches
         for reference measurements.
@@ -126,26 +127,30 @@ export default function SizeGuidePage() {
       )}
 
       {result && (
-        <div className="border border-[color:var(--line)] p-6 bg-white/70 mt-4">
-          <h2 className="font-display text-3xl mb-3">Our suggestion</h2>
+        <div className="surface-panel p-6 md:p-8 mt-4">
+          <p className="eyebrow mb-2">Suggestion</p>
+          <h2 className="font-display text-3xl tracking-tight mb-3">Our suggestion</h2>
+          <div className="lux-rule" />
           <p className="prose-muted mb-6">
             Start with a <strong>{result.size.replace("cm", " cm")}</strong>{" "}
-            <strong>{result.shape}</strong> shade. You can refine fabric and fitting in the
-            configurator.
+            <strong>{result.shape}</strong> shade. Refine fabric, lining and fitting in the studio.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
-              href={`/shop/lampshades?shape=${result.shape}`}
+              href={`/design-your-shade?shape=${result.shape}&step=1`}
               className="btn-primary"
+            >
+              Open studio with {result.shape}
+            </Link>
+            <Link
+              href={`/shop/lampshades?shape=${result.shape}`}
+              className="btn-secondary"
             >
               Shop {result.shape} shades
             </Link>
-            <Link href="/design-your-shade" className="btn-secondary">
-              Design your shade
-            </Link>
             <button
               type="button"
-              className="text-sm underline"
+              className="btn-quiet"
               onClick={() => {
                 setStep(0);
                 setAnswers([]);

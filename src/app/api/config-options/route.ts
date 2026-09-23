@@ -18,6 +18,11 @@ export async function GET() {
       name: f.name,
       priceMod: toNumber(f.priceMod),
       imageUrl: f.imageUrl,
+      swatchUrl: f.swatchUrl,
+      material: f.material,
+      colour: f.colour,
+      pattern: f.pattern,
+      description: f.description,
     })),
     sizes: sizes.map((s) => ({
       id: s.id,

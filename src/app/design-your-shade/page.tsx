@@ -1,13 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { calculateUnitPrice } from "@/lib/pricing";
 import { formatMoney } from "@/lib/utils";
 import { useCart } from "@/components/cart/CartProvider";
 import { SITE } from "@/lib/site";
 import { COPY } from "@/lib/copy";
+import {
+  FabricSwatchGrid,
+  type FabricOpt,
+} from "@/components/studio/FabricSwatchGrid";
+import { StudioFittingHint, StudioSizeHint } from "@/components/studio/StudioHints";
+import {
+  buildStudioSharePath,
+  type FabricFamily,
+} from "@/lib/studio/fabric-family";
 
 type Opt = {
   id: string;
@@ -38,10 +48,28 @@ function usableImage(url?: string | null): string | null {
 }
 
 export default function DesignYourShadePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container-site section-pad">
+          <p className="eyebrow mb-3">Atelier</p>
+          <h1 className="section-title">Design your shade</h1>
+          <p className="prose-muted mt-4">Loading the studio…</p>
+        </div>
+      }
+    >
+      <DesignStudioInner />
+    </Suspense>
+  );
+}
+
+function DesignStudioInner() {
   const { addConfigured, setDrawerOpen } = useCart();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(0);
   const [shapes, setShapes] = useState<Shape[]>([]);
-  const [fabrics, setFabrics] = useState<Opt[]>([]);
+  const [fabrics, setFabrics] = useState<FabricOpt[]>([]);
   const [sizes, setSizes] = useState<Opt[]>([]);
   const [linings, setLinings] = useState<Opt[]>([]);
   const [fittings, setFittings] = useState<Opt[]>([]);
@@ -50,23 +78,54 @@ export default function DesignYourShadePage() {
   const [sizeId, setSizeId] = useState("");
   const [liningId, setLiningId] = useState("");
   const [fittingId, setFittingId] = useState("");
+  const [fabricFilter, setFabricFilter] = useState<FabricFamily>("all");
   const [saved, setSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     fetch("/api/config-options")
       .then((r) => r.json())
       .then((d) => {
-        setShapes(d.shapes || []);
-        setFabrics(d.fabrics || []);
-        setSizes(d.sizes || []);
-        setLinings(d.linings || []);
-        setFittings(d.fittings || []);
-        setShapeKey(d.shapes?.[0]?.key || "drum");
-        setFabricId(d.fabrics?.[0]?.id || "");
-        setSizeId(d.sizes?.[1]?.id || d.sizes?.[0]?.id || "");
-        setLiningId(d.linings?.[0]?.id || "");
-        setFittingId(d.fittings?.[0]?.id || "");
+        const nextShapes: Shape[] = d.shapes || [];
+        const nextFabrics: FabricOpt[] = d.fabrics || [];
+        const nextSizes: Opt[] = d.sizes || [];
+        const nextLinings: Opt[] = d.linings || [];
+        const nextFittings: Opt[] = d.fittings || [];
+        setShapes(nextShapes);
+        setFabrics(nextFabrics);
+        setSizes(nextSizes);
+        setLinings(nextLinings);
+        setFittings(nextFittings);
+
+        const qShape = searchParams.get("shape");
+        const qFabric = searchParams.get("fabric");
+        const qSize = searchParams.get("size");
+        const qLining = searchParams.get("lining");
+        const qFitting = searchParams.get("fitting");
+        const qStep = Number(searchParams.get("step") || "");
+
+        const shapeOk = nextShapes.find((s) => s.key === qShape);
+        const fabricOk = nextFabrics.find((f) => f.slug === qFabric || f.id === qFabric);
+        const sizeOk = nextSizes.find((s) => s.slug === qSize || s.id === qSize);
+        const liningOk = nextLinings.find((l) => l.slug === qLining || l.id === qLining);
+        const fittingOk = nextFittings.find((f) => f.slug === qFitting || f.id === qFitting);
+
+        setShapeKey(shapeOk?.key || nextShapes[0]?.key || "drum");
+        setFabricId(fabricOk?.id || nextFabrics[0]?.id || "");
+        setSizeId(sizeOk?.id || nextSizes[1]?.id || nextSizes[0]?.id || "");
+        setLiningId(liningOk?.id || nextLinings[0]?.id || "");
+        setFittingId(fittingOk?.id || nextFittings[0]?.id || "");
+
+        if (Number.isFinite(qStep) && qStep >= 0 && qStep < STEPS.length) {
+          setStep(qStep);
+        } else if (shapeOk && fabricOk && sizeOk && liningOk && fittingOk) {
+          setStep(5);
+        }
+        setReady(true);
       });
+    // Apply deep-link once on load
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const shape = shapes.find((s) => s.key === shapeKey);
@@ -87,10 +146,33 @@ export default function DesignYourShadePage() {
   }, [shape, fabric, size, lining, fitting]);
 
   const previewSrc =
+    usableImage(fabric?.swatchUrl) ||
     usableImage(fabric?.imageUrl) ||
     usableImage(shape?.imageUrl) ||
     usableImage(shapes.find((s) => usableImage(s.imageUrl))?.imageUrl) ||
     FALLBACK_PREVIEW;
+
+  const syncUrl = useCallback(
+    (nextStep = step) => {
+      if (!ready) return;
+      const path = buildStudioSharePath({
+        shapeKey,
+        fabricSlug: fabric?.slug,
+        sizeSlug: size?.slug,
+        liningSlug: lining?.slug,
+        fittingSlug: fitting?.slug,
+        step: nextStep,
+      });
+      router.replace(path, { scroll: false });
+    },
+    [ready, shapeKey, fabric?.slug, size?.slug, lining?.slug, fitting?.slug, step, router]
+  );
+
+  useEffect(() => {
+    if (!ready) return;
+    const t = setTimeout(() => syncUrl(step), 120);
+    return () => clearTimeout(t);
+  }, [ready, shapeKey, fabricId, sizeId, liningId, fittingId, step, syncUrl]);
 
   async function saveDesign() {
     if (!shape || !fabric || !size || !lining || !fitting) return;
@@ -108,6 +190,25 @@ export default function DesignYourShadePage() {
       }),
     });
     if (res.ok) setSaved(true);
+  }
+
+  async function copyShareLink() {
+    const path = buildStudioSharePath({
+      shapeKey,
+      fabricSlug: fabric?.slug,
+      sizeSlug: size?.slug,
+      liningSlug: lining?.slug,
+      fittingSlug: fitting?.slug,
+      step: 5,
+    });
+    const url = `${window.location.origin}${path}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
   }
 
   const progress = ((step + 1) / STEPS.length) * 100;
@@ -179,6 +280,12 @@ export default function DesignYourShadePage() {
                   {shape?.name || "Shade"}
                 </p>
                 <p className="text-sm text-white/80 mt-1">{fabric?.name}</p>
+                {size && (
+                  <p className="text-xs text-white/65 mt-1">
+                    {size.name}
+                    {size.diameterCm != null ? ` · Ø ${size.diameterCm} cm` : ""}
+                  </p>
+                )}
                 <p className="mt-3 text-lg tracking-wide">{formatMoney(unitPrice)}</p>
               </div>
             </div>
@@ -199,29 +306,34 @@ export default function DesignYourShadePage() {
               />
             )}
             {step === 1 && (
-              <OptionGrid
-                label="Choose a fabric"
-                options={fabrics.map((f) => ({
-                  id: f.id,
-                  name: f.name,
-                  meta: f.priceMod ? `+£${f.priceMod}` : "Included",
-                  image: usableImage(f.imageUrl) || undefined,
-                }))}
+              <FabricSwatchGrid
+                fabrics={fabrics}
                 value={fabricId}
                 onChange={setFabricId}
+                filter={fabricFilter}
+                onFilterChange={setFabricFilter}
               />
             )}
             {step === 2 && (
-              <OptionGrid
-                label="Choose a size"
-                options={sizes.map((s) => ({
-                  id: s.id,
-                  name: s.name,
-                  meta: s.priceMod ? `+£${s.priceMod}` : "Base size",
-                }))}
-                value={sizeId}
-                onChange={setSizeId}
-              />
+              <>
+                <OptionGrid
+                  label="Choose a size"
+                  options={sizes.map((s) => ({
+                    id: s.id,
+                    name: s.name,
+                    meta: [
+                      s.diameterCm != null ? `Ø ${s.diameterCm} cm` : null,
+                      s.heightCm != null ? `H ${s.heightCm} cm` : null,
+                      s.priceMod ? `+£${s.priceMod}` : "Base size",
+                    ]
+                      .filter(Boolean)
+                      .join(" · "),
+                  }))}
+                  value={sizeId}
+                  onChange={setSizeId}
+                />
+                <StudioSizeHint sizes={sizes} />
+              </>
             )}
             {step === 3 && (
               <OptionGrid
@@ -236,16 +348,19 @@ export default function DesignYourShadePage() {
               />
             )}
             {step === 4 && (
-              <OptionGrid
-                label="Choose a fitting"
-                options={fittings.map((f) => ({
-                  id: f.id,
-                  name: f.name,
-                  meta: f.description || (f.priceMod ? `+£${f.priceMod}` : "Included"),
-                }))}
-                value={fittingId}
-                onChange={setFittingId}
-              />
+              <>
+                <OptionGrid
+                  label="Choose a fitting"
+                  options={fittings.map((f) => ({
+                    id: f.id,
+                    name: f.name,
+                    meta: f.description || (f.priceMod ? `+£${f.priceMod}` : "Included"),
+                  }))}
+                  value={fittingId}
+                  onChange={setFittingId}
+                />
+                <StudioFittingHint />
+              </>
             )}
             {step === 5 && (
               <div className="surface-panel p-6 md:p-8 space-y-5">
@@ -303,9 +418,12 @@ export default function DesignYourShadePage() {
                   >
                     Add to bag
                   </button>
+                  <button type="button" className="btn-secondary" onClick={copyShareLink}>
+                    {copied ? "Link copied" : "Copy share link"}
+                  </button>
                   <Link
                     href={`/shop/lampshades?q=${encodeURIComponent(fabric?.name?.split(" ").slice(0, 3).join(" ") || "")}`}
-                    className="btn-secondary"
+                    className="btn-quiet"
                   >
                     Matching shades
                   </Link>
@@ -322,11 +440,16 @@ export default function DesignYourShadePage() {
                   </button>
                 </div>
                 <p className="text-xs text-muted leading-relaxed">
-                  Made to order in Britain. Pay securely with Stripe — shipping is calculated at
-                  checkout from studio rates.
+                  Share the link to reopen this exact configuration. Made to order in Britain —
+                  pay securely with Stripe.
                 </p>
                 {saved && (
-                  <p className="text-sm text-bronze">Design saved to your account.</p>
+                  <p className="text-sm text-bronze">
+                    Design saved.{" "}
+                    <Link href="/account/saved-designs" className="underline underline-offset-4">
+                      View saved designs
+                    </Link>
+                  </p>
                 )}
               </div>
             )}

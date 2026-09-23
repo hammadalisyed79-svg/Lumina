@@ -26,7 +26,9 @@ What we sell
 
 Key journeys on this site
 - Shop: /shop/lampshades, /shop/fabrics, /shop/cushions, /shop/kits, bestsellers and collections.
-- Design your shade: /design-your-shade — shape, fabric, size, lining, fitting; add to bag or save design.
+- Design your shade: /design-your-shade — shape, fabric (swatch filters: velvet/linen/silk/wool/cotton/print), size, lining, fitting; add to bag, save design, or copy a shareable link that restores the configuration.
+- Size guide: /size-guide — suggests diameter/shape, then opens the studio.
+- Saved designs: /account/saved-designs — reopen in studio or add to bag in one click.
 - Bespoke: /bespoke · Trade: /trade · Size guide: /size-guide · About: /about · FAQ: /faq · Contact: /contact
 - Checkout is on this website with Stripe (not Shopify). Orders stay unpaid until Stripe confirms payment.
 - Account: sign in, orders, wishlist, saved designs.
