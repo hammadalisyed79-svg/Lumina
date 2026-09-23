@@ -225,23 +225,23 @@ export default async function HomePage() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[rgba(28,25,21,0.45)] via-[rgba(28,25,21,0.18)] to-transparent" />
-        <div className="relative container-site py-16 md:py-24 text-white max-w-3xl">
+        <div className="relative container-site py-14 sm:py-16 md:py-24 text-white max-w-3xl">
           <p className="eyebrow text-white/85 mb-3">
             {heroPayload.eyebrow || COPY.hero.eyebrow}
           </p>
-          <h1 className="font-display text-5xl md:text-7xl leading-[1.05] mb-3">
+          <h1 className="font-display text-[2.5rem] leading-[1.08] sm:text-5xl md:text-7xl md:leading-[1.05] mb-3">
             {heroSection?.title || COPY.hero.title}
           </h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-xl mb-8">
+          <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-xl mb-7 sm:mb-8">
             {heroSection?.subtitle || COPY.hero.subtitle}
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link href={heroSection?.ctaHref || "/shop/lampshades"} className="btn-primary">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+            <Link href={heroSection?.ctaHref || "/shop/lampshades"} className="btn-primary w-full sm:w-auto text-center">
               {heroSection?.ctaLabel || COPY.hero.cta}
             </Link>
             <Link
               href={heroPayload.secondaryCtaHref || "/about"}
-              className="btn-ghost"
+              className="btn-ghost w-full sm:w-auto text-center"
             >
               {heroPayload.secondaryCtaLabel || COPY.hero.secondary}
             </Link>

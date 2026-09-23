@@ -26,13 +26,13 @@ export function ShopFilters({
   const hasFilters = Boolean(current.shape || current.sort || current.min || current.max);
 
   return (
-    <div className="mb-8 space-y-3">
-      <div className="flex flex-wrap gap-3 items-end">
+    <div className="mb-6 md:mb-8 space-y-3">
+      <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
         {showShape && (
-          <label className="text-sm">
+          <label className="text-sm col-span-2 sm:col-auto">
             <span className="label">Shape</span>
             <select
-              className="input w-auto min-w-[140px]"
+              className="input w-full sm:w-auto sm:min-w-[140px]"
               value={current.shape || ""}
               onChange={(e) => update("shape", e.target.value)}
             >
@@ -48,7 +48,7 @@ export function ShopFilters({
         <label className="text-sm">
           <span className="label">Price from</span>
           <select
-            className="input w-auto min-w-[120px]"
+            className="input w-full sm:w-auto sm:min-w-[120px]"
             value={current.min || ""}
             onChange={(e) => update("min", e.target.value)}
           >
@@ -62,7 +62,7 @@ export function ShopFilters({
         <label className="text-sm">
           <span className="label">Price to</span>
           <select
-            className="input w-auto min-w-[120px]"
+            className="input w-full sm:w-auto sm:min-w-[120px]"
             value={current.max || ""}
             onChange={(e) => update("max", e.target.value)}
           >
@@ -73,10 +73,10 @@ export function ShopFilters({
             <option value="150">£150</option>
           </select>
         </label>
-        <label className="text-sm">
+        <label className="text-sm col-span-2 sm:col-auto">
           <span className="label">Sort</span>
           <select
-            className="input w-auto min-w-[160px]"
+            className="input w-full sm:w-auto sm:min-w-[160px]"
             value={current.sort || ""}
             onChange={(e) => update("sort", e.target.value)}
           >

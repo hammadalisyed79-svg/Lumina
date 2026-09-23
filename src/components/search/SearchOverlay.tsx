@@ -29,10 +29,15 @@ export function SearchOverlay() {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-[color:var(--ivory)]/95 backdrop-blur-sm">
-      <div className="container-site pt-16 md:pt-24 max-w-3xl">
+    <div className="fixed inset-0 z-[80] bg-[color:var(--ivory)] text-[color:var(--ink)]">
+      <div className="container-site pt-10 md:pt-24 max-w-3xl">
         <div className="flex justify-end mb-6">
-          <button type="button" onClick={() => setOpen(false)} aria-label="Close search">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close search"
+            className="flex h-10 w-10 items-center justify-center"
+          >
             <X size={22} />
           </button>
         </div>
@@ -51,8 +56,8 @@ export function SearchOverlay() {
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search lampshades, fabrics, cushions…"
-            className="flex-1 bg-transparent text-xl md:text-2xl outline-none font-display"
+            placeholder="Search lampshades, fabrics…"
+            className="flex-1 min-w-0 bg-transparent text-xl md:text-2xl outline-none font-display text-[color:var(--ink)]"
           />
         </form>
         <p className="mt-4 text-sm text-[color:var(--muted)]">Press Enter to search</p>

@@ -74,7 +74,7 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
         <span className="text-[color:var(--ink)] capitalize">{title}</span>
       </nav>
       <div className="mb-6 md:mb-8 max-w-2xl">
-        <h1 className="font-display text-4xl md:text-5xl capitalize mb-3">{title}</h1>
+        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl capitalize mb-3">{title}</h1>
         {collection?.description && !type && (
           <p className="prose-muted">{collection.description}</p>
         )}

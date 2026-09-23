@@ -116,19 +116,22 @@ export default function DesignYourShadePage() {
       <h1 className="font-display text-4xl md:text-5xl mb-3">{COPY.designPage.title}</h1>
       <p className="prose-muted max-w-2xl mb-10">{COPY.designPage.body}</p>
 
-      <div className="flex flex-wrap gap-2 mb-10">
+      <div className="flex flex-wrap gap-2 mb-8 md:mb-10">
         {STEPS.map((label, i) => (
           <button
             key={label}
             type="button"
             onClick={() => setStep(i)}
-            className={`px-3 py-1.5 text-xs tracking-wide uppercase border ${
+            className={`px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs tracking-wide uppercase border ${
               step === i
                 ? "border-[color:var(--ink)] bg-[color:var(--ink)] text-white"
                 : "border-[color:var(--line)]"
             }`}
           >
-            {i + 1}. {label}
+            <span className="sm:hidden">{i + 1}</span>
+            <span className="hidden sm:inline">
+              {i + 1}. {label}
+            </span>
           </button>
         ))}
       </div>

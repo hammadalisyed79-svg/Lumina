@@ -34,7 +34,7 @@ export function CartDrawer() {
             <div key={item.id} className="flex gap-4">
               <div className="relative h-24 w-20 bg-[color:var(--stone)] shrink-0">
                 {item.imageUrl && (
-                  <Image src={item.imageUrl} alt="" fill className="object-cover" />
+                  <Image src={item.imageUrl} alt="" fill unoptimized className="object-cover" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
