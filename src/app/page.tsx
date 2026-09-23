@@ -109,10 +109,9 @@ export default async function HomePage() {
       prisma.shape.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
       shapeImageMap(shapeKeys),
       Promise.all([
-        pickByType("LAMPSHADE", 2),
-        pickByType("FABRIC", 2),
-        pickByType("CUSHION", 2),
-        pickByType("KIT", 2),
+        pickByType("LAMPSHADE", 6),
+        pickByType("FABRIC", 1),
+        pickByType("CUSHION", 1),
       ]),
       prisma.collection.findMany({
         where: { slug: { in: ["linen-calm", "botanical", "bestsellers"] }, published: true },
@@ -183,32 +182,44 @@ export default async function HomePage() {
       ? bestsellers
       : selected.slice(0, 4);
 
+  // Category tiles from the live luminahub.co.uk homepage (downloaded locally)
+  const categoryTiles: Record<string, string> = {
+    drum: "/media/homepage/shape-0.png",
+    oval: "/media/homepage/shape-1.png",
+    rectangular: "/media/homepage/shape-2.png",
+    square: "/media/homepage/shape-3.png",
+  };
+
+  const heroImage = "/media/homepage/hero-lifestyle.png";
+  const storyImage = "/media/homepage/story-craft.png";
+
   return (
     <>
-      <section className="relative min-h-[78vh] md:min-h-[88vh] flex items-end overflow-hidden bg-[color:var(--ink)]">
+      <section className="relative min-h-[78vh] md:min-h-[88vh] flex items-center overflow-hidden bg-[color:var(--ink)]">
         <Image
-          src="/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg"
-          alt="Handmade teal and gold velvet drum lampshade"
+          src={heroImage}
+          alt="Lumina Hub handmade lampshades styled in a living room"
           fill
           priority
-          className="object-cover object-center"
+          className="object-cover object-[center_40%]"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(28,25,21,0.72)] via-[rgba(28,25,21,0.28)] to-[rgba(28,25,21,0.12)]" />
-        <div className="relative container-site pb-12 md:pb-20 text-white max-w-3xl">
-          <h1 className="font-display text-5xl md:text-7xl leading-[1.05] mb-4">
-            Light, made personal.
+        <div className="absolute inset-0 bg-gradient-to-r from-[rgba(28,25,21,0.45)] via-[rgba(28,25,21,0.18)] to-transparent" />
+        <div className="relative container-site py-16 md:py-24 text-white max-w-3xl">
+          <p className="eyebrow text-white/85 mb-3">Lighting · Home decor</p>
+          <h1 className="font-display text-5xl md:text-7xl leading-[1.05] mb-3">
+            Welcome to Lumina Hub
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-xl mb-8">
-            Handcrafted lampshades, expressive fabrics and bespoke finishes made for
-            interiors with character.
+            Where light meets craftsmanship — handmade lampshades, cushions and printed
+            fabrics from our UK studio.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/shop/drum" className="btn-primary">
-              Shop lampshades
+            <Link href="/shop/lampshades" className="btn-primary">
+              Shop now
             </Link>
-            <Link href="/design-your-shade" className="btn-ghost">
-              Design your own
+            <Link href="/about" className="btn-ghost">
+              Our story
             </Link>
           </div>
         </div>
@@ -217,16 +228,19 @@ export default async function HomePage() {
       <section className="section-pad container-site">
         <div className="flex items-end justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <p className="eyebrow mb-2">Forms</p>
+            <p className="eyebrow mb-2">Categories</p>
             <h2 className="font-display text-4xl md:text-5xl">Shop by shape</h2>
+            <p className="prose-muted mt-2 max-w-lg">
+              Discover premium handmade lamp shades for every space.
+            </p>
           </div>
           <Link href="/shop/lampshades" className="text-sm underline hidden sm:inline">
-            View all
+            Explore our range
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
           {shapes.map((s) => {
-            const src = shapeImages[s.key] || designImage;
+            const src = categoryTiles[s.key] || shapeImages[s.key] || designImage;
             return (
               <Link
                 key={s.id}
@@ -242,7 +256,7 @@ export default async function HomePage() {
                     sizes="(max-width:768px) 50vw, 16vw"
                   />
                 </div>
-                <p className="text-center text-sm tracking-wide">{s.name}</p>
+                <p className="text-center text-sm tracking-wide">{s.name} lampshades</p>
               </Link>
             );
           })}
@@ -276,30 +290,38 @@ export default async function HomePage() {
       </section>
 
       <section className="section-pad container-site">
-        <p className="eyebrow mb-2">Featured</p>
-        <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">Selected pieces</h2>
+        <div className="flex items-end justify-between gap-4 mb-6 md:mb-8">
+          <div>
+            <p className="eyebrow mb-2">Featured</p>
+            <h2 className="font-display text-4xl md:text-5xl">Drum lampshades</h2>
+          </div>
+          <Link href="/shop/lampshades?shape=drum" className="text-sm underline hidden sm:inline">
+            Shop more
+          </Link>
+        </div>
         <FeaturedSlider products={selected} />
       </section>
 
       <section className="container-site section-pad grid md:grid-cols-2 gap-8 md:gap-10 items-center">
         <div className="relative aspect-[4/5] overflow-hidden bg-[color:var(--stone)]">
           <Image
-            src={craftImage}
-            alt="Handmade Lumina Hub lampshade"
+            src={storyImage}
+            alt="Lumina Hub craftsmanship — shades bringing spaces to life"
             fill
             className="object-cover object-center"
             sizes="(max-width:768px) 100vw, 50vw"
           />
         </div>
         <div>
-          <p className="eyebrow mb-3">Craft</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-4">Made by hand</h2>
+          <p className="eyebrow mb-3">Our story</p>
+          <h2 className="font-display text-4xl md:text-5xl mb-4">Light &amp; texture</h2>
           <p className="prose-muted max-w-md mb-6">
-            Each shade is stretched, trimmed and finished in our UK workshop. Frames are selected
-            for proportion; fabrics are matched for grain and light quality.
+            We craft handmade lampshades and lighting, one piece at a time, in the UK. Our
+            studio blends timeless silhouettes with rich textures — velvet, linen and bespoke
+            prints — so your space feels warm, refined and personal.
           </p>
           <Link href="/about" className="btn-secondary">
-            Our atelier
+            Read more
           </Link>
         </div>
       </section>
