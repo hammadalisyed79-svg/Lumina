@@ -1,7 +1,8 @@
 # Lumina Hub — delivery report (preview)
 
 **Preview URL:** https://luminahub-lyart.vercel.app/  
-**Authority note:** Catalog import is **preliminary** (public `products.json`). Shopify Admin API + Storefront token required before calling commerce “complete”.
+**Commit:** `311c3c8` on `origin/main` (prod deploy READY)  
+**Authority note:** Catalog import is **preliminary** (public `products.json`). Shopify Admin API + Storefront token required before calling commerce “complete”. Not 100% complete without Storefront checkout tokens.
 
 ## 1. Reconciliation (source → target)
 
@@ -36,11 +37,16 @@ Owner zip `LUMINA_CATALOG_FOR_CURSOR.zip` matched the same 179 / 25,468 / 1,243 
 
 ## 3. Checkout test evidence
 
-Without Shopify tokens, `POST /api/checkout` returns **503** with:
-`Checkout is not live: set SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN…`  
-and does **not** mark orders paid. UI surfaces the error and does not clear the bag.
+Prod smoke (2026-09-23), real published product + variant, valid shipping:
+
+- `POST https://luminahub-lyart.vercel.app/api/checkout` → **503**
+- Body includes `mode: "blocked"`, `orderNumber: "LH-20260923-PO5KK"`, blockers:
+  `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_TOKEN`, `Verified shipping rates in Shopify`
+- Order is **not** marked paid (`paid_dev` path removed)
 
 With tokens: creates Shopify cart via Storefront API and redirects to `checkoutUrl` (`mode: "shopify"`).
+
+Route smoke: `/`, `/shop`, `/shop/lampshades`, `/shipping`, `/faq` → **200**.
 
 ## 4. Credentials / settings the owner must provide
 
