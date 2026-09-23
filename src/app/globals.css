@@ -125,12 +125,12 @@ body {
 }
 
 .section-pad {
-  padding-block: 4.5rem;
+  padding-block: 2.75rem;
 }
 
 @media (min-width: 768px) {
   .section-pad {
-    padding-block: 6rem;
+    padding-block: 3.75rem;
   }
 }
 

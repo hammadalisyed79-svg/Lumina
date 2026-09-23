@@ -6,49 +6,177 @@ import { FeaturedSlider } from "@/components/home/FeaturedSlider";
 import { ReviewsStrip } from "@/components/home/ReviewsStrip";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
 import { toNumber } from "@/lib/pricing";
+import { isWebImageUrl, shortDisplayTitle } from "@/lib/utils";
+import type { Product, ProductImage, ProductType } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
-  const [shapes, featured, bestsellers, moods, reviews] = await Promise.all([
-    prisma.shape.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
-    prisma.product.findMany({
-      where: { published: true, featured: true },
-      include: { images: { orderBy: { sortOrder: "asc" } } },
-      take: 8,
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.product.findMany({
-      where: { published: true, bestseller: true },
-      include: { images: { orderBy: { sortOrder: "asc" } } },
-      take: 8,
-    }),
-    prisma.collection.findMany({
-      where: { slug: { in: ["linen-calm", "botanical", "bestsellers"] }, published: true },
-    }),
-    prisma.review.findMany({
-      where: { status: "APPROVED" },
-      include: { product: true },
-      take: 6,
-      orderBy: { createdAt: "desc" },
-    }),
-  ]);
+type ProductWithImages = Product & { images: ProductImage[] };
 
-  const cards = (products: typeof featured) =>
-    products.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      title: p.title,
-      subtitle: p.subtitle,
-      basePrice: toNumber(p.basePrice),
-      imageUrl: p.images[0]?.url || "/demo-assets/products/placeholder.svg",
-      hoverImageUrl: p.images[1]?.url,
-    }));
+function firstWebImage(images: { url: string }[]) {
+  return images.find((i) => isWebImageUrl(i.url))?.url || null;
+}
+
+function toCard(p: ProductWithImages) {
+  const imageUrl = firstWebImage(p.images);
+  if (!imageUrl) return null;
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: shortDisplayTitle(p.title),
+    subtitle: p.subtitle,
+    basePrice: toNumber(p.basePrice),
+    imageUrl,
+    hoverImageUrl: p.images.find((i, idx) => idx > 0 && isWebImageUrl(i.url))?.url,
+  };
+}
+
+async function pickByType(type: ProductType, take: number) {
+  const rows = await prisma.product.findMany({
+    where: {
+      published: true,
+      type,
+      images: { some: { NOT: { url: { contains: ".heic" } } } },
+    },
+    include: { images: { orderBy: { sortOrder: "asc" }, take: 4 } },
+    orderBy: [{ featured: "desc" }, { bestseller: "desc" }, { updatedAt: "desc" }],
+    take: take * 2,
+  });
+  return rows.map(toCard).filter(Boolean).slice(0, take) as NonNullable<
+    ReturnType<typeof toCard>
+  >[];
+}
+
+async function shapeImageMap(keys: string[]) {
+  const map: Record<string, string> = {};
+  await Promise.all(
+    keys.map(async (key) => {
+      const p = await prisma.product.findFirst({
+        where: {
+          published: true,
+          shapeKey: key,
+          type: "LAMPSHADE",
+          images: { some: {} },
+        },
+        include: { images: { orderBy: { sortOrder: "asc" }, take: 6 } },
+        orderBy: [{ featured: "desc" }, { bestseller: "desc" }],
+      });
+      const url = p ? firstWebImage(p.images) : null;
+      if (url) map[key] = url;
+    })
+  );
+  // Ensure every key has a real photo — fall back to drum if a shape is sparse
+  const drum = map.drum;
+  for (const key of keys) {
+    if (!map[key] && drum) map[key] = drum;
+  }
+  return map;
+}
+
+async function moodImage(slug: string, fallback: string) {
+  const col = await prisma.collection.findUnique({
+    where: { slug },
+    include: {
+      products: {
+        take: 8,
+        include: {
+          product: {
+            include: { images: { orderBy: { sortOrder: "asc" }, take: 4 } },
+          },
+        },
+      },
+    },
+  });
+  for (const row of col?.products || []) {
+    const url = firstWebImage(row.product.images);
+    if (url) return url;
+  }
+  return fallback;
+}
+
+export default async function HomePage() {
+  const shapeKeys = ["drum", "empire", "oval", "rectangular", "coolie", "square"];
+
+  const [shapes, shapeImages, curatedParts, moodMeta, reviews, lifestyle] =
+    await Promise.all([
+      prisma.shape.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
+      shapeImageMap(shapeKeys),
+      Promise.all([
+        pickByType("LAMPSHADE", 2),
+        pickByType("FABRIC", 2),
+        pickByType("CUSHION", 2),
+        pickByType("KIT", 2),
+      ]),
+      prisma.collection.findMany({
+        where: { slug: { in: ["linen-calm", "botanical", "bestsellers"] }, published: true },
+      }),
+      prisma.review.findMany({
+        where: { status: "APPROVED" },
+        include: { product: true },
+        take: 6,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.product.findMany({
+        where: {
+          published: true,
+          type: "LAMPSHADE",
+          images: { some: { NOT: { url: { contains: ".heic" } } } },
+        },
+        include: { images: { orderBy: { sortOrder: "asc" }, take: 3 } },
+        orderBy: [{ featured: "desc" }, { updatedAt: "desc" }],
+        take: 12,
+      }),
+    ]);
+
+  const selected = curatedParts.flat();
+  const lifestyleUrls = lifestyle
+    .map((p) => firstWebImage(p.images))
+    .filter(Boolean) as string[];
+
+  const designImage =
+    shapeImages.drum ||
+    lifestyleUrls[0] ||
+    "/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg";
+
+  const craftImage = lifestyleUrls[1] || designImage;
+  const tradeImage = lifestyleUrls[2] || designImage;
+  const homeImages = [
+    lifestyleUrls[3] || designImage,
+    lifestyleUrls[4] || craftImage,
+    lifestyleUrls[5] || tradeImage,
+  ];
+
+  const moodCards = await Promise.all(
+    moodMeta.map(async (m) => ({
+      ...m,
+      imageUrl: await moodImage(m.slug, designImage),
+    }))
+  );
+
+  const bestsellers = (
+    await prisma.product.findMany({
+      where: {
+        published: true,
+        bestseller: true,
+        images: { some: { NOT: { url: { contains: ".heic" } } } },
+      },
+      include: { images: { orderBy: { sortOrder: "asc" }, take: 4 } },
+      take: 12,
+    })
+  )
+    .map(toCard)
+    .filter(Boolean)
+    .slice(0, 4) as NonNullable<ReturnType<typeof toCard>>[];
+
+  // Prefer mixed bestsellers if kits dominate
+  const mixedBestsellers =
+    bestsellers.filter((b) => !/kit/i.test(b.title)).length >= 2
+      ? bestsellers
+      : selected.slice(0, 4);
 
   return (
     <>
-      {/* 1 Hero */}
-      <section className="relative min-h-[88vh] flex items-end overflow-hidden bg-[color:var(--ink)]">
+      <section className="relative min-h-[78vh] md:min-h-[88vh] flex items-end overflow-hidden bg-[color:var(--ink)]">
         <Image
           src="/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg"
           alt="Handmade teal and gold velvet drum lampshade"
@@ -58,7 +186,7 @@ export default async function HomePage() {
           sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(28,25,21,0.72)] via-[rgba(28,25,21,0.28)] to-[rgba(28,25,21,0.12)]" />
-        <div className="relative container-site pb-16 md:pb-24 text-white max-w-3xl">
+        <div className="relative container-site pb-12 md:pb-20 text-white max-w-3xl">
           <h1 className="font-display text-5xl md:text-7xl leading-[1.05] mb-4">
             Light, made personal.
           </h1>
@@ -77,9 +205,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 2 Shop by shape */}
       <section className="section-pad container-site">
-        <div className="flex items-end justify-between gap-4 mb-10">
+        <div className="flex items-end justify-between gap-4 mb-6 md:mb-8">
           <div>
             <p className="eyebrow mb-2">Forms</p>
             <h2 className="font-display text-4xl md:text-5xl">Shop by shape</h2>
@@ -88,58 +215,72 @@ export default async function HomePage() {
             View all
           </Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-          {shapes.map((s) => (
-            <Link
-              key={s.id}
-              href={`/shop/lampshades?shape=${s.key}`}
-              className="group block"
-            >
-              <div className="relative aspect-square bg-[color:var(--stone)] overflow-hidden mb-3">
-                <Image
-                  src={s.imageUrl || "/demo-assets/shapes/drum.svg"}
-                  alt={s.name}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                />
-              </div>
-              <p className="text-center text-sm tracking-wide">{s.name}</p>
-            </Link>
-          ))}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+          {shapes.map((s) => {
+            const src = shapeImages[s.key] || designImage;
+            return (
+              <Link
+                key={s.id}
+                href={`/shop/lampshades?shape=${s.key}`}
+                className="group block"
+              >
+                <div className="relative aspect-square overflow-hidden bg-[color:var(--stone)] mb-2">
+                  <Image
+                    src={src}
+                    alt={`${s.name} lampshade`}
+                    fill
+                    className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+                    sizes="(max-width:768px) 50vw, 16vw"
+                  />
+                </div>
+                <p className="text-center text-sm tracking-wide">{s.name}</p>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
-      {/* 3 Design CTA */}
       <section className="bg-[color:var(--charcoal)] text-[color:var(--ivory)]">
-        <div className="container-site section-pad grid md:grid-cols-2 gap-10 items-center">
+        <div className="container-site section-pad grid md:grid-cols-2 gap-8 md:gap-10 items-center">
           <div>
             <p className="eyebrow text-[color:var(--champagne)] mb-3">Made for your room</p>
             <h2 className="font-display text-4xl md:text-5xl mb-4">Design your shade</h2>
-            <p className="text-white/75 max-w-md mb-8">
-              Choose shape, fabric, size, lining and fitting. Preview your configuration and add it
-              to your bag with server-trusted pricing.
+            <p className="text-white/75 max-w-md mb-6">
+              Explore shape, fabric, size, lining and fitting in the studio tool. Purchasing a
+              configured shade opens once each option maps to a Shopify variant — until then,
+              save a design or enquire with the studio.
             </p>
             <Link href="/design-your-shade" className="btn-primary">
               Start designing
             </Link>
           </div>
-          <div className="relative aspect-[4/3] bg-[color:var(--ink)]">
-            <Image src="/demo-assets/lifestyle/atelier.svg" alt="" fill className="object-cover opacity-90" />
+          <div className="relative aspect-[4/3] overflow-hidden bg-[color:var(--ink)]">
+            <Image
+              src={designImage}
+              alt="Handmade lampshade designed in the Lumina studio"
+              fill
+              className="object-cover object-center"
+              sizes="(max-width:768px) 100vw, 50vw"
+            />
           </div>
         </div>
       </section>
 
-      {/* 4 Featured slider */}
       <section className="section-pad container-site">
         <p className="eyebrow mb-2">Featured</p>
-        <h2 className="font-display text-4xl md:text-5xl mb-10">Selected pieces</h2>
-        <FeaturedSlider products={cards(featured)} />
+        <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">Selected pieces</h2>
+        <FeaturedSlider products={selected} />
       </section>
 
-      {/* 5 Made by hand */}
-      <section className="container-site section-pad grid md:grid-cols-2 gap-10 items-center">
-        <div className="relative aspect-[4/5] bg-[color:var(--stone)]">
-          <Image src="/demo-assets/lifestyle/atelier.svg" alt="Atelier craft" fill className="object-cover" />
+      <section className="container-site section-pad grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+        <div className="relative aspect-[4/5] overflow-hidden bg-[color:var(--stone)]">
+          <Image
+            src={craftImage}
+            alt="Handmade Lumina Hub lampshade"
+            fill
+            className="object-cover object-center"
+            sizes="(max-width:768px) 100vw, 50vw"
+          />
         </div>
         <div>
           <p className="eyebrow mb-3">Craft</p>
@@ -154,24 +295,30 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6 Shop by mood */}
       <section className="section-pad bg-[color:var(--stone)]/35">
         <div className="container-site">
           <p className="eyebrow mb-2">Atmospheres</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-10">Shop by mood</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {moods.map((m) => (
-              <Link key={m.id} href={`/shop/${m.slug}`} className="group relative aspect-[5/6] overflow-hidden bg-[color:var(--stone)]">
+          <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">Shop by mood</h2>
+          <div className="grid md:grid-cols-3 gap-4 md:gap-5">
+            {moodCards.map((m) => (
+              <Link
+                key={m.id}
+                href={`/shop/${m.slug}`}
+                className="group relative aspect-[5/6] overflow-hidden bg-[color:var(--stone)]"
+              >
                 <Image
-                  src={m.imageUrl || "/demo-assets/lifestyle/atelier.svg"}
+                  src={m.imageUrl}
                   alt={m.title}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.04]"
+                  sizes="(max-width:768px) 100vw, 33vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute bottom-6 left-6 text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+                <div className="absolute bottom-5 left-5 right-5 text-white">
                   <p className="font-display text-3xl">{m.title}</p>
-                  <p className="text-sm text-white/80 mt-1 max-w-xs">{m.description}</p>
+                  {m.description && (
+                    <p className="text-sm text-white/80 mt-1 line-clamp-2">{m.description}</p>
+                  )}
                 </div>
               </Link>
             ))}
@@ -179,20 +326,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7 Editorial */}
       <section className="section-pad container-site max-w-3xl text-center">
         <p className="eyebrow mb-3">Editorial</p>
-        <h2 className="font-display text-4xl md:text-5xl mb-5">Light as an interior material</h2>
+        <h2 className="font-display text-4xl md:text-5xl mb-4">Light as an interior material</h2>
         <p className="prose-muted text-lg">
           We treat fabric, frame and lining as a composition — so each shade feels considered in
-          the room, not merely functional. Quiet neutrals, botanical prints, and evening silks for
-          British interiors.
+          the room, not merely functional.
         </p>
       </section>
 
-      {/* 8 Bestsellers */}
       <section className="section-pad container-site">
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-end justify-between mb-6 md:mb-8">
           <div>
             <p className="eyebrow mb-2">Favourites</p>
             <h2 className="font-display text-4xl md:text-5xl">Bestsellers</h2>
@@ -201,26 +345,26 @@ export default async function HomePage() {
             Shop all
           </Link>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8">
-          {cards(bestsellers).map((p) => (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {mixedBestsellers.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
         </div>
       </section>
 
-      {/* 9 Customer homes */}
       <section className="bg-[color:var(--charcoal)] text-white">
         <div className="container-site section-pad">
           <p className="eyebrow text-[color:var(--champagne)] mb-2">In situ</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-10">Customer homes</h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {["customer-home", "atelier", "botanical"].map((key) => (
-              <div key={key} className="relative aspect-[4/5]">
+          <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">Customer homes</h2>
+          <div className="grid md:grid-cols-3 gap-3 md:gap-4">
+            {homeImages.map((src, i) => (
+              <div key={`${src}-${i}`} className="relative aspect-[4/5] overflow-hidden">
                 <Image
-                  src={`/demo-assets/lifestyle/${key}.svg`}
-                  alt="Customer interior with Lumina shade"
+                  src={src}
+                  alt="Lumina Hub lampshade in an interior setting"
                   fill
-                  className="object-cover"
+                  className="object-cover object-center"
+                  sizes="(max-width:768px) 100vw, 33vw"
                 />
               </div>
             ))}
@@ -228,22 +372,22 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 10 Reviews */}
       <section className="section-pad container-site">
         <p className="eyebrow mb-2">Kind words</p>
-        <h2 className="font-display text-4xl md:text-5xl mb-10">Reviews</h2>
-        <ReviewsStrip reviews={reviews.map((r) => ({
-          id: r.id,
-          author: r.author,
-          rating: r.rating,
-          title: r.title,
-          body: r.body,
-          productTitle: r.product.title,
-        }))} />
+        <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">Reviews</h2>
+        <ReviewsStrip
+          reviews={reviews.map((r) => ({
+            id: r.id,
+            author: r.author,
+            rating: r.rating,
+            title: r.title,
+            body: r.body,
+            productTitle: shortDisplayTitle(r.product.title, 40),
+          }))}
+        />
       </section>
 
-      {/* 11 Trade */}
-      <section className="container-site section-pad grid md:grid-cols-2 gap-10 items-center border-y border-[color:var(--line)]">
+      <section className="container-site section-pad grid md:grid-cols-2 gap-8 md:gap-10 items-center border-y border-[color:var(--line)]">
         <div>
           <p className="eyebrow mb-3">Professionals</p>
           <h2 className="font-display text-4xl md:text-5xl mb-4">Trade programme</h2>
@@ -255,12 +399,17 @@ export default async function HomePage() {
             Apply for trade
           </Link>
         </div>
-        <div className="relative aspect-[16/11] bg-[color:var(--stone)]">
-          <Image src="/demo-assets/lifestyle/botanical.svg" alt="" fill className="object-cover" />
+        <div className="relative aspect-[16/11] overflow-hidden bg-[color:var(--stone)]">
+          <Image
+            src={tradeImage}
+            alt="Lumina Hub trade and project shades"
+            fill
+            className="object-cover object-center"
+            sizes="(max-width:768px) 100vw, 50vw"
+          />
         </div>
       </section>
 
-      {/* 12 Newsletter (also in footer) */}
       <section className="section-pad container-site max-w-xl text-center">
         <p className="eyebrow mb-3">Stay close</p>
         <h2 className="font-display text-4xl mb-4">Studio notes</h2>

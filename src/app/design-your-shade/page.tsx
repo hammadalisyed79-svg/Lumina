@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { calculateUnitPrice } from "@/lib/pricing";
 import { formatMoney } from "@/lib/utils";
-import { useCart } from "@/components/cart/CartProvider";
 
 type Opt = { id: string; slug: string; name: string; priceMod: number; imageUrl?: string; description?: string; diameterCm?: number | null; heightCm?: number | null };
 type Shape = { key: string; name: string; basePrice: number; imageUrl?: string; description?: string };
@@ -12,7 +12,6 @@ type Shape = { key: string; name: string; basePrice: number; imageUrl?: string; 
 const STEPS = ["Shape", "Fabric", "Size", "Lining", "Fitting", "Review"] as const;
 
 export default function DesignYourShadePage() {
-  const { addConfigured } = useCart();
   const [step, setStep] = useState(0);
   const [shapes, setShapes] = useState<Shape[]>([]);
   const [fabrics, setFabrics] = useState<Opt[]>([]);
@@ -60,27 +59,6 @@ export default function DesignYourShadePage() {
     });
   }, [shape, fabric, size, lining, fitting]);
 
-  function addToBag() {
-    if (!shape || !fabric || !size || !lining || !fitting) return;
-    addConfigured({
-      title: `${shape.name} shade · ${fabric.name}`,
-      imageUrl: fabric.imageUrl || shape.imageUrl,
-      config: {
-        shapeKey: shape.key,
-        shapeName: shape.name,
-        fabricSlug: fabric.slug,
-        fabricName: fabric.name,
-        sizeSlug: size.slug,
-        sizeName: size.name,
-        liningSlug: lining.slug,
-        liningName: lining.name,
-        fittingSlug: fitting.slug,
-        fittingName: fitting.name,
-        unitPrice,
-      },
-    });
-  }
-
   async function saveDesign() {
     if (!shape || !fabric || !size || !lining || !fitting) return;
     const res = await fetch("/api/saved-designs", {
@@ -104,8 +82,9 @@ export default function DesignYourShadePage() {
       <p className="eyebrow mb-2">Configurator</p>
       <h1 className="font-display text-4xl md:text-5xl mb-3">Design your shade</h1>
       <p className="prose-muted max-w-xl mb-10">
-        Build a made-to-order lampshade in six considered steps. Your configuration is stored with
-        the cart, checkout and order confirmation.
+        Explore shape, fabric, size, lining and fitting. This studio tool does not add items to
+        checkout yet — configured shades become purchasable once each option maps to a Shopify
+        variant. You can save a design or contact the studio for a quote.
       </p>
 
       <div className="flex flex-wrap gap-2 mb-10">
@@ -215,13 +194,17 @@ export default function DesignYourShadePage() {
                 <li className="font-medium pt-2">Price: {formatMoney(unitPrice)}</li>
               </ul>
               <div className="flex flex-wrap gap-3 pt-4">
-                <button type="button" className="btn-primary" onClick={addToBag}>
-                  Add to bag
-                </button>
+                <Link href="/bespoke" className="btn-primary">
+                  Enquire about this design
+                </Link>
                 <button type="button" className="btn-secondary" onClick={saveDesign}>
                   Save design
                 </button>
               </div>
+              <p className="text-xs text-[color:var(--muted)]">
+                Add to bag is disabled until configurator options map to Shopify variants.
+                Indicative price above is for studio guidance only.
+              </p>
               {saved && <p className="text-sm text-[color:var(--muted)]">Design saved to your account / guest key.</p>}
             </div>
           )}

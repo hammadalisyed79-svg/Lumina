@@ -35,3 +35,27 @@ export function orderNumber(): string {
   const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
   return `LH-${stamp}-${rand}`;
 }
+
+/** Short shop/card title — does not alter stored product descriptions. */
+export function shortDisplayTitle(title: string, max = 52): string {
+  let t = String(title || "")
+    .replace(/^(handmade by order|made by order|print by order|circular)\s+/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  // Drop trailing catalogue boilerplate
+  t = t
+    .replace(/\b(all shapes?( and sizes)?|all sizes?( and shapes)?|available|on demand|custom size|sold by (the )?meter|140cm wide)\b/gi, "")
+    .replace(/[·|,/-]+\s*$/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  if (t.length <= max) return t || title;
+  const cut = t.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > 24 ? cut.slice(0, lastSpace) : cut).trim()}…`;
+}
+
+export function isWebImageUrl(url?: string | null): boolean {
+  if (!url) return false;
+  const u = url.toLowerCase();
+  return !u.includes(".heic") && !u.includes("placeholder") && !u.includes("/demo-assets/");
+}

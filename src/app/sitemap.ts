@@ -1,13 +1,10 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const [products, collections] = await Promise.all([
-    prisma.product.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
-    prisma.collection.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
-  ]);
-
   const staticRoutes = [
     "",
     "/shop/lampshades",
@@ -23,15 +20,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(),
   }));
 
-  return [
-    ...staticRoutes,
-    ...products.map((p) => ({
-      url: `${base}/product/${p.slug}`,
-      lastModified: p.updatedAt,
-    })),
-    ...collections.map((c) => ({
-      url: `${base}/shop/${c.slug}`,
-      lastModified: c.updatedAt,
-    })),
-  ];
+  if (!process.env.DATABASE_URL) {
+    return staticRoutes;
+  }
+
+  try {
+    const [products, collections] = await Promise.all([
+      prisma.product.findMany({
+        where: { published: true },
+        select: { slug: true, updatedAt: true },
+      }),
+      prisma.collection.findMany({
+        where: { published: true },
+        select: { slug: true, updatedAt: true },
+      }),
+    ]);
+
+    return [
+      ...staticRoutes,
+      ...products.map((p) => ({
+        url: `${base}/product/${p.slug}`,
+        lastModified: p.updatedAt,
+      })),
+      ...collections.map((c) => ({
+        url: `${base}/shop/${c.slug}`,
+        lastModified: c.updatedAt,
+      })),
+    ];
+  } catch {
+    return staticRoutes;
+  }
 }

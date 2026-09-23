@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Heart } from "lucide-react";
-import { formatMoney } from "@/lib/utils";
+import { formatMoney, shortDisplayTitle } from "@/lib/utils";
 import { useWishlist } from "@/components/wishlist/WishlistProvider";
 
 export type ProductCardData = {
@@ -56,7 +56,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
       </div>
       <div className="mt-3 space-y-1">
         <Link href={`/product/${product.slug}`} className="font-medium leading-snug block">
-          {product.title}
+          {shortDisplayTitle(product.title)}
         </Link>
         {product.subtitle && (
           <p className="text-sm text-[color:var(--muted)]">{product.subtitle}</p>
