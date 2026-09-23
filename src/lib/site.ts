@@ -9,9 +9,7 @@ export const SITE = {
   address: "Electric Parade, Seven Kings, Ilford IG3 8BS, United Kingdom",
   currency: "gbp" as const,
   locale: "en-GB" as const,
-  // Provisional UI defaults only — replace with Shopify shipping settings before launch.
-  freeShippingFrom: 75,
-  defaultShipping: 4.95,
+  // Do not advertise free-shipping thresholds until Shopify shipping rules are configured.
   maxContent: "max-w-[1440px]",
 };
 

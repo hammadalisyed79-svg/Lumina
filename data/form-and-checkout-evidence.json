@@ -1,0 +1,64 @@
+{
+  "testedAt": "2026-09-23T07:04:16.380Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "shopifyConfigured": false,
+  "resendConfigured": false,
+  "contact": {
+    "path": "POST /api/contact → prisma.bespokeEnquiry + sendEmail(studio)",
+    "database": {
+      "table": "bespokeEnquiry",
+      "enquiryId": "cmudrc4xq0000u5c0ccc86zr5",
+      "ok": true
+    },
+    "email": {
+      "to": "orders@luminahub.co.uk",
+      "delivered": false,
+      "skipped": true,
+      "reason": "RESEND_API_KEY missing/placeholder — DB write is the durable destination",
+      "id": "dev-skip"
+    }
+  },
+  "newsletter": {
+    "path": "POST /api/newsletter → prisma.newsletterSubscriber + sendEmail(studio)",
+    "database": {
+      "table": "newsletterSubscriber",
+      "subscriberId": "cmudrc55r0001u5c00gtlb1jy",
+      "email": "evidence+1790147056669@example.com",
+      "ok": true
+    },
+    "email": {
+      "to": "orders@luminahub.co.uk",
+      "delivered": false,
+      "skipped": true,
+      "reason": "RESEND_API_KEY missing/placeholder — DB write is the durable destination",
+      "id": "dev-skip"
+    }
+  },
+  "checkoutBlocked": {
+    "status": 503,
+    "bodyKeys": [
+      "error",
+      "mode",
+      "blockers"
+    ],
+    "mode": "blocked",
+    "hasOrderNumber": false,
+    "hasOrderId": false,
+    "orderNumberValue": null,
+    "error": "Checkout is not live. Set SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN for Shopify hosted checkout.",
+    "blockers": [
+      "SHOPIFY_STORE_DOMAIN",
+      "SHOPIFY_STOREFRONT_TOKEN",
+      "Verified shipping rates in Shopify"
+    ],
+    "ordersCreated": 0,
+    "productSlug": "print-by-order-abstract-paint-strokes-in-navy-blue-gold-teal-combination-velvet-fabric-140cm",
+    "variantShopifyId": "56921167102330",
+    "logicAssertion": {
+      "shopifyConfigured": false,
+      "stripeConfigured": true,
+      "ordersCreatedByGateSimulation": 0,
+      "rule": "Blocked/failed responses must omit orderNumber and must not create Order rows before provider success"
+    }
+  }
+}

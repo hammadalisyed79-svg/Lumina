@@ -72,16 +72,14 @@ export type ShippingInput = {
 export function calculateShipping(
   subtotalAfterDiscount: number,
   method: ShippingInput | null | undefined,
-  fallbackFlat = 4.95,
-  freeFrom = 75,
 ): number {
-  if (!method) {
-    return subtotalAfterDiscount >= freeFrom ? 0 : fallbackFlat;
-  }
+  // No invented free-shipping defaults — only use an explicit ShippingMethod row.
+  if (!method) return 0;
   const price = toNumber(method.price);
   if (method.calcType === "FLAT") return roundMoney(price);
   if (method.calcType === "FREE_ABOVE") {
-    const threshold = method.freeAbove != null ? toNumber(method.freeAbove) : freeFrom;
+    if (method.freeAbove == null) return roundMoney(price);
+    const threshold = toNumber(method.freeAbove);
     return subtotalAfterDiscount >= threshold ? 0 : roundMoney(price);
   }
   return roundMoney(price);
@@ -91,20 +89,14 @@ export function calculateOrderTotals(args: {
   lines: PricingInput[];
   coupon?: CouponInput | null;
   shipping?: ShippingInput | null;
-  freeShippingFrom?: number;
-  defaultShipping?: number;
 }) {
   const subtotal = roundMoney(
     args.lines.reduce((sum, line) => sum + calculateLineTotal(line), 0),
   );
   const { discount } = applyCoupon(subtotal, args.coupon);
   const afterDiscount = roundMoney(Math.max(0, subtotal - discount));
-  const shippingTotal = calculateShipping(
-    afterDiscount,
-    args.shipping,
-    args.defaultShipping ?? 4.95,
-    args.freeShippingFrom ?? 75,
-  );
+  // Local estimate only; Shopify checkout remains SoT for live shipping.
+  const shippingTotal = calculateShipping(afterDiscount, args.shipping);
   const taxTotal = 0;
   const total = roundMoney(afterDiscount + shippingTotal + taxTotal);
   return { subtotal, discountTotal: discount, shippingTotal, taxTotal, total };

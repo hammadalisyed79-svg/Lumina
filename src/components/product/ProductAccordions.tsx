@@ -13,7 +13,7 @@ export function ProductAccordions({
     { title: "Details", body: description },
     {
       title: "Lead time & shipping",
-      body: `Made to order in approximately ${leadTimeDays} working days. UK mainland delivery from £4.95, complimentary over £75.`,
+      body: `Made to order in approximately ${leadTimeDays} working days. Delivery options and costs are confirmed at Shopify checkout once shipping rates are configured — we do not advertise free shipping until those rules are live.`,
     },
     {
       title: "Care",

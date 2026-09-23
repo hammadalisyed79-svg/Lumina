@@ -153,20 +153,23 @@ async function main() {
     data: [
       {
         name: "UK Mainland Standard",
-        description: "3–5 working days",
-        calcType: ShippingCalc.FREE_ABOVE,
-        price: 4.95,
-        freeAbove: 75,
-        estimatedDays: "3-5",
+        description: "Rate confirmed at Shopify checkout once shipping rules are live",
+        calcType: ShippingCalc.FLAT,
+        price: 0,
+        freeAbove: null,
+        estimatedDays: "TBC",
         sortOrder: 0,
+        active: false,
       },
       {
-        name: "UK Express",
-        description: "1–2 working days",
+        name: "Shipping calculated at checkout",
+        description: "Provisional placeholder — not a free-shipping offer",
         calcType: ShippingCalc.FLAT,
-        price: 9.95,
-        estimatedDays: "1-2",
+        price: 0,
+        freeAbove: null,
+        estimatedDays: "TBC",
         sortOrder: 1,
+        active: true,
       },
     ],
   });
@@ -465,7 +468,7 @@ async function main() {
     data: [
       {
         key: "announcement",
-        value: { text: "Complimentary UK mainland delivery on orders over £75 · Made to order in Britain" },
+        value: { text: "Handmade to order in Britain · Delivery options confirmed at checkout" },
       },
       {
         key: "seo_default",

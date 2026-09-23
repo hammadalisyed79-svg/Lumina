@@ -4,12 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatMoney } from "@/lib/utils";
-import { SITE } from "@/lib/site";
 
 export default function CartPage() {
   const { items, subtotal, updateQty, remove } = useCart();
-  const shippingEstimate =
-    subtotal >= SITE.freeShippingFrom ? 0 : SITE.defaultShipping;
 
   return (
     <div className="container-site py-10 md:py-14">
@@ -60,15 +57,16 @@ export default function CartPage() {
               <span>Subtotal</span>
               <span>{formatMoney(subtotal)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span>Est. shipping</span>
-              <span>{shippingEstimate === 0 ? "Complimentary" : formatMoney(shippingEstimate)}</span>
-            </div>
+            <p className="text-xs text-[color:var(--muted)]">
+              Shipping is calculated at Shopify checkout once rates are configured.
+              No free-shipping threshold is advertised until those rules are live.
+            </p>
             <div className="divider my-2" />
             <div className="flex justify-between font-medium">
               <span>Estimated total</span>
-              <span>{formatMoney(subtotal + shippingEstimate)}</span>
+              <span>{formatMoney(subtotal)}</span>
             </div>
+            <p className="text-[10px] text-[color:var(--muted)]">Excludes shipping &amp; tax</p>
             <Link href="/checkout" className="btn-primary w-full mt-4">
               Checkout
             </Link>

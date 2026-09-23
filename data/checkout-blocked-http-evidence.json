@@ -1,0 +1,19 @@
+﻿{
+  "testedAt": "2026-09-23T07:04:16.000Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "status": 503,
+  "body": {
+    "error": "Checkout is not live. Set SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN for Shopify hosted checkout.",
+    "mode": "blocked",
+    "blockers": [
+      "SHOPIFY_STORE_DOMAIN",
+      "SHOPIFY_STOREFRONT_TOKEN",
+      "Verified shipping rates in Shopify"
+    ]
+  },
+  "bodyKeys": ["error", "mode", "blockers"],
+  "hasOrderNumber": false,
+  "hasOrderId": false,
+  "ordersCreated": 0,
+  "note": "Shopify E2E checkout not attempted — tokens absent. Checkout must not be described as working."
+}

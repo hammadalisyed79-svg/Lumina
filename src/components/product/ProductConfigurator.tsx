@@ -1,11 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
-import { calculateUnitPrice } from "@/lib/pricing";
 import { formatMoney } from "@/lib/utils";
 
-type Option = { id: string; slug: string; name: string; priceMod: number };
+type ShopifyVariant = {
+  id: string;
+  title: string;
+  sku: string;
+  priceOverride: number | null;
+  shopifyVariantId: string | null;
+  option1: string | null;
+  option2: string | null;
+  option3: string | null;
+  active: boolean;
+};
 
 type Props = {
   product: {
@@ -17,163 +26,114 @@ type Props = {
     configEnabled: boolean;
     type: string;
     shapeKey?: string | null;
-    variants: {
-      id: string;
-      title: string;
-      sku: string;
-      priceOverride: number | null;
-      fabricId: string | null;
-      sizeId: string | null;
-      liningId: string | null;
-      fittingId: string | null;
-    }[];
+    variants: ShopifyVariant[];
   };
 };
 
+/**
+ * Purchasable options must map to Shopify variants (shopifyVariantId).
+ * Studio configurator pricing is not used for catalog Shopify products.
+ */
 export function ProductConfigurator({ product }: Props) {
-  const { addProduct, addConfigured } = useCart();
-  const [fabrics, setFabrics] = useState<Option[]>([]);
-  const [sizes, setSizes] = useState<Option[]>([]);
-  const [linings, setLinings] = useState<Option[]>([]);
-  const [fittings, setFittings] = useState<Option[]>([]);
-  const [shapes, setShapes] = useState<{ key: string; name: string; basePrice: number }[]>([]);
-  const [fabricId, setFabricId] = useState("");
-  const [sizeId, setSizeId] = useState("");
-  const [liningId, setLiningId] = useState("");
-  const [fittingId, setFittingId] = useState("");
-  const [shapeKey, setShapeKey] = useState(product.shapeKey || "drum");
+  const { addProduct } = useCart();
+  const purchasable = useMemo(
+    () =>
+      product.variants.filter(
+        (v) => v.active && v.shopifyVariantId && v.priceOverride != null
+      ),
+    [product.variants]
+  );
+
+  const [variantId, setVariantId] = useState(purchasable[0]?.id || "");
   const [qty, setQty] = useState(1);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch("/api/config-options")
-      .then((r) => r.json())
-      .then((data) => {
-        setFabrics(data.fabrics);
-        setSizes(data.sizes);
-        setLinings(data.linings);
-        setFittings(data.fittings);
-        setShapes(data.shapes);
-        setFabricId(data.fabrics[0]?.id || "");
-        setSizeId(data.sizes[1]?.id || data.sizes[0]?.id || "");
-        setLiningId(data.linings[0]?.id || "");
-        setFittingId(data.fittings[0]?.id || "");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const selected = purchasable.find((v) => v.id === variantId) || purchasable[0];
+  const unitPrice = selected?.priceOverride ?? product.basePrice;
 
-  const fabric = fabrics.find((f) => f.id === fabricId);
-  const size = sizes.find((s) => s.id === sizeId);
-  const lining = linings.find((l) => l.id === liningId);
-  const fitting = fittings.find((f) => f.id === fittingId);
-  const shape = shapes.find((s) => s.key === shapeKey);
-
-  const unitPrice = useMemo(() => {
-    if (!product.configEnabled) {
-      const v = product.variants[0];
-      return v?.priceOverride ?? product.basePrice;
+  // Group option1 values for a simpler selector when many variants exist
+  const option1Values = useMemo(() => {
+    const set = new Set<string>();
+    for (const v of purchasable) {
+      if (v.option1) set.add(v.option1);
     }
-    return calculateUnitPrice({
-      basePrice: shape?.basePrice ?? product.basePrice,
-      fabricMod: fabric?.priceMod,
-      sizeMod: size?.priceMod,
-      liningMod: lining?.priceMod,
-      fittingMod: fitting?.priceMod,
-    });
-  }, [product, shape, fabric, size, lining, fitting]);
+    return [...set];
+  }, [purchasable]);
+
+  const [option1, setOption1] = useState(purchasable[0]?.option1 || "");
+
+  const filteredByOption1 = useMemo(() => {
+    if (!option1 || option1Values.length <= 1) return purchasable;
+    const matched = purchasable.filter((v) => v.option1 === option1);
+    return matched.length ? matched : purchasable;
+  }, [purchasable, option1, option1Values.length]);
+
+  function onSelectOption1(value: string) {
+    setOption1(value);
+    const next = purchasable.find((v) => v.option1 === value);
+    if (next) setVariantId(next.id);
+  }
 
   function add() {
-    if (!product.configEnabled) {
-      const v = product.variants[0];
-      addProduct({
-        productId: product.id,
-        variantId: v?.id,
-        slug: product.slug,
-        title: product.title,
-        imageUrl: product.imageUrl,
-        quantity: qty,
-        unitPrice,
-      });
-      return;
-    }
-    if (!fabric || !size || !lining || !fitting || !shape) return;
-    addConfigured({
-      title: `${shape.name} shade · ${fabric.name}`,
+    if (!selected?.shopifyVariantId) return;
+    addProduct({
+      productId: product.id,
+      variantId: selected.id,
+      slug: product.slug,
+      title:
+        selected.title && selected.title !== "Default Title"
+          ? `${product.title} · ${selected.title}`
+          : product.title,
       imageUrl: product.imageUrl,
       quantity: qty,
-      config: {
-        shapeKey: shape.key,
-        shapeName: shape.name,
-        fabricSlug: fabric.slug,
-        fabricName: fabric.name,
-        sizeSlug: size.slug,
-        sizeName: size.name,
-        liningSlug: lining.slug,
-        liningName: lining.name,
-        fittingSlug: fitting.slug,
-        fittingName: fitting.name,
-        unitPrice,
-      },
+      unitPrice,
     });
   }
 
-  if (loading) return <p className="text-sm text-[color:var(--muted)]">Loading options…</p>;
+  if (!purchasable.length) {
+    return (
+      <div className="border-t border-[color:var(--line)] pt-6 space-y-3">
+        <p className="text-sm text-[color:var(--muted)]">
+          This product has no purchasable Shopify variants mapped yet. Checkout is
+          unavailable for this item.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 border-t border-[color:var(--line)] pt-6">
-      {product.configEnabled && (
-        <>
-          <Field label="Shape">
-            <select className="input" value={shapeKey} onChange={(e) => setShapeKey(e.target.value)}>
-              {shapes.map((s) => (
-                <option key={s.key} value={s.key}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Fabric">
-            <select className="input" value={fabricId} onChange={(e) => setFabricId(e.target.value)}>
-              {fabrics.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                  {f.priceMod ? ` (+£${f.priceMod})` : ""}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Size">
-            <select className="input" value={sizeId} onChange={(e) => setSizeId(e.target.value)}>
-              {sizes.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                  {s.priceMod ? ` (+£${s.priceMod})` : ""}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Lining">
-            <select className="input" value={liningId} onChange={(e) => setLiningId(e.target.value)}>
-              {linings.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.name}
-                  {l.priceMod ? ` (+£${l.priceMod})` : ""}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Fitting">
-            <select className="input" value={fittingId} onChange={(e) => setFittingId(e.target.value)}>
-              {fittings.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                  {f.priceMod ? ` (+£${f.priceMod})` : ""}
-                </option>
-              ))}
-            </select>
-          </Field>
-        </>
+      {option1Values.length > 1 && (
+        <label className="block space-y-2">
+          <span className="text-sm font-medium">Option</span>
+          <select
+            className="input"
+            value={option1 || ""}
+            onChange={(e) => onSelectOption1(e.target.value)}
+          >
+            {option1Values.map((v) => (
+              <option key={v} value={v}>
+                {v}
+              </option>
+            ))}
+          </select>
+        </label>
       )}
+
+      <label className="block space-y-2">
+        <span className="text-sm font-medium">Variant</span>
+        <select
+          className="input"
+          value={selected?.id || ""}
+          onChange={(e) => setVariantId(e.target.value)}
+        >
+          {filteredByOption1.slice(0, 200).map((v) => (
+            <option key={v.id} value={v.id}>
+              {v.title === "Default Title" ? "Standard" : v.title}
+              {v.priceOverride != null ? ` — ${formatMoney(v.priceOverride)}` : ""}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="flex items-center gap-4">
         <label className="flex items-center border border-[color:var(--line)]">
@@ -188,21 +148,18 @@ export function ProductConfigurator({ product }: Props) {
         <p className="font-medium">{formatMoney(unitPrice)}</p>
       </div>
 
-      <button type="button" className="btn-primary w-full md:w-auto" onClick={add}>
+      <button
+        type="button"
+        className="btn-primary w-full md:w-auto"
+        onClick={add}
+        disabled={!selected?.shopifyVariantId}
+      >
         Add to bag
       </button>
       <p className="text-xs text-[color:var(--muted)]">
-        Pricing is recalculated securely at checkout.
+        Price shown matches the selected Shopify variant. Final shipping is set at
+        Shopify checkout.
       </p>
     </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="label">{label}</span>
-      {children}
-    </label>
   );
 }

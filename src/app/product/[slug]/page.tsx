@@ -114,10 +114,11 @@ export default async function ProductPage({ params }: Props) {
                 title: v.title,
                 sku: v.sku,
                 priceOverride: v.priceOverride ? toNumber(v.priceOverride) : null,
-                fabricId: v.fabricId,
-                sizeId: v.sizeId,
-                liningId: v.liningId,
-                fittingId: v.fittingId,
+                shopifyVariantId: v.shopifyVariantId,
+                option1: v.option1,
+                option2: v.option2,
+                option3: v.option3,
+                active: v.active,
               })),
             }}
           />

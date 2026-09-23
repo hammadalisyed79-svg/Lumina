@@ -1,0 +1,150 @@
+{
+  "verifiedAt": "2026-09-23T07:01:27.395Z",
+  "source": "https://www.luminahub.co.uk/products.json",
+  "authority": "DB vs preliminary public catalog dump — not a live Storefront purchasability proof",
+  "totals": {
+    "catalogProducts": 179,
+    "catalogVariants": 25468,
+    "dbPublishedProducts": 179,
+    "dbVariants": 25468,
+    "purchasableUiOptions": 25217,
+    "priceAndIdMappedOk": 25468,
+    "missingShopifyVariantId": 0,
+    "orphanDbVariants": 0,
+    "priceMismatches": 0,
+    "optionLabelMismatches": 0,
+    "catalogVariantsMissingInDbSample": 0,
+    "catalogVariantsNotInDb": 0
+  },
+  "samples": [
+    {
+      "productSlug": "circular-drum-lamp-shade-kits-15cm-diameter-x-15cm-height-with-golden-ring-and-golden-lining",
+      "variantTitle": "Default Title",
+      "shopifyVariantId": "56864743391610",
+      "displayedPrice": 24.99,
+      "catalogPrice": 24.99,
+      "option1": "Default Title",
+      "merchandiseGid": "gid://shopify/ProductVariant/56864743391610",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "circular-drum-lamp-shade-kits-20cm-diameter-x-18cm-height-with-golden-ring-and-golden-lining",
+      "variantTitle": "Default Title",
+      "shopifyVariantId": "56864805945722",
+      "displayedPrice": 30,
+      "catalogPrice": 30,
+      "option1": "Default Title",
+      "merchandiseGid": "gid://shopify/ProductVariant/56864805945722",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "circular-drum-lamp-shade-kits-25cm-diameter-x-21cm-height-with-golden-ring-and-golden-lining",
+      "variantTitle": "Default Title",
+      "shopifyVariantId": "56864747946362",
+      "displayedPrice": 35,
+      "catalogPrice": 35,
+      "option1": "Default Title",
+      "merchandiseGid": "gid://shopify/ProductVariant/56864747946362",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "circular-drum-lamp-shade-kits-30cm-diameter-x-21cm-height-with-golden-ring-and-golden-lining",
+      "variantTitle": "Default Title",
+      "shopifyVariantId": "56864803717498",
+      "displayedPrice": 39.99,
+      "catalogPrice": 39.99,
+      "option1": "Default Title",
+      "merchandiseGid": "gid://shopify/ProductVariant/56864803717498",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "handmade-abstract-pattern-drum-lamp-shade-clarke-and-clarke-fabric-brown-velvet-fabric",
+      "variantTitle": "BRUSH SILVER / 15cm dia x 25cm h",
+      "shopifyVariantId": "56693404238202",
+      "displayedPrice": 34.99,
+      "catalogPrice": 34.99,
+      "option1": "BRUSH SILVER",
+      "merchandiseGid": "gid://shopify/ProductVariant/56693404238202",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "handmade-abstract-pattern-drum-lamp-shade-clarke-and-clarke-fabric-brown-velvet-fabric",
+      "variantTitle": "BRUSH SILVER / 20cm dia x 15cm h",
+      "shopifyVariantId": "56693404336506",
+      "displayedPrice": 29.99,
+      "catalogPrice": 29.99,
+      "option1": "BRUSH SILVER",
+      "merchandiseGid": "gid://shopify/ProductVariant/56693404336506",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "handmade-abstract-pattern-drum-lamp-shade-clarke-and-clarke-fabric-brown-velvet-fabric",
+      "variantTitle": "BRUSH SILVER / 20cm dia x 18cm h",
+      "shopifyVariantId": "56693404434810",
+      "displayedPrice": 34.99,
+      "catalogPrice": 34.99,
+      "option1": "BRUSH SILVER",
+      "merchandiseGid": "gid://shopify/ProductVariant/56693404434810",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "handmade-abstract-pattern-drum-lamp-shade-clarke-and-clarke-fabric-brown-velvet-fabric",
+      "variantTitle": "BRUSH SILVER / 20cm dia x 21cm h",
+      "shopifyVariantId": "56693404533114",
+      "displayedPrice": 39.99,
+      "catalogPrice": 39.99,
+      "option1": "BRUSH SILVER",
+      "merchandiseGid": "gid://shopify/ProductVariant/56693404533114",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "handmade-abstract-pattern-drum-lamp-shade-clarke-and-clarke-fabric-brown-velvet-fabric",
+      "variantTitle": "BRUSH SILVER / 20cm dia x 25cm h",
+      "shopifyVariantId": "56693404631418",
+      "displayedPrice": 44.99,
+      "catalogPrice": 44.99,
+      "option1": "BRUSH SILVER",
+      "merchandiseGid": "gid://shopify/ProductVariant/56693404631418",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "handmade-abstract-pattern-drum-lamp-shade-clarke-and-clarke-fabric-brown-velvet-fabric",
+      "variantTitle": "BRUSH SILVER / 25cm dia x 18cm h",
+      "shopifyVariantId": "56693404729722",
+      "displayedPrice": 39.99,
+      "catalogPrice": 39.99,
+      "option1": "BRUSH SILVER",
+      "merchandiseGid": "gid://shopify/ProductVariant/56693404729722",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "handmade-abstract-pattern-drum-lamp-shade-clarke-and-clarke-fabric-brown-velvet-fabric",
+      "variantTitle": "BRUSH SILVER / 25cm dia x 21cm h",
+      "shopifyVariantId": "56693404828026",
+      "displayedPrice": 44.99,
+      "catalogPrice": 44.99,
+      "option1": "BRUSH SILVER",
+      "merchandiseGid": "gid://shopify/ProductVariant/56693404828026",
+      "uiPurchasable": true
+    },
+    {
+      "productSlug": "handmade-abstract-pattern-drum-lamp-shade-clarke-and-clarke-fabric-brown-velvet-fabric",
+      "variantTitle": "BRUSH SILVER / 25cm dia x 25cm h",
+      "shopifyVariantId": "56693404926330",
+      "displayedPrice": 49.99,
+      "catalogPrice": 49.99,
+      "option1": "BRUSH SILVER",
+      "merchandiseGid": "gid://shopify/ProductVariant/56693404926330",
+      "uiPurchasable": true
+    }
+  ],
+  "issues": {
+    "missingShopifyId": [],
+    "orphanDbVariants": [],
+    "priceMismatches": [],
+    "optionLabelMismatches": [],
+    "catalogMissingInDb": []
+  },
+  "checkoutNote": "Checkout remains blocked without SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN. Mapping OK ≠ end-to-end Shopify checkout success.",
+  "pass": true
+}

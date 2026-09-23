@@ -124,7 +124,8 @@ export default function CheckoutPage() {
             >
               {methods.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.name} — {formatMoney(m.price)}
+                  {m.name}
+                  {m.price > 0 ? ` — ${formatMoney(m.price)}` : " — set at Shopify checkout"}
                 </option>
               ))}
             </select>
