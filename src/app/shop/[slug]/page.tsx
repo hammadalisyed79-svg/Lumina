@@ -33,9 +33,10 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
   const sp = await searchParams;
   const collection = await getCollectionBySlug(slug);
   const type = TYPE_MAP[slug];
+  // Prefer product-type routes (lampshades/fabrics/…) over sparse seeded collections.
   const { products } = await listProductsForShop({
-    collectionSlug: collection ? slug : undefined,
-    type: !collection ? type : undefined,
+    collectionSlug: !type && collection ? slug : undefined,
+    type,
     query: {
       shape: sp.shape,
       sort: sp.sort,
@@ -47,7 +48,14 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
   });
 
   // mood routes like linen-calm, botanical, bestsellers, new
-  const title = collection?.title || slug.replace(/-/g, " ");
+  const title =
+    (type
+      ? { LAMPSHADE: "Lampshades", FABRIC: "Fabrics", CUSHION: "Cushions", KIT: "Kits" }[
+          type
+        ]
+      : null) ||
+    collection?.title ||
+    slug.replace(/-/g, " ");
 
   return (
     <div className="container-site py-10 md:py-14">
@@ -58,12 +66,26 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
       </nav>
       <div className="mb-6 md:mb-8 max-w-2xl">
         <h1 className="font-display text-4xl md:text-5xl capitalize mb-3">{title}</h1>
-        {collection?.description && (
+        {collection?.description && !type && (
           <p className="prose-muted">{collection.description}</p>
+        )}
+        {type === "LAMPSHADE" && (
+          <p className="prose-muted">Handmade lampshades in classic British forms.</p>
+        )}
+        {type === "FABRIC" && (
+          <p className="prose-muted">Printed and woven textiles for interiors.</p>
+        )}
+        {type === "CUSHION" && (
+          <p className="prose-muted">Cushion covers made to order.</p>
+        )}
+        {type === "KIT" && (
+          <p className="prose-muted">Lampshade kits for makers.</p>
         )}
       </div>
       <ShopFilters slug={slug} current={sp} showShape={slug === "lampshades" || !!TYPE_MAP[slug] === false} />
-      <p className="text-sm text-[color:var(--muted)] mb-4">{products.length} pieces</p>
+      <p className="text-sm text-[color:var(--muted)] mb-4">
+        {products.length} {products.length === 1 ? "piece" : "pieces"}
+      </p>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
