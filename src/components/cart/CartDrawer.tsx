@@ -31,11 +31,27 @@ export function CartDrawer() {
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
           {items.length === 0 && (
-            <div className="py-8 text-center">
-              <p className="eyebrow mb-3 text-muted">Empty</p>
+            <div className="py-8 text-center space-y-4">
+              <p className="eyebrow">Empty</p>
               <p className="prose-muted text-sm max-w-xs mx-auto">
-                Your bag is empty. Explore lampshades or design your own shade in the studio.
+                Your bag is waiting. Discover a silhouette or compose a shade in the studio.
               </p>
+              <div className="flex flex-col gap-2 items-center">
+                <Link
+                  href="/shop/lampshades"
+                  className="btn-primary"
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  Browse lampshades
+                </Link>
+                <Link
+                  href="/design-your-shade"
+                  className="btn-quiet !py-2"
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  Design a shade
+                </Link>
+              </div>
             </div>
           )}
           {items.map((item) => (
@@ -88,6 +104,9 @@ export function CartDrawer() {
             <span>Subtotal</span>
             <span>{formatMoney(subtotal)}</span>
           </div>
+          <p className="text-[10px] tracking-[0.08em] uppercase text-muted leading-relaxed">
+            Made to order · Stripe secure · Shipping at checkout
+          </p>
           <Link
             href="/cart"
             className="btn-secondary w-full"

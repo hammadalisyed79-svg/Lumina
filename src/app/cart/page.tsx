@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatMoney } from "@/lib/utils";
 import { COPY } from "@/lib/copy";
+import { EmptyState } from "@/components/commerce/EmptyState";
+import { CommerceTrust } from "@/components/commerce/CommerceTrust";
 
 export default function CartPage() {
   const { items, subtotal, updateQty, remove } = useCart();
@@ -17,29 +19,24 @@ export default function CartPage() {
         <div className="lux-rule" />
       </header>
       {items.length === 0 ? (
-        <div className="py-16 text-center max-w-md mx-auto">
-          <h2 className="font-display text-3xl mb-3">{COPY.cartEmpty.title}</h2>
-          <p className="prose-muted mb-6">{COPY.cartEmpty.body}</p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/shop/lampshades" className="btn-primary">
-              {COPY.cartEmpty.cta}
-            </Link>
-            <Link href="/design-your-shade" className="btn-secondary">
-              Design a shade
-            </Link>
-          </div>
-        </div>
+        <EmptyState
+          eyebrow="Bag"
+          title={COPY.cartEmpty.title}
+          body={COPY.cartEmpty.body}
+          primary={{ href: "/shop/lampshades", label: COPY.cartEmpty.cta }}
+          secondary={{ href: "/design-your-shade", label: "Design a shade" }}
+        />
       ) : (
-        <div className="grid lg:grid-cols-[1fr_320px] gap-12">
+        <div className="grid lg:grid-cols-[1fr_340px] gap-12">
           <div className="space-y-6">
             {items.map((item) => (
-              <div key={item.id} className="flex gap-4 border-b border-[color:var(--line)] pb-6">
-                <div className="relative h-28 w-24 bg-[color:var(--stone)] shrink-0">
+              <div key={item.id} className="flex gap-4 border-b border-line pb-6">
+                <div className="relative h-28 w-24 bg-stone shrink-0">
                   {item.imageUrl && (
-                    <Image src={item.imageUrl} alt="" fill className="object-cover" />
+                    <Image src={item.imageUrl} alt="" fill unoptimized className="object-cover" />
                   )}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="font-medium">{item.title}</p>
                   {item.config && (
                     <p className="text-xs text-muted mt-2 leading-relaxed">
@@ -48,37 +45,43 @@ export default function CartPage() {
                       {item.config.liningName} · {item.config.fittingName}
                     </p>
                   )}
-                  <div className="mt-3 flex items-center justify-between">
+                  <div className="mt-3 flex items-center justify-between gap-3">
                     <div className="qty-control">
-                      <button type="button" onClick={() => updateQty(item.id, item.quantity - 1)}>−</button>
+                      <button type="button" aria-label="Decrease" onClick={() => updateQty(item.id, item.quantity - 1)}>
+                        −
+                      </button>
                       <span>{item.quantity}</span>
-                      <button type="button" onClick={() => updateQty(item.id, item.quantity + 1)}>+</button>
+                      <button type="button" aria-label="Increase" onClick={() => updateQty(item.id, item.quantity + 1)}>
+                        +
+                      </button>
                     </div>
                     <p>{formatMoney(item.unitPrice * item.quantity)}</p>
                   </div>
-                  <button type="button" className="text-xs underline mt-2 text-[color:var(--muted)]" onClick={() => remove(item.id)}>
+                  <button
+                    type="button"
+                    className="text-xs underline mt-2 text-muted hover:text-bronze"
+                    onClick={() => remove(item.id)}
+                  >
                     Remove
                   </button>
                 </div>
               </div>
             ))}
           </div>
-          <aside className="surface-panel p-6 md:p-8 h-fit space-y-3">
-            <p className="eyebrow mb-2">Summary</p>
+          <aside className="surface-panel p-6 md:p-8 h-fit space-y-4">
+            <p className="eyebrow mb-1">Summary</p>
             <div className="flex justify-between text-sm">
               <span>Subtotal</span>
               <span>{formatMoney(subtotal)}</span>
             </div>
-            <p className="text-xs text-muted">
-              Shipping is calculated at checkout from studio rates.
-            </p>
-            <div className="divider my-2" />
+            <div className="divider" />
             <div className="flex justify-between font-medium">
               <span>Estimated total</span>
               <span>{formatMoney(subtotal)}</span>
             </div>
-            <p className="text-[10px] text-[color:var(--muted)]">Excludes shipping &amp; tax</p>
-            <Link href="/checkout" className="btn-primary w-full mt-4">
+            <p className="text-[10px] text-muted">Excludes shipping &amp; tax</p>
+            <CommerceTrust compact />
+            <Link href="/checkout" className="btn-primary w-full mt-2">
               Checkout
             </Link>
           </aside>

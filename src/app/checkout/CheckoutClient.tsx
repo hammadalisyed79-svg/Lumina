@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatMoney } from "@/lib/utils";
+import { COPY } from "@/lib/copy";
+import { EmptyState } from "@/components/commerce/EmptyState";
+import { CommerceTrust } from "@/components/commerce/CommerceTrust";
 
 type ShippingMethod = { id: string; name: string; price: number; description?: string };
 
@@ -19,6 +22,7 @@ export default function CheckoutClient() {
   const [couponCode, setCouponCode] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [noticeKind, setNoticeKind] = useState<"warn" | "error">("warn");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -34,13 +38,10 @@ export default function CheckoutClient() {
     const cancelled = searchParams.get("cancelled");
     const failed = searchParams.get("failed");
     if (!cancelled && !failed) return;
+    setNoticeKind(failed ? "error" : "warn");
     const pending = sessionStorage.getItem(PENDING_ORDER_KEY);
     if (!pending) {
-      setNotice(
-        failed
-          ? "Payment was not completed. Your bag is unchanged."
-          : "Checkout was cancelled. No payment was taken."
-      );
+      setNotice(failed ? COPY.paymentNotice.failed : COPY.paymentNotice.cancelled);
       return;
     }
     fetch("/api/checkout/cancel", {
@@ -54,18 +55,22 @@ export default function CheckoutClient() {
       .then((r) => r.json())
       .then((d) => {
         sessionStorage.removeItem(PENDING_ORDER_KEY);
-        setNotice(
-          failed
-            ? d.updated
-              ? `Payment failed for ${pending}. Order remains unpaid.`
-              : `Payment failed. Order ${pending} was not marked paid.`
-            : d.updated
-              ? `Checkout cancelled for ${pending}. Order is not paid.`
-              : `Checkout cancelled. Order ${pending} was already closed.`
-        );
+        if (failed) {
+          setNotice(
+            d.updated
+              ? `Payment failed for ${pending}. Order remains unpaid — you can try again.`
+              : COPY.paymentNotice.failed
+          );
+        } else {
+          setNotice(
+            d.updated
+              ? `Checkout cancelled for ${pending}. No payment was taken.`
+              : COPY.paymentNotice.cancelled
+          );
+        }
       })
       .catch(() => {
-        setNotice("Could not record checkout cancellation. No payment was taken.");
+        setNotice(COPY.paymentNotice.cancelled);
       });
   }, [searchParams]);
 
@@ -137,11 +142,14 @@ export default function CheckoutClient() {
 
   if (items.length === 0 && !notice && !error) {
     return (
-      <div className="container-site py-20 text-center">
-        <p className="prose-muted mb-4">Nothing to checkout.</p>
-        <Link href="/shop/lampshades" className="btn-primary">
-          Continue shopping
-        </Link>
+      <div className="container-site section-pad">
+        <EmptyState
+          eyebrow="Checkout"
+          title={COPY.checkoutEmpty.title}
+          body={COPY.checkoutEmpty.body}
+          primary={{ href: "/shop/lampshades", label: COPY.checkoutEmpty.cta }}
+          secondary={{ href: "/design-your-shade", label: "Design a shade" }}
+        />
       </div>
     );
   }
@@ -155,49 +163,53 @@ export default function CheckoutClient() {
           <div className="lux-rule" />
         </header>
         {notice && (
-          <p className="text-sm border border-[color:var(--line)] bg-white/80 p-3 mb-4">
+          <p className={`notice-panel mb-5 ${noticeKind === "error" ? "is-error" : "is-warn"}`}>
             {notice}
           </p>
         )}
         {items.length === 0 ? (
-          <Link href="/shop/lampshades" className="btn-primary">
-            Continue shopping
-          </Link>
+          <EmptyState
+            eyebrow="Bag"
+            title={COPY.checkoutEmpty.title}
+            body={COPY.paymentNotice.cancelled}
+            primary={{ href: "/shop/lampshades", label: "Continue shopping" }}
+            className="py-8 text-left max-w-none mx-0 [&_.lux-rule]:mx-0 [&_div.flex]:justify-start"
+          />
         ) : (
           <form onSubmit={onSubmit} className="space-y-5">
             <label className="block">
               <span className="label">Email</span>
-              <input name="email" type="email" required className="input" />
+              <input name="email" type="email" required className="input" autoComplete="email" />
             </label>
             <label className="block">
               <span className="label">Full name</span>
-              <input name="fullName" required className="input" />
+              <input name="fullName" required className="input" autoComplete="name" />
             </label>
             <label className="block">
               <span className="label">Address line 1</span>
-              <input name="line1" required className="input" />
+              <input name="line1" required className="input" autoComplete="address-line1" />
             </label>
             <label className="block">
               <span className="label">Address line 2</span>
-              <input name="line2" className="input" />
+              <input name="line2" className="input" autoComplete="address-line2" />
             </label>
             <div className="grid grid-cols-2 gap-4">
               <label className="block">
                 <span className="label">City</span>
-                <input name="city" required className="input" />
+                <input name="city" required className="input" autoComplete="address-level2" />
               </label>
               <label className="block">
                 <span className="label">Postcode</span>
-                <input name="postcode" required className="input" />
+                <input name="postcode" required className="input" autoComplete="postal-code" />
               </label>
             </div>
             <label className="block">
               <span className="label">County</span>
-              <input name="county" className="input" />
+              <input name="county" className="input" autoComplete="address-level1" />
             </label>
             <label className="block">
               <span className="label">Phone</span>
-              <input name="phone" className="input" />
+              <input name="phone" className="input" autoComplete="tel" />
             </label>
 
             <label className="block">
@@ -210,7 +222,7 @@ export default function CheckoutClient() {
                 {methods.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name}
-                    {m.price > 0 ? ` — ${formatMoney(m.price)}` : " — free / calculated"}
+                    {m.price > 0 ? ` — ${formatMoney(m.price)}` : " — calculated"}
                   </option>
                 ))}
               </select>
@@ -221,36 +233,29 @@ export default function CheckoutClient() {
               <input
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
-                placeholder="Coupon code"
+                placeholder="Optional code"
                 className="input"
               />
             </label>
 
-            {error && (
-              <p className="text-sm text-red-700 whitespace-pre-wrap border border-red-200 bg-red-50 p-3">
-                {error}
-              </p>
-            )}
+            {error && <p className="notice-panel is-error whitespace-pre-wrap">{error}</p>}
             <button type="submit" className="btn-primary w-full" disabled={loading}>
               {loading ? "Processing…" : "Pay securely with Stripe"}
             </button>
-            <p className="text-xs text-[color:var(--muted)]">
-              Payment is processed by Stripe on this site. Orders stay unpaid until Stripe confirms
-              payment via webhook.
-            </p>
+            <CommerceTrust />
           </form>
         )}
       </div>
       <aside className="surface-panel p-6 md:p-8 h-fit">
         <p className="eyebrow mb-2">Your bag</p>
-        <h2 className="font-display text-2xl mb-4">Order summary</h2>
+        <h2 className="font-display text-2xl tracking-tight mb-4">Order summary</h2>
         <ul className="space-y-3 mb-6">
           {items.map((i) => (
             <li key={i.id} className="text-sm flex justify-between gap-4">
               <span>
                 {i.quantity}× {i.title}
                 {i.config && (
-                  <span className="block text-[color:var(--muted)] text-xs mt-1">
+                  <span className="block text-muted text-xs mt-1">
                     {i.config.shapeName} / {i.config.fabricName} / {i.config.sizeName}
                   </span>
                 )}
@@ -263,8 +268,9 @@ export default function CheckoutClient() {
           <span>Subtotal</span>
           <span>{formatMoney(subtotal)}</span>
         </div>
-        <p className="text-xs text-muted mt-4">
-          Shipping is calculated at Stripe checkout from studio rates. Tax is confirmed before payment.
+        <p className="text-xs text-muted mt-4 leading-relaxed">
+          Shipping and tax are confirmed before you pay. Orders stay unpaid until Stripe confirms
+          payment.
         </p>
       </aside>
     </div>

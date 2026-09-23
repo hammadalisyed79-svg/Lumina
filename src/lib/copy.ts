@@ -147,6 +147,28 @@ export const COPY = {
     cta: "Browse lampshades",
   },
 
+  checkoutEmpty: {
+    title: "Nothing to checkout",
+    body: "Add a lampshade or studio design to your bag, then return here to pay securely with Stripe.",
+    cta: "Browse lampshades",
+  },
+
   searchEmpty:
     "Search by colour, pattern or shape — or start with drum, empire and our most-loved pieces.",
+
+  searchNoResults: {
+    title: "No matches",
+    body: "Try a shorter term, a colour, or browse by silhouette.",
+  },
+
+  ordersEmpty: {
+    title: "No orders yet",
+    body: "When you complete a Stripe checkout, your orders will appear here.",
+    cta: "Shop lampshades",
+  },
+
+  paymentNotice: {
+    cancelled: "Checkout was cancelled. No payment was taken — your bag is unchanged.",
+    failed: "Payment was not completed. Your bag is unchanged; you can try again when ready.",
+  },
 };

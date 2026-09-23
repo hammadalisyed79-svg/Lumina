@@ -159,6 +159,7 @@ export default async function ProductPage({ params }: Props) {
                 configEnabled: product.configEnabled,
                 type: product.type,
                 shapeKey: product.shapeKey,
+                leadTimeDays: product.leadTimeDays,
                 variants: product.variants.map((v) => ({
                   id: v.id,
                   title: v.title,

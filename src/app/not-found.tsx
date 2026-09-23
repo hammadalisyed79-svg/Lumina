@@ -1,22 +1,19 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/commerce/EmptyState";
 
 export default function NotFound() {
   return (
-    <div className="container-site section-pad max-w-xl text-center">
-      <p className="eyebrow mb-3">404</p>
-      <h1 className="font-display text-4xl md:text-5xl mb-4">Page not found</h1>
-      <p className="prose-muted mb-8">
-        That link may have moved. Browse lampshades, fabrics or cushions, or return home.
-      </p>
-      <div className="flex flex-wrap justify-center gap-3">
-        <Link href="/" className="btn-primary">
-          Home
-        </Link>
-        <Link href="/shop/lampshades" className="btn-secondary">
-          Shop lampshades
-        </Link>
+    <div className="container-site section-pad">
+      <EmptyState
+        eyebrow="404"
+        title="Page not found"
+        body="That link may have moved. Browse lampshades, open the studio, or return home."
+        primary={{ href: "/shop/lampshades", label: "Shop lampshades" }}
+        secondary={{ href: "/", label: "Home", variant: "secondary" }}
+      />
+      <div className="flex justify-center -mt-4">
         <Link href="/search" className="btn-quiet">
-          Search
+          Search the catalogue
         </Link>
       </div>
     </div>
