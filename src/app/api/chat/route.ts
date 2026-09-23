@@ -10,11 +10,21 @@ const MAX_HISTORY = 12;
 const MAX_CONTENT = 1200;
 
 function getClient() {
-  let key = process.env.OPENAI_API_KEY?.trim() || "";
+  let key =
+    process.env.OPENAI_API_KEY?.trim() ||
+    process.env.OPENAI_KEY?.trim() ||
+    "";
   // Tolerate accidental wrappers from paste: quotes or "openai KEY: …"
   key = key.replace(/^["']|["']$/g, "");
   key = key.replace(/^openai\s*key\s*[:=]\s*/i, "").trim();
-  if (!key || key.includes("placeholder") || key === "sk-...") return null;
+  if (!key || key.includes("placeholder") || key === "sk-...") {
+    if (process.env.VERCEL) {
+      console.error(
+        "[chat] OPENAI_API_KEY missing in this deployment. Set it in Vercel → Settings → Environment Variables (Production) and Redeploy."
+      );
+    }
+    return null;
+  }
   return new OpenAI({ apiKey: key });
 }
 
