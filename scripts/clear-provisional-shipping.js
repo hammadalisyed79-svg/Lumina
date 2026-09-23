@@ -18,12 +18,12 @@ async function main() {
     create: {
       key: "announcement",
       value: {
-        text: "Handmade to order in Britain · Delivery options confirmed at checkout",
+        text: "Handmade to order in Britain · Online checkout unavailable until Shopify is connected",
       },
     },
     update: {
       value: {
-        text: "Handmade to order in Britain · Delivery options confirmed at checkout",
+        text: "Handmade to order in Britain · Online checkout unavailable until Shopify is connected",
       },
     },
   });

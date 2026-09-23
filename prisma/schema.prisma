@@ -403,6 +403,8 @@ model Order {
   shippingMethodId  String?
   stripeSessionId   String?       @unique
   stripePaymentIntent String?     @unique
+  shopifyCartId     String?       @unique
+  shopifyOrderId    String?       @unique
   shippingName      String?
   shippingLine1     String?
   shippingLine2     String?
@@ -462,6 +464,14 @@ model StripeWebhookEvent {
   id          String   @id @default(cuid())
   eventId     String   @unique
   type        String
+  processedAt DateTime @default(now())
+  payload     Json?
+}
+
+model ShopifyWebhookEvent {
+  id          String   @id @default(cuid())
+  eventId     String   @unique
+  topic       String
   processedAt DateTime @default(now())
   payload     Json?
 }

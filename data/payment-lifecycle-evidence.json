@@ -1,0 +1,44 @@
+{
+  "testedAt": "2026-09-23T07:17:24.224Z",
+  "shopifyConfigured": false,
+  "announcement": {
+    "text": "Handmade to order in Britain · Online checkout unavailable until Shopify is connected",
+    "avoidsMisleadingCheckoutClaim": true
+  },
+  "checkoutBlockedWithoutShopify": {
+    "error": "fetch failed"
+  },
+  "cartCreateDoesNotMarkPaid": {
+    "orderNumber": "LH-TEST-MUDRT0U9",
+    "status": "AWAITING_PAYMENT",
+    "paymentStatus": "PENDING",
+    "pass": true
+  },
+  "paidExactlyOnce": {
+    "firstUpdate": true,
+    "secondUpdate": false,
+    "paidEventCount": 1,
+    "paymentStatus": "PAID",
+    "pass": true
+  },
+  "cancellation": {
+    "orderNumber": "LH-CANCEL-MUDRT4D3",
+    "firstUpdated": true,
+    "secondUpdated": false,
+    "finalStatus": "CANCELLED",
+    "finalPaymentStatus": "UNPAID",
+    "pass": true
+  },
+  "failedPayment": {
+    "orderNumber": "LH-FAIL-MUDRT5FN",
+    "updated": true,
+    "paymentStatus": "FAILED",
+    "status": "AWAITING_PAYMENT",
+    "pass": true
+  },
+  "hostedShopifyE2E": {
+    "ran": false,
+    "reason": "SHOPIFY_STORE_DOMAIN / SHOPIFY_STOREFRONT_TOKEN not set. Hosted test purchase deferred until owner configures Shopify."
+  },
+  "commerceComplete": false
+}

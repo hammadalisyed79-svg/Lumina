@@ -468,7 +468,7 @@ async function main() {
     data: [
       {
         key: "announcement",
-        value: { text: "Handmade to order in Britain · Delivery options confirmed at checkout" },
+        value: { text: "Handmade to order in Britain · Online checkout unavailable until Shopify is connected" },
       },
       {
         key: "seo_default",

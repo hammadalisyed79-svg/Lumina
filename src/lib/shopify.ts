@@ -4,6 +4,8 @@
  * When unset, helpers return null / throw ShopifyNotConfiguredError.
  */
 
+import { createHmac, timingSafeEqual } from "node:crypto";
+
 export class ShopifyNotConfiguredError extends Error {
   constructor(message = "Shopify Storefront API is not configured") {
     super(message);
@@ -12,8 +14,11 @@ export class ShopifyNotConfiguredError extends Error {
 }
 
 export function isShopifyConfigured() {
+  const token = process.env.SHOPIFY_STOREFRONT_TOKEN;
   return Boolean(
-    process.env.SHOPIFY_STORE_DOMAIN && process.env.SHOPIFY_STOREFRONT_TOKEN
+    process.env.SHOPIFY_STORE_DOMAIN &&
+      token &&
+      !token.includes("placeholder")
   );
 }
 
@@ -71,7 +76,10 @@ export type ShopifyCartLine = {
   attributes?: { key: string; value: string }[];
 };
 
-export async function createShopifyCheckout(lines: ShopifyCartLine[]) {
+export async function createShopifyCheckout(
+  lines: ShopifyCartLine[],
+  cartAttributes?: { key: string; value: string }[]
+) {
   if (!isShopifyConfigured()) throw new ShopifyNotConfiguredError();
   const data = await shopifyStorefront<{
     cartCreate: {
@@ -85,6 +93,7 @@ export async function createShopifyCheckout(lines: ShopifyCartLine[]) {
         quantity: l.quantity,
         attributes: l.attributes,
       })),
+      attributes: cartAttributes,
     },
   });
   if (data.cartCreate.userErrors?.length) {
@@ -99,6 +108,22 @@ export async function createShopifyCheckout(lines: ShopifyCartLine[]) {
 export function variantGid(numericId: string) {
   if (numericId.startsWith("gid://")) return numericId;
   return `gid://shopify/ProductVariant/${numericId}`;
+}
+
+export function verifyShopifyWebhookHmac(
+  rawBody: string,
+  hmacHeader: string | null
+): boolean {
+  const secret = process.env.SHOPIFY_WEBHOOK_SECRET;
+  if (!secret || !hmacHeader || secret.includes("placeholder")) return false;
+  const digest = createHmac("sha256", secret)
+    .update(rawBody, "utf8")
+    .digest("base64");
+  try {
+    return timingSafeEqual(Buffer.from(digest), Buffer.from(hmacHeader));
+  } catch {
+    return false;
+  }
 }
 
 export { CART_LINES_ADD };

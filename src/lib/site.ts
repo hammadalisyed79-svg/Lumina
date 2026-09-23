@@ -14,7 +14,7 @@ export const SITE = {
 };
 
 export const ANNOUNCEMENT =
-  "Handmade to order in Britain · Delivery options confirmed at checkout";
+  "Handmade to order in Britain · Online checkout unavailable until Shopify is connected";
 
 export const NAV_MEGA = {
   lampshades: {

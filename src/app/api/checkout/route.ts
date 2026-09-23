@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { calculateOrderTotals, toNumber } from "@/lib/pricing";
 import { prisma } from "@/lib/db";
-import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { orderNumber } from "@/lib/utils";
 import { writeAuditLog } from "@/lib/security/audit";
 import { rateLimit, clientIp } from "@/lib/security/rate-limit";
@@ -144,10 +143,9 @@ export async function POST(req: Request) {
     });
   }
 
-  // Gate payment providers BEFORE creating an order — blocked responses must not expose order numbers.
-  const shopifyReady = isShopifyConfigured();
-  const stripeReady = isStripeConfigured();
-  if (!shopifyReady && !stripeReady) {
+  // Shopify Storefront hosted checkout is the only live path.
+  // Keep checkout unavailable while Shopify is unconfigured (no Stripe substitute).
+  if (!isShopifyConfigured()) {
     return NextResponse.json(
       {
         error:
@@ -156,6 +154,7 @@ export async function POST(req: Request) {
         blockers: [
           "SHOPIFY_STORE_DOMAIN",
           "SHOPIFY_STOREFRONT_TOKEN",
+          "SHOPIFY_WEBHOOK_SECRET",
           "Verified shipping rates in Shopify",
         ],
       },
@@ -203,103 +202,20 @@ export async function POST(req: Request) {
       : { calcType: "FLAT" as const, price: 0, freeAbove: null },
   });
 
-  // Shopify path (preferred SoT)
-  if (shopifyReady) {
-    try {
-      const cart = await createShopifyCheckout(
-        pricedLines.map((l) => ({
-          merchandiseId: variantGid(l.shopifyVariantId!),
-          quantity: l.quantity,
-        }))
-      );
-
-      const number = orderNumber();
-      const order = await prisma.order.create({
-        data: {
-          orderNumber: number,
-          userId: session?.user?.id,
-          email: data.email.toLowerCase(),
-          status: "AWAITING_PAYMENT",
-          paymentStatus: "PENDING",
-          subtotal: totals.subtotal,
-          shippingTotal: totals.shippingTotal,
-          discountTotal: totals.discountTotal,
-          taxTotal: totals.taxTotal,
-          total: totals.total,
-          couponCode: coupon?.code,
-          shippingMethodId: shippingMethod?.id,
-          shippingName: data.shipping.fullName,
-          shippingLine1: data.shipping.line1,
-          shippingLine2: data.shipping.line2,
-          shippingCity: data.shipping.city,
-          shippingCounty: data.shipping.county,
-          shippingPostcode: data.shipping.postcode,
-          shippingCountry: data.shipping.country,
-          shippingPhone: data.shipping.phone,
-          items: {
-            create: pricedLines.map((l) => ({
-              productId: l.productId,
-              variantId: l.variantId,
-              title: l.title,
-              sku: l.sku,
-              quantity: l.quantity,
-              unitPrice: l.unitPrice,
-              lineTotal: l.lineTotal,
-              imageUrl: l.imageUrl,
-            })),
-          },
-          events: {
-            create: {
-              type: "shopify_checkout",
-              message: `Shopify cart ${cart.id}`,
-            },
-          },
-        },
-      });
-
-      if (coupon) {
-        await prisma.coupon.update({
-          where: { id: coupon.id },
-          data: { usedCount: { increment: 1 } },
-        });
-        await prisma.couponRedemption.create({
-          data: {
-            couponId: coupon.id,
-            orderId: order.id,
-            userId: session?.user?.id,
-          },
-        });
-      }
-
-      await writeAuditLog({
-        userId: session?.user?.id,
-        action: "order.created",
-        entity: "Order",
-        entityId: order.id,
-        ip,
-        meta: { orderNumber: number, mode: "shopify" },
-      });
-
-      return NextResponse.json({
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-        url: cart.checkoutUrl,
-        mode: "shopify",
-      });
-    } catch (e) {
-      return NextResponse.json(
-        {
-          error: e instanceof Error ? e.message : "Shopify checkout failed",
-          mode: "blocked",
-        },
-        { status: 502 }
-      );
-    }
-  }
-
-  // Legacy Stripe only when Shopify is not configured but Stripe is.
-  if (stripeReady) {
+  // Shopify hosted checkout (SoT). Cart creation must leave payment PENDING — never PAID.
+  try {
     const number = orderNumber();
+    const cart = await createShopifyCheckout(
+      pricedLines.map((l) => ({
+        merchandiseId: variantGid(l.shopifyVariantId!),
+        quantity: l.quantity,
+      })),
+      [
+        { key: "lumina_order_number", value: number },
+        { key: "lumina_order_email", value: data.email.toLowerCase() },
+      ]
+    );
+
     const order = await prisma.order.create({
       data: {
         orderNumber: number,
@@ -314,6 +230,7 @@ export async function POST(req: Request) {
         total: totals.total,
         couponCode: coupon?.code,
         shippingMethodId: shippingMethod?.id,
+        shopifyCartId: cart.id,
         shippingName: data.shipping.fullName,
         shippingLine1: data.shipping.line1,
         shippingLine2: data.shipping.line2,
@@ -334,48 +251,52 @@ export async function POST(req: Request) {
             imageUrl: l.imageUrl,
           })),
         },
-        events: { create: { type: "created", message: "Order created (Stripe legacy)" } },
-      },
-      include: { items: true },
-    });
-
-    const stripe = getStripe()!;
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    const checkoutSession = await stripe.checkout.sessions.create({
-      mode: "payment",
-      customer_email: order.email,
-      line_items: order.items.map((item) => ({
-        quantity: item.quantity,
-        price_data: {
-          currency: "gbp",
-          unit_amount: Math.round(toNumber(item.unitPrice) * 100),
-          product_data: { name: item.title },
+        events: {
+          create: {
+            type: "shopify_checkout",
+            message: `Shopify cart ${cart.id} created — awaiting payment`,
+          },
         },
-      })),
-      success_url: `${siteUrl}/order/${order.orderNumber}?success=1`,
-      cancel_url: `${siteUrl}/checkout?cancelled=1`,
-      metadata: { orderId: order.id, orderNumber: order.orderNumber },
+      },
     });
 
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { stripeSessionId: checkoutSession.id },
+    if (coupon) {
+      await prisma.coupon.update({
+        where: { id: coupon.id },
+        data: { usedCount: { increment: 1 } },
+      });
+      await prisma.couponRedemption.create({
+        data: {
+          couponId: coupon.id,
+          orderId: order.id,
+          userId: session?.user?.id,
+        },
+      });
+    }
+
+    await writeAuditLog({
+      userId: session?.user?.id,
+      action: "order.created",
+      entity: "Order",
+      entityId: order.id,
+      ip,
+      meta: { orderNumber: number, mode: "shopify", paymentStatus: "PENDING" },
     });
 
     return NextResponse.json({
       orderId: order.id,
       orderNumber: order.orderNumber,
-      url: checkoutSession.url,
-      mode: "stripe",
+      url: cart.checkoutUrl,
+      mode: "shopify",
+      paymentStatus: order.paymentStatus,
     });
+  } catch (e) {
+    return NextResponse.json(
+      {
+        error: e instanceof Error ? e.message : "Shopify checkout failed",
+        mode: "blocked",
+      },
+      { status: 502 }
+    );
   }
-
-  return NextResponse.json(
-    {
-      error: "Checkout is not live.",
-      mode: "blocked",
-      blockers: ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_TOKEN"],
-    },
-    { status: 503 }
-  );
 }
