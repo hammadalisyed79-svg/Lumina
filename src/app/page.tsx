@@ -401,7 +401,7 @@ export default async function HomePage() {
         <p className="prose-muted text-lg mb-8">
           {editorialSection?.body || COPY.editorial.body}
         </p>
-        <Link href={editorialSection?.ctaHref || "/about"} className="btn-secondary">
+        <Link href={editorialSection?.ctaHref || "/craft"} className="btn-secondary">
           {editorialSection?.ctaLabel || COPY.editorial.cta}
         </Link>
       </section>

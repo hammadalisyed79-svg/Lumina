@@ -28,6 +28,8 @@ Key journeys on this site
 - Shop: /shop/lampshades, /shop/fabrics, /shop/cushions, /shop/kits, bestsellers and collections.
 - Design your shade: /design-your-shade — shape, fabric (swatch filters: velvet/linen/silk/wool/cotton/print), size, lining, fitting; add to bag, save design, or copy a shareable link that restores the configuration.
 - Size guide: /size-guide — suggests diameter/shape, then opens the studio.
+- Craft note: /craft — how we treat light as a material (fabric, frame, lining).
+- Care: /care — looking after velvet, linen, linings and bulbs.
 - Saved designs: /account/saved-designs — reopen in studio or add to bag in one click.
 - Bespoke: /bespoke · Trade: /trade · Size guide: /size-guide · About: /about · FAQ: /faq · Contact: /contact
 - Checkout is on this website with Stripe (not Shopify). Orders stay unpaid until Stripe confirms payment.

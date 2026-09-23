@@ -6,6 +6,12 @@ import { ShopFilters } from "@/components/shop/ShopFilters";
 import { ShopPagination } from "@/components/shop/ShopPagination";
 import { ProductType } from "@prisma/client";
 import { COPY } from "@/lib/copy";
+import {
+  DEFAULT_OG_IMAGE,
+  JsonLd,
+  breadcrumbJsonLd,
+} from "@/lib/seo/json-ld";
+import { normalizeImageSrc } from "@/lib/image";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +30,42 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const collection = await getCollectionBySlug(slug);
+  const type = TYPE_MAP[slug];
+  const typeMeta = type ? COPY.shopMeta[type] : null;
+
+  const title =
+    collection?.seoTitle ||
+    collection?.title ||
+    typeMeta?.title ||
+    slug.replace(/-/g, " ");
+  const description =
+    collection?.seoDesc ||
+    collection?.description ||
+    typeMeta?.description ||
+    COPY.metaDescription;
+
+  const ogImage = collection?.imageUrl
+    ? normalizeImageSrc(collection.imageUrl)
+    : DEFAULT_OG_IMAGE;
+
   return {
-    title: collection?.seoTitle || collection?.title || slug,
-    description: collection?.seoDesc || collection?.description || undefined,
+    title,
+    description,
+    alternates: {
+      canonical: `/shop/${slug}`,
+    },
+    openGraph: {
+      title: `${title} | Lumina Hub`,
+      description,
+      url: `/shop/${slug}`,
+      images: [{ url: ogImage }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | Lumina Hub`,
+      description,
+      images: [ogImage],
+    },
   };
 }
 
@@ -69,11 +108,17 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
     slug.replace(/-/g, " ");
 
   const showShape = type === "LAMPSHADE" || (!type && Boolean(collection));
-
   const eyebrow = type ? typeEyebrows[type] || "Shop" : "Collection";
 
   return (
     <div className="container-site section-pad">
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Shop", path: "/shop/lampshades" },
+          { name: title, path: `/shop/${slug}` },
+        ])}
+      />
       <nav className="page-crumb">
         <Link href="/">Home</Link>
         <span className="mx-2 text-line">/</span>
@@ -88,21 +133,12 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
         {collection?.description && !type && (
           <p className="prose-muted">{collection.description}</p>
         )}
-        {type === "LAMPSHADE" && (
-          <p className="prose-muted">{COPY.shopIntros.LAMPSHADE}</p>
-        )}
-        {type === "FABRIC" && (
-          <p className="prose-muted">{COPY.shopIntros.FABRIC}</p>
-        )}
-        {type === "CUSHION" && (
-          <p className="prose-muted">{COPY.shopIntros.CUSHION}</p>
-        )}
-        {type === "KIT" && (
-          <p className="prose-muted">{COPY.shopIntros.KIT}</p>
+        {type && COPY.shopIntros[type] && (
+          <p className="prose-muted">{COPY.shopIntros[type]}</p>
         )}
       </div>
       <ShopFilters slug={slug} current={sp} showShape={showShape} />
-      <p className="text-sm text-[color:var(--muted)] mb-4">
+      <p className="text-sm text-muted mb-4">
         {total} {total === 1 ? "piece" : "pieces"}
         {total > pageSize ? ` · showing ${products.length} on this page` : null}
       </p>

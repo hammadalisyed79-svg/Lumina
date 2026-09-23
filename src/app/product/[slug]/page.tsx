@@ -11,6 +11,11 @@ import { ProductAccordions } from "@/components/product/ProductAccordions";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ReviewForm } from "@/components/product/ReviewForm";
 import { SITE } from "@/lib/site";
+import {
+  DEFAULT_OG_IMAGE,
+  JsonLd,
+  breadcrumbJsonLd,
+} from "@/lib/seo/json-ld";
 
 export const dynamic = "force-dynamic";
 
@@ -20,14 +25,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) return { title: "Product" };
+  const title = product.seoTitle || product.title;
+  const description = product.seoDesc || product.shortDesc || undefined;
+  const ogImage =
+    product.images.find((i) => isWebImageUrl(i.url))?.url || DEFAULT_OG_IMAGE;
+  const image = normalizeImageSrc(ogImage);
   return {
-    title: product.seoTitle || product.title,
-    description: product.seoDesc || product.shortDesc || undefined,
+    title,
+    description,
+    alternates: { canonical: `/product/${slug}` },
     openGraph: {
-      images: product.images
-        .filter((i) => isWebImageUrl(i.url))
-        .slice(0, 1)
-        .map((i) => ({ url: normalizeImageSrc(i.url) })),
+      title: `${shortDisplayTitle(title, 60)} | Lumina Hub`,
+      description,
+      url: `/product/${slug}`,
+      images: [{ url: image }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${shortDisplayTitle(title, 60)} | Lumina Hub`,
+      description,
+      images: [image],
     },
   };
 }
@@ -87,9 +104,13 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <div>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <JsonLd data={jsonLd} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Shop", path: "/shop/lampshades" },
+          { name: shortDisplayTitle(product.title, 48), path: `/product/${product.slug}` },
+        ])}
       />
 
       <div className="container-site py-8 md:py-12">

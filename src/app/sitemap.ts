@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
+import { getSiteUrl } from "@/lib/seo/json-ld";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const base = getSiteUrl();
   const staticRoutes = [
     "",
     "/shop/lampshades",
@@ -13,6 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/shop/kits",
     "/design-your-shade",
     "/size-guide",
+    "/craft",
     "/trade",
     "/bespoke",
     "/about",
@@ -23,11 +25,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/refunds",
     "/privacy",
     "/terms",
-    "/search",
-    "/wishlist",
   ].map((path) => ({
     url: `${base}${path}`,
     lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: path === "" ? 1 : path.startsWith("/shop") ? 0.9 : 0.7,
   }));
 
   if (!process.env.DATABASE_URL) {
@@ -51,10 +53,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...products.map((p) => ({
         url: `${base}/product/${p.slug}`,
         lastModified: p.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
       })),
       ...collections.map((c) => ({
         url: `${base}/shop/${c.slug}`,
         lastModified: c.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.75,
       })),
     ];
   } catch {

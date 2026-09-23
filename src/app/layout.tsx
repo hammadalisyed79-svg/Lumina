@@ -6,7 +6,15 @@ import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { StorefrontShell } from "@/components/layout/StorefrontShell";
 import { SITE } from "@/lib/site";
+import { COPY } from "@/lib/copy";
 import { getPrimaryNavLinks } from "@/lib/navigation";
+import {
+  DEFAULT_OG_IMAGE,
+  JsonLd,
+  getSiteUrl,
+  organizationJsonLd,
+  websiteJsonLd,
+} from "@/lib/seo/json-ld";
 
 const display = Cormorant_Garamond({
   variable: "--font-display",
@@ -20,18 +28,7 @@ const body = Figtree({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-function resolveSiteUrl() {
-  const raw = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000")
-    .trim()
-    .replace(/^["']|["']$/g, "");
-  try {
-    return new URL(raw).toString().replace(/\/$/, "");
-  } catch {
-    return "http://localhost:3000";
-  }
-}
-
-const siteUrl = resolveSiteUrl();
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -39,12 +36,31 @@ export const metadata: Metadata = {
     default: `${SITE.name} | Handmade Lampshades & Interior Textiles`,
     template: `%s | ${SITE.name}`,
   },
-  description:
-    "British handmade lampshades, printed fabrics and cushion covers. Design your shade or shop classic forms — velvet, linen and bespoke prints from our UK studio.",
+  description: COPY.metaDescription,
+  alternates: {
+    canonical: siteUrl,
+  },
   openGraph: {
     type: "website",
     locale: "en_GB",
     siteName: SITE.name,
+    title: `${SITE.name} | Handmade Lampshades & Interior Textiles`,
+    description: COPY.metaDescription,
+    url: siteUrl,
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "Lumina Hub handmade lampshades",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE.name} | Handmade Lampshades & Interior Textiles`,
+    description: COPY.metaDescription,
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };
@@ -58,6 +74,8 @@ export default async function RootLayout({
   return (
     <html lang="en-GB">
       <body className={`${display.variable} ${body.variable} antialiased`}>
+        <JsonLd data={organizationJsonLd()} />
+        <JsonLd data={websiteJsonLd()} />
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>

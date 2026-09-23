@@ -56,8 +56,98 @@ export const COPY = {
     eyebrow: "Perspective",
     title: "Treat light as a material",
     body: "Fabric, frame and lining work as a composition — so a shade doesn’t merely cover a bulb; it shapes how a room feels at dusk.",
-    cta: "Inside the atelier",
+    cta: "Read the craft note",
   },
+
+  craft: {
+    eyebrow: "Perspective",
+    title: "Treat light as a material",
+    metaDescription:
+      "How Lumina Hub thinks about fabric, frame and lining — composing handmade lampshades so light shapes the room, not just fills it.",
+    paragraphs: [
+      "A lampshade is rarely just a cover. Fabric grain, frame silhouette and lining colour decide whether light pools softly, glances warm across a wall, or stays crisp and clear.",
+      "In our Ilford studio we stretch, trim and inspect each piece by hand — matching materials to how a room is used at dusk, not only how it photographs at noon.",
+      "That is why Design your shade exists: silhouette, cloth, size, lining and fitting chosen as one composition, made to order in Britain.",
+    ],
+    pillars: [
+      {
+        title: "Fabric",
+        body: "Velvet deepens glow; linen keeps daylight honest; prints set mood before the lamp is even switched on.",
+      },
+      {
+        title: "Frame",
+        body: "Drum, empire, coolie and more — proportion relative to the base and the ceiling matters more than fashion.",
+      },
+      {
+        title: "Lining",
+        body: "Warm metallic linings add evening gold; white or ivory keep colour true for reading and task light.",
+      },
+    ],
+  },
+
+  care: {
+    eyebrow: "Longevity",
+    title: "Care for your shade",
+    metaDescription:
+      "How to care for handmade Lumina Hub lampshades and textiles — dusting, bulbs, velvet, linen and foil finishes from our UK studio.",
+    intro:
+      "A little gentleness keeps fabric, foil and frame looking considered for years. Follow any notes on the product page for special finishes.",
+    sections: [
+      {
+        title: "Everyday dusting",
+        points: [
+          "Dust with a soft, dry cloth or soft brush — never scrub or wipe with damp fabric.",
+          "Work from the top of the shade downward so grit does not settle into the grain.",
+        ],
+      },
+      {
+        title: "Velvet, linen & print",
+        points: [
+          "Velvet: brush lightly with the nap; avoid crushing the pile against hard surfaces.",
+          "Linen and cotton: dry dust only; keep steam and water away from stretched panels.",
+          "Printed cloth: treat as dry-clean only for the shade surface — do not immerse.",
+        ],
+      },
+      {
+        title: "Linings & bulbs",
+        points: [
+          "Keep water, steam and abrasive cleaners away from fabric and foil linings.",
+          "Prefer LED bulbs within the wattage guidance on the product page or Terms.",
+          "Allow heat to dissipate; never use a higher wattage than recommended.",
+        ],
+      },
+      {
+        title: "Placement",
+        points: [
+          "Keep shades clear of open flames, heaters and prolonged harsh midday sun when possible.",
+          "If a shade is stored, keep it upright in a dry room — never crushed under weight.",
+        ],
+      },
+    ],
+  },
+
+  shopMeta: {
+    LAMPSHADE: {
+      title: "Handmade lampshades",
+      description:
+        "British handmade lampshades in drum, empire, oval and more — velvet, linen and print, made to order for pendant, table and floor lamps.",
+    },
+    FABRIC: {
+      title: "Interior fabrics",
+      description:
+        "Printed and woven textiles from the Lumina Hub studio — the same stories that wrap our handmade lampshades.",
+    },
+    CUSHION: {
+      title: "Cushion covers",
+      description:
+        "Made-to-order cushion covers in matching patterns, so schemes continue from lamp to sofa.",
+    },
+    KIT: {
+      title: "Lampshade kits",
+      description:
+        "Studio-quality lampshade kits for makers who want to craft at home with considered materials.",
+    },
+  } as Record<string, { title: string; description: string }>,
 
   bestsellers: {
     eyebrow: "Most loved",

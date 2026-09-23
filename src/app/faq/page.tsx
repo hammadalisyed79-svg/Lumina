@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd, faqPageJsonLd, DEFAULT_OG_IMAGE } from "@/lib/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "FAQ",
-  description: "Frequently asked questions about Lumina Hub lampshades.",
+  description:
+    "Answers about made-to-order lampshades, sizing, returns, Stripe checkout, Design your shade and trade at Lumina Hub.",
+  openGraph: {
+    title: "FAQ | Lumina Hub",
+    description: "Handmade lampshades — sizing, shipping, returns and studio checkout.",
+    images: [{ url: DEFAULT_OG_IMAGE }],
+  },
 };
 
-const FAQS = [
+export const FAQS = [
   {
     q: "Are shades made to order?",
     a: "Yes. Most lampshades are handmade to order in the UK. Lead times are shown on product pages and typically allow a few business days for production before dispatch.",
@@ -44,6 +51,7 @@ const FAQS = [
 export default function FaqPage() {
   return (
     <div className="container-site section-pad max-w-3xl">
+      <JsonLd data={faqPageJsonLd(FAQS)} />
       <p className="eyebrow mb-3">Help</p>
       <h1 className="section-title">FAQ</h1>
       <div className="lux-rule" />
@@ -55,13 +63,13 @@ export default function FaqPage() {
           </section>
         ))}
       </div>
-      <p className="mt-10 text-sm text-[color:var(--muted)]">
+      <p className="mt-10 text-sm text-muted">
         Still unsure?{" "}
-        <Link href="/contact" className="underline">
+        <Link href="/contact" className="underline underline-offset-4 hover:text-bronze">
           Contact us
         </Link>{" "}
         or read the{" "}
-        <Link href="/size-guide" className="underline">
+        <Link href="/size-guide" className="underline underline-offset-4 hover:text-bronze">
           size guide
         </Link>
         .
