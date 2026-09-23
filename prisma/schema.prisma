@@ -237,6 +237,9 @@ model Product {
   type            ProductType @default(LAMPSHADE)
   shapeKey        String?
   moodTags        String[]    @default([])
+  colourTags      String[]    @default([])
+  patternTags     String[]    @default([])
+  material        String?
   basePrice       Decimal     @db.Decimal(10, 2)
   compareAtPrice  Decimal?    @db.Decimal(10, 2)
   published       Boolean     @default(true)
@@ -246,10 +249,19 @@ model Product {
   leadTimeDays    Int         @default(7)
   seoTitle        String?
   seoDesc         String?
+  seoKeywords     String[]    @default([])
   configEnabled   Boolean     @default(true)
   shopifyProductId String?    @unique
   shopifyHandle   String?
+  sourceWebsite   String?
+  sourceUrl       String?
+  sourceHandle    String?     @unique
   sourceTitle     String?     @db.Text
+  sourceOriginalDescription String? @db.Text
+  sourceAvailability String?
+  availabilityReviewed Boolean @default(false)
+  sourceImportedAt DateTime?
+  migrationStatus String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -273,6 +285,25 @@ model Product {
   @@index([bestseller])
   @@index([shapeKey])
   @@index([shopifyHandle])
+  @@index([sourceHandle])
+  @@index([migrationStatus])
+}
+
+model ProductImage {
+  id          String  @id @default(cuid())
+  productId   String
+  url         String
+  alt         String?
+  sortOrder   Int     @default(0)
+  isPrimary   Boolean @default(false)
+  sourceUrl   String?
+  width       Int?
+  height      Int?
+  contentHash String?
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+  @@index([contentHash])
 }
 
 model CollectionProduct {
@@ -283,18 +314,6 @@ model CollectionProduct {
   product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@id([collectionId, productId])
-}
-
-model ProductImage {
-  id        String  @id @default(cuid())
-  productId String
-  url       String
-  alt       String?
-  sortOrder Int     @default(0)
-  isPrimary Boolean @default(false)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@index([productId, sortOrder])
 }
 
 model ProductVariant {

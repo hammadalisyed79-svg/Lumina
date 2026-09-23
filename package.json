@@ -17,6 +17,7 @@
     "db:studio": "prisma studio",
     "db:local": "tsx scripts/start-local-pg.ts",
     "seed": "tsx prisma/seed.ts",
+    "import:luminahub": "tsx scripts/import-luminahub.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "postinstall": "prisma generate"

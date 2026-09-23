@@ -57,5 +57,9 @@ export function shortDisplayTitle(title: string, max = 52): string {
 export function isWebImageUrl(url?: string | null): boolean {
   if (!url) return false;
   const u = url.toLowerCase();
-  return !u.includes(".heic") && !u.includes("placeholder") && !u.includes("/demo-assets/");
+  if (u.includes(".heic") || u.includes("placeholder") || u.includes("/demo-assets/")) {
+    return false;
+  }
+  // Prefer local catalog/media; allow relative app paths
+  return u.startsWith("/catalog/") || u.startsWith("/media/") || u.startsWith("http");
 }
