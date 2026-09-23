@@ -1,7 +1,7 @@
 # Lumina Hub — delivery report (preview)
 
 **Preview URL:** https://luminahub-lyart.vercel.app/  
-**Commit:** `632929f` on `origin/main`  
+**Commit:** `b458d25` on `origin/main`  
 **Authority note:** Catalog import is **preliminary** (public `products.json` → `data/shopify-catalog.json`). Shopify Admin API + Storefront token required before calling commerce complete. **Do not describe checkout as working** until a Shopify hosted test checkout succeeds end to end.
 
 ## 1. Reconciliation (source → target)
@@ -40,9 +40,11 @@ PDP `ProductConfigurator` only offers variants with `shopifyVariantId` + `priceO
 
 **Change:** Orders are created only after Shopify cart creation succeeds (or legacy Stripe session). Blocked / failed JSON **omits** `orderNumber` and `orderId`.
 
-Evidence script: `node scripts/evidence-forms-checkout.js` → `data/form-and-checkout-evidence.json`
+Evidence script: `node scripts/evidence-forms-checkout.js` → `data/form-and-checkout-evidence.json`  
+HTTP local: `data/checkout-blocked-http-evidence.json`  
+Prod smoke (`https://luminahub-lyart.vercel.app/api/checkout`): `data/checkout-blocked-prod-evidence.json`
 
-Expected without Storefront tokens:
+Observed without Storefront tokens:
 
 - `POST /api/checkout` → **503**
 - Body: `mode: "blocked"`, `error`, `blockers` — **no** `orderNumber`

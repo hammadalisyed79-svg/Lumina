@@ -1,0 +1,15 @@
+{
+  "url": "https://luminahub-lyart.vercel.app/api/checkout",
+  "status": 503,
+  "body": {
+    "error": "Checkout is not live. Set SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN for Shopify hosted checkout.",
+    "mode": "blocked",
+    "blockers": [
+      "SHOPIFY_STORE_DOMAIN",
+      "SHOPIFY_STOREFRONT_TOKEN",
+      "Verified shipping rates in Shopify"
+    ]
+  },
+  "hasOrderNumber": false,
+  "ordersCreated": 0
+}
