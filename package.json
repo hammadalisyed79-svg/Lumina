@@ -1,36 +1,63 @@
 {
   "name": "luminahub",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
-    "seed": "node scripts/seed-cli.js",
-    "fetch-products": "node scripts/fetch-products.js"
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "db:local": "tsx scripts/start-local-pg.ts",
+    "seed": "tsx prisma/seed.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "better-sqlite3": "^13.0.3",
+    "@auth/prisma-adapter": "^2.11.3",
+    "@prisma/client": "6.19.3",
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
     "framer-motion": "^13.4.1",
     "lucide-react": "^1.47.0",
+    "nanoid": "^6.0.1",
     "next": "^16.3.6",
+    "next-auth": "^5.0.0-beta.32",
+    "prisma": "6.19.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "resend": "^6.28.1",
+    "sharp": "^0.35.4",
+    "stripe": "^22.6.2",
+    "tailwind-merge": "^3.7.0",
     "uuid": "^14.0.2",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/better-sqlite3": "^9.6.0",
-    "@types/node": "^20",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.20.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
+    "embedded-postgres": "^18.4.0-beta.17",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }

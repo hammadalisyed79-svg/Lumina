@@ -2,101 +2,79 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { formatGBP } from "@/lib/money";
+import { useCart } from "@/components/cart/CartProvider";
+import { formatMoney } from "@/lib/utils";
 import { SITE } from "@/lib/site";
-import { useCart } from "@/components/CartProvider";
 
 export default function CartPage() {
-  const { items, subtotal, setQuantity, removeItem } = useCart();
-  const shipping =
-    subtotal === 0 ? 0 : subtotal >= SITE.freeShippingFrom ? 0 : SITE.shippingFlat;
-  const total = subtotal + shipping;
-
-  if (items.length === 0) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 py-24 text-center">
-        <h1 className="font-[family-name:var(--font-display)] text-5xl">Your bag</h1>
-        <p className="mt-4 text-[var(--muted)]">Nothing here yet.</p>
-        <Link href="/shop" className="btn-primary mt-8 inline-flex">
-          Continue shopping
-        </Link>
-      </div>
-    );
-  }
+  const { items, subtotal, updateQty, remove } = useCart();
+  const shippingEstimate =
+    subtotal >= SITE.freeShippingFrom ? 0 : SITE.defaultShipping;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="font-[family-name:var(--font-display)] text-5xl mb-10">Your bag</h1>
-      <div className="grid lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2 space-y-6">
-          {items.map((item) => (
-            <div
-              key={item.handle}
-              className="flex gap-4 border-b border-[var(--line)] pb-6"
-            >
-              <div className="relative w-24 h-28 bg-[var(--stone)] shrink-0 overflow-hidden">
-                {item.image && (
-                  <Image src={item.image} alt="" fill className="object-cover" sizes="96px" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <Link
-                  href={`/shop/${item.handle}`}
-                  className="font-medium line-clamp-2 hover:text-[var(--brass)]"
-                >
-                  {item.title}
-                </Link>
-                <p className="mt-1 text-sm">{formatGBP(item.price)}</p>
-                <div className="mt-3 flex items-center gap-3">
-                  <input
-                    type="number"
-                    min={1}
-                    max={20}
-                    value={item.quantity}
-                    onChange={(e) =>
-                      setQuantity(item.handle, Number(e.target.value) || 1)
-                    }
-                    className="field w-20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeItem(item.handle)}
-                    className="text-sm text-[var(--muted)] underline"
-                  >
+    <div className="container-site py-10 md:py-14">
+      <h1 className="font-display text-4xl md:text-5xl mb-8">Shopping bag</h1>
+      {items.length === 0 ? (
+        <div className="py-16 text-center">
+          <p className="prose-muted mb-6">Your bag is empty.</p>
+          <Link href="/shop/lampshades" className="btn-primary">
+            Shop lampshades
+          </Link>
+        </div>
+      ) : (
+        <div className="grid lg:grid-cols-[1fr_320px] gap-12">
+          <div className="space-y-6">
+            {items.map((item) => (
+              <div key={item.id} className="flex gap-4 border-b border-[color:var(--line)] pb-6">
+                <div className="relative h-28 w-24 bg-[color:var(--stone)] shrink-0">
+                  {item.imageUrl && (
+                    <Image src={item.imageUrl} alt="" fill className="object-cover" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">{item.title}</p>
+                  {item.config && (
+                    <pre className="text-xs text-[color:var(--muted)] mt-2 whitespace-pre-wrap font-sans">
+                      {item.config.shapeName} · {item.config.fabricName} · {item.config.sizeName}
+                      {"\n"}
+                      {item.config.liningName} · {item.config.fittingName}
+                    </pre>
+                  )}
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="flex items-center border border-[color:var(--line)]">
+                      <button type="button" className="px-3 py-1" onClick={() => updateQty(item.id, item.quantity - 1)}>−</button>
+                      <span className="px-2">{item.quantity}</span>
+                      <button type="button" className="px-3 py-1" onClick={() => updateQty(item.id, item.quantity + 1)}>+</button>
+                    </div>
+                    <p>{formatMoney(item.unitPrice * item.quantity)}</p>
+                  </div>
+                  <button type="button" className="text-xs underline mt-2 text-[color:var(--muted)]" onClick={() => remove(item.id)}>
                     Remove
                   </button>
                 </div>
               </div>
-              <p className="font-medium shrink-0">
-                {formatGBP(item.price * item.quantity)}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <aside className="bg-white/70 border border-[var(--line)] p-6 h-fit">
-          <h2 className="text-xs uppercase tracking-[0.2em] text-[var(--muted)] mb-4">
-            Summary
-          </h2>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>{formatGBP(subtotal)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Shipping</span>
-              <span>{shipping === 0 ? "Free" : formatGBP(shipping)}</span>
-            </div>
-            <div className="flex justify-between pt-3 border-t border-[var(--line)] text-base font-medium">
-              <span>Total</span>
-              <span>{formatGBP(total)}</span>
-            </div>
+            ))}
           </div>
-          <Link href="/checkout" className="btn-primary w-full mt-6">
-            Checkout
-          </Link>
-        </aside>
-      </div>
+          <aside className="border border-[color:var(--line)] p-6 h-fit bg-white/60 space-y-3">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal</span>
+              <span>{formatMoney(subtotal)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Est. shipping</span>
+              <span>{shippingEstimate === 0 ? "Complimentary" : formatMoney(shippingEstimate)}</span>
+            </div>
+            <div className="divider my-2" />
+            <div className="flex justify-between font-medium">
+              <span>Estimated total</span>
+              <span>{formatMoney(subtotal + shippingEstimate)}</span>
+            </div>
+            <Link href="/checkout" className="btn-primary w-full mt-4">
+              Checkout
+            </Link>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }

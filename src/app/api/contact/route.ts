@@ -1,34 +1,39 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getDb } from "@/lib/db";
-
-export const runtime = "nodejs";
+import { rateLimit, clientIp } from "@/lib/security/rate-limit";
+import { sendEmail } from "@/lib/email";
+import { prisma } from "@/lib/db";
 
 const schema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(2),
   email: z.string().email(),
-  subject: z.string().optional(),
-  message: z.string().min(5),
+  message: z.string().min(10),
 });
 
-export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const parsed = schema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid message" }, { status: 400 });
-  }
-  const { name, email, subject, message } = parsed.data;
-  const result = getDb()
-    .prepare(
-      `INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)`
-    )
-    .run(name, email, subject || null, message);
-  return NextResponse.json({ ok: true, id: result.lastInsertRowid });
-}
+export async function POST(req: Request) {
+  const ip = clientIp(req.headers);
+  const rl = rateLimit(`contact:${ip}`, 5, 60_000);
+  if (!rl.ok) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
-export async function GET() {
-  const messages = getDb()
-    .prepare("SELECT * FROM contact_messages ORDER BY created_at DESC LIMIT 100")
-    .all();
-  return NextResponse.json({ messages });
+  const body = await req.json().catch(() => null);
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Invalid message" }, { status: 400 });
+
+  await prisma.bespokeEnquiry.create({
+    data: {
+      name: parsed.data.name,
+      email: parsed.data.email.toLowerCase(),
+      subject: "Contact form",
+      message: parsed.data.message,
+      status: "NEW",
+    },
+  });
+
+  await sendEmail({
+    to: process.env.EMAIL_FROM?.match(/<(.+)>/)?.[1] || "hello@luminahub.co.uk",
+    subject: `Contact from ${parsed.data.name}`,
+    html: `<p>${parsed.data.name} &lt;${parsed.data.email}&gt;</p><p>${parsed.data.message}</p>`,
+  });
+
+  return NextResponse.json({ ok: true });
 }

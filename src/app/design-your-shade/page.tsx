@@ -1,0 +1,292 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { calculateUnitPrice } from "@/lib/pricing";
+import { formatMoney } from "@/lib/utils";
+import { useCart } from "@/components/cart/CartProvider";
+
+type Opt = { id: string; slug: string; name: string; priceMod: number; imageUrl?: string; description?: string; diameterCm?: number | null; heightCm?: number | null };
+type Shape = { key: string; name: string; basePrice: number; imageUrl?: string; description?: string };
+
+const STEPS = ["Shape", "Fabric", "Size", "Lining", "Fitting", "Review"] as const;
+
+export default function DesignYourShadePage() {
+  const { addConfigured } = useCart();
+  const [step, setStep] = useState(0);
+  const [shapes, setShapes] = useState<Shape[]>([]);
+  const [fabrics, setFabrics] = useState<Opt[]>([]);
+  const [sizes, setSizes] = useState<Opt[]>([]);
+  const [linings, setLinings] = useState<Opt[]>([]);
+  const [fittings, setFittings] = useState<Opt[]>([]);
+  const [shapeKey, setShapeKey] = useState("drum");
+  const [fabricId, setFabricId] = useState("");
+  const [sizeId, setSizeId] = useState("");
+  const [liningId, setLiningId] = useState("");
+  const [fittingId, setFittingId] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/config-options")
+      .then((r) => r.json())
+      .then((d) => {
+        setShapes(d.shapes);
+        setFabrics(d.fabrics);
+        setSizes(d.sizes);
+        setLinings(d.linings);
+        setFittings(d.fittings);
+        setShapeKey(d.shapes[0]?.key || "drum");
+        setFabricId(d.fabrics[0]?.id || "");
+        setSizeId(d.sizes[1]?.id || d.sizes[0]?.id || "");
+        setLiningId(d.linings[0]?.id || "");
+        setFittingId(d.fittings[0]?.id || "");
+      });
+  }, []);
+
+  const shape = shapes.find((s) => s.key === shapeKey);
+  const fabric = fabrics.find((f) => f.id === fabricId);
+  const size = sizes.find((s) => s.id === sizeId);
+  const lining = linings.find((l) => l.id === liningId);
+  const fitting = fittings.find((f) => f.id === fittingId);
+
+  const unitPrice = useMemo(() => {
+    if (!shape) return 0;
+    return calculateUnitPrice({
+      basePrice: shape.basePrice,
+      fabricMod: fabric?.priceMod,
+      sizeMod: size?.priceMod,
+      liningMod: lining?.priceMod,
+      fittingMod: fitting?.priceMod,
+    });
+  }, [shape, fabric, size, lining, fitting]);
+
+  function addToBag() {
+    if (!shape || !fabric || !size || !lining || !fitting) return;
+    addConfigured({
+      title: `${shape.name} shade · ${fabric.name}`,
+      imageUrl: fabric.imageUrl || shape.imageUrl,
+      config: {
+        shapeKey: shape.key,
+        shapeName: shape.name,
+        fabricSlug: fabric.slug,
+        fabricName: fabric.name,
+        sizeSlug: size.slug,
+        sizeName: size.name,
+        liningSlug: lining.slug,
+        liningName: lining.name,
+        fittingSlug: fitting.slug,
+        fittingName: fitting.name,
+        unitPrice,
+      },
+    });
+  }
+
+  async function saveDesign() {
+    if (!shape || !fabric || !size || !lining || !fitting) return;
+    const res = await fetch("/api/saved-designs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: `${shape.name} / ${fabric.name}`,
+        shapeKey: shape.key,
+        fabricSlug: fabric.slug,
+        sizeSlug: size.slug,
+        liningSlug: lining.slug,
+        fittingSlug: fitting.slug,
+        unitPrice,
+      }),
+    });
+    if (res.ok) setSaved(true);
+  }
+
+  return (
+    <div className="container-site py-10 md:py-14">
+      <p className="eyebrow mb-2">Configurator</p>
+      <h1 className="font-display text-4xl md:text-5xl mb-3">Design your shade</h1>
+      <p className="prose-muted max-w-xl mb-10">
+        Build a made-to-order lampshade in six considered steps. Your configuration is stored with
+        the cart, checkout and order confirmation.
+      </p>
+
+      <div className="flex flex-wrap gap-2 mb-10">
+        {STEPS.map((label, i) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => setStep(i)}
+            className={`px-3 py-1.5 text-xs tracking-wide uppercase border ${
+              step === i
+                ? "border-[color:var(--ink)] bg-[color:var(--ink)] text-white"
+                : "border-[color:var(--line)]"
+            }`}
+          >
+            {i + 1}. {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-12">
+        <div className="relative aspect-[4/5] bg-[color:var(--stone)]">
+          <Image
+            src={fabric?.imageUrl || shape?.imageUrl || "/demo-assets/shapes/drum.svg"}
+            alt="Shade preview"
+            fill
+            className="object-cover"
+          />
+          <div className="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/55 to-transparent text-white">
+            <p className="font-display text-3xl">{shape?.name || "Shade"}</p>
+            <p className="text-sm text-white/85">{fabric?.name}</p>
+            <p className="mt-2 text-lg">{formatMoney(unitPrice)}</p>
+          </div>
+        </div>
+
+        <div>
+          {step === 0 && (
+            <OptionGrid
+              label="Choose a shape"
+              options={shapes.map((s) => ({
+                id: s.key,
+                name: s.name,
+                meta: s.description,
+                image: s.imageUrl,
+              }))}
+              value={shapeKey}
+              onChange={setShapeKey}
+            />
+          )}
+          {step === 1 && (
+            <OptionGrid
+              label="Choose a fabric"
+              options={fabrics.map((f) => ({
+                id: f.id,
+                name: f.name,
+                meta: f.priceMod ? `+£${f.priceMod}` : "Included",
+                image: f.imageUrl,
+              }))}
+              value={fabricId}
+              onChange={setFabricId}
+            />
+          )}
+          {step === 2 && (
+            <OptionGrid
+              label="Choose a size"
+              options={sizes.map((s) => ({
+                id: s.id,
+                name: s.name,
+                meta: s.priceMod ? `+£${s.priceMod}` : "Base size",
+              }))}
+              value={sizeId}
+              onChange={setSizeId}
+            />
+          )}
+          {step === 3 && (
+            <OptionGrid
+              label="Choose a lining"
+              options={linings.map((l) => ({
+                id: l.id,
+                name: l.name,
+                meta: l.priceMod ? `+£${l.priceMod}` : "Included",
+              }))}
+              value={liningId}
+              onChange={setLiningId}
+            />
+          )}
+          {step === 4 && (
+            <OptionGrid
+              label="Choose a fitting"
+              options={fittings.map((f) => ({
+                id: f.id,
+                name: f.name,
+                meta: f.description || (f.priceMod ? `+£${f.priceMod}` : "Included"),
+              }))}
+              value={fittingId}
+              onChange={setFittingId}
+            />
+          )}
+          {step === 5 && (
+            <div className="space-y-4 border border-[color:var(--line)] p-6 bg-white/60">
+              <h2 className="font-display text-3xl">Your configuration</h2>
+              <ul className="space-y-2 text-[15px]">
+                <li>Shape: {shape?.name}</li>
+                <li>Fabric: {fabric?.name}</li>
+                <li>Size: {size?.name}</li>
+                <li>Lining: {lining?.name}</li>
+                <li>Fitting: {fitting?.name}</li>
+                <li className="font-medium pt-2">Price: {formatMoney(unitPrice)}</li>
+              </ul>
+              <div className="flex flex-wrap gap-3 pt-4">
+                <button type="button" className="btn-primary" onClick={addToBag}>
+                  Add to bag
+                </button>
+                <button type="button" className="btn-secondary" onClick={saveDesign}>
+                  Save design
+                </button>
+              </div>
+              {saved && <p className="text-sm text-[color:var(--muted)]">Design saved to your account / guest key.</p>}
+            </div>
+          )}
+
+          <div className="flex justify-between mt-8">
+            <button
+              type="button"
+              className="btn-secondary"
+              disabled={step === 0}
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+            >
+              Back
+            </button>
+            {step < STEPS.length - 1 && (
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
+              >
+                Continue
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OptionGrid({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { id: string; name: string; meta?: string | null; image?: string }[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div>
+      <h2 className="font-display text-3xl mb-6">{label}</h2>
+      <div className="grid sm:grid-cols-2 gap-3">
+        {options.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            onClick={() => onChange(o.id)}
+            className={`text-left border p-4 transition-colors ${
+              value === o.id
+                ? "border-[color:var(--ink)] bg-white"
+                : "border-[color:var(--line)] hover:border-[color:var(--bronze)]"
+            }`}
+          >
+            {o.image && (
+              <div className="relative h-24 mb-3 bg-[color:var(--stone)]">
+                <Image src={o.image} alt="" fill className="object-cover" />
+              </div>
+            )}
+            <p className="font-medium">{o.name}</p>
+            {o.meta && <p className="text-sm text-[color:var(--muted)] mt-1">{o.meta}</p>}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

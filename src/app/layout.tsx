@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Figtree } from "next/font/google";
 import "./globals.css";
-import { CartProvider } from "@/components/CartProvider";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { CartProvider } from "@/components/cart/CartProvider";
+import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
+import { AuthProvider } from "@/components/auth/AuthProvider";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { SearchOverlay } from "@/components/search/SearchOverlay";
+import { SITE } from "@/lib/site";
 
 const display = Cormorant_Garamond({
   variable: "--font-display",
@@ -17,13 +22,22 @@ const body = Figtree({
   weight: ["300", "400", "500", "600", "700"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "Lumina Hub | Handmade Lampshades & Printed Fabrics",
-    template: "%s | Lumina Hub",
+    default: `${SITE.name} | Handmade Lampshades & Interior Textiles`,
+    template: `%s | ${SITE.name}`,
   },
   description:
-    "UK handmade lampshades, cushion covers, and printed velvet fabrics. Made to order in drum, rectangular, oval, and more.",
+    "Premium UK handmade lampshades, fabrics, cushions and kits. Design your shade or shop ready-made collections.",
+  openGraph: {
+    type: "website",
+    locale: "en_GB",
+    siteName: SITE.name,
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -34,11 +48,17 @@ export default function RootLayout({
   return (
     <html lang="en-GB">
       <body className={`${display.variable} ${body.variable} antialiased`}>
-        <CartProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <Header />
+              <main className="min-h-[60vh]">{children}</main>
+              <Footer />
+              <CartDrawer />
+              <SearchOverlay />
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
