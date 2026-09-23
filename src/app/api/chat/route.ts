@@ -10,8 +10,11 @@ const MAX_HISTORY = 12;
 const MAX_CONTENT = 1200;
 
 function getClient() {
-  const key = process.env.OPENAI_API_KEY?.trim();
-  if (!key) return null;
+  let key = process.env.OPENAI_API_KEY?.trim() || "";
+  // Tolerate accidental wrappers from paste: quotes or "openai KEY: …"
+  key = key.replace(/^["']|["']$/g, "");
+  key = key.replace(/^openai\s*key\s*[:=]\s*/i, "").trim();
+  if (!key || key.includes("placeholder") || key === "sk-...") return null;
   return new OpenAI({ apiKey: key });
 }
 
