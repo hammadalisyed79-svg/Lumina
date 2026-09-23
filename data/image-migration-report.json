@@ -1,9 +1,9 @@
 {
-  "completedAt": "2026-09-23T06:33:51.710Z",
+  "completedAt": "2026-09-23T08:36:27.959Z",
   "totals": {
     "jobs": 1243,
-    "downloaded": 1243,
-    "skippedExisting": 0,
+    "downloaded": 0,
+    "skippedExisting": 1243,
     "failed": 0
   },
   "heicCount": 3,
