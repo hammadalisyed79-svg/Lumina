@@ -1,9 +1,13 @@
 # Lumina Hub — delivery report
 
-**Commit:** `8e98e3a` on `origin/main`  
+**Commit:** (see `git log -1` on `origin/main` after Phase 1 push)  
 **Production URL:** https://luminahub-lyart.vercel.app/  
 **Also:** `lumina` Vercel project (same repo)  
 **Do not mark checkout complete** — Shopify Storefront tokens are not configured; checkout returns **503**.
+
+## Phase 1 platform foundations (2026-09-23)
+
+See [PHASE1.md](PHASE1.md). Delivered: RBAC + permissions, admin SaaS shell, dashboard KPIs/charts, users/audit/search, schema for inventory/nav/homepage/fulfilment. **Not** catalogue CRUD depth, configurator checkout, or live payments.
 
 ## Latest homepage / storefront pass
 

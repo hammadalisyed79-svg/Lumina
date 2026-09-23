@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid message" }, { status: 400 });
 
-  const enquiry = await prisma.bespokeEnquiry.create({
+  const enquiry = await prisma.contactEnquiry.create({
     data: {
       name: parsed.data.name,
       email: parsed.data.email.toLowerCase(),
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     destination: {
-      database: "bespokeEnquiry",
+      database: "contactEnquiry",
       enquiryId: enquiry.id,
       emailTo: to,
       emailDelivered: !mail.skipped,

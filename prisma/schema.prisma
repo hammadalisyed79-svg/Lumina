@@ -10,7 +10,9 @@ datasource db {
 enum Role {
   CUSTOMER
   TRADE
+  STAFF
   ADMIN
+  SUPER_ADMIN
 }
 
 enum ProductType {
@@ -25,11 +27,55 @@ enum OrderStatus {
   PENDING
   AWAITING_PAYMENT
   PAID
+  CONFIRMED
   PROCESSING
+  PRODUCTION
+  QC
+  PACKED
   SHIPPED
+  DISPATCHED
   DELIVERED
   CANCELLED
   REFUNDED
+}
+
+enum ProductionStatus {
+  NONE
+  QUEUED
+  IN_PRODUCTION
+  QC
+  PACKED
+  DISPATCHED
+  COMPLETE
+}
+
+enum EnquiryStatus {
+  NEW
+  READ
+  REPLIED
+  ARCHIVED
+}
+
+enum InventoryKind {
+  FINISHED
+  KIT
+  FABRIC
+  COMPONENT
+  OTHER
+}
+
+enum HomepageSectionType {
+  HERO
+  SHOP_BY_SHAPE
+  FEATURED_COLLECTION
+  DESIGN_YOUR_SHADE
+  SHOP_BY_MOOD
+  EDITORIAL
+  BEST_SELLERS
+  CUSTOMER_HOMES
+  REVIEWS
+  TRADE
+  NEWSLETTER
 }
 
 enum PaymentStatus {
@@ -47,18 +93,22 @@ enum ReviewStatus {
   REJECTED
 }
 
-enum TradeStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 enum BespokeStatus {
   NEW
   REVIEWING
   QUOTED
   ACCEPTED
+  DECLINED
+  COMPLETED
   CLOSED
+}
+
+enum TradeStatus {
+  NEW
+  PENDING
+  REVIEWING
+  APPROVED
+  REJECTED
 }
 
 enum CouponType {
@@ -93,8 +143,11 @@ model User {
   savedDesigns  SavedDesign[]
   tradeApps     TradeApplication[]
   bespoke       BespokeEnquiry[]
-  auditLogs     AuditLog[]
-  couponsUsed   CouponRedemption[]
+  auditLogs       AuditLog[]
+  couponsUsed     CouponRedemption[]
+  contactEnquiries ContactEnquiry[]
+  staffNotes      CustomerNote[] @relation("CustomerNotes")
+  notesAuthored   CustomerNote[] @relation("NoteAuthor")
 
   @@index([role])
 }
@@ -208,6 +261,12 @@ model Product {
   relatedTo       ProductRelation[] @relation("ProductTo")
   wishlistItems   WishlistItem[]
   orderItems      OrderItem[]
+  eligibleShapes  ProductShape[]
+  eligibleFabrics ProductFabric[]
+  eligibleSizes   ProductSize[]
+  eligibleLinings ProductLining[]
+  eligibleFittings ProductFitting[]
+  inventoryItems  InventoryItem[]
 
   @@index([type, published])
   @@index([featured])
@@ -279,31 +338,42 @@ model Fabric {
   id          String   @id @default(cuid())
   slug        String   @unique
   name        String
+  internalCode String?
   description String?  @db.Text
   colour      String?
   material    String?
+  pattern     String?
   imageUrl    String?
   swatchUrl   String?
   priceMod    Decimal  @default(0) @db.Decimal(10, 2)
+  stockQty    Int?
   active      Boolean  @default(true)
   sortOrder   Int      @default(0)
   variants    ProductVariant[]
   designs     SavedDesign[]
+  products    ProductFabric[]
+  inventoryItems InventoryItem[]
 }
 
 model Size {
   id          String   @id @default(cuid())
   slug        String   @unique
   name        String
+  shapeId     String?
   diameterCm  Decimal? @db.Decimal(6, 2)
   heightCm    Decimal? @db.Decimal(6, 2)
   widthCm     Decimal? @db.Decimal(6, 2)
   depthCm     Decimal? @db.Decimal(6, 2)
+  displayUnit String   @default("cm")
   priceMod    Decimal  @default(0) @db.Decimal(10, 2)
   active      Boolean  @default(true)
   sortOrder   Int      @default(0)
+  shape       Shape?   @relation(fields: [shapeId], references: [id])
   variants    ProductVariant[]
   designs     SavedDesign[]
+  products    ProductSize[]
+
+  @@index([shapeId])
 }
 
 model Lining {
@@ -311,11 +381,14 @@ model Lining {
   slug      String  @unique
   name      String
   colour    String?
+  swatchUrl String?
+  description String?
   priceMod  Decimal @default(0) @db.Decimal(10, 2)
   active    Boolean @default(true)
   sortOrder Int     @default(0)
   variants  ProductVariant[]
   designs   SavedDesign[]
+  products  ProductLining[]
 }
 
 model Fitting {
@@ -323,11 +396,14 @@ model Fitting {
   slug        String  @unique
   name        String
   description String?
+  imageUrl    String?
+  compatibility String?
   priceMod    Decimal @default(0) @db.Decimal(10, 2)
   active      Boolean @default(true)
   sortOrder   Int     @default(0)
   variants    ProductVariant[]
   designs     SavedDesign[]
+  products    ProductFitting[]
 }
 
 model Shape {
@@ -337,9 +413,57 @@ model Shape {
   description String?
   imageUrl    String?
   basePrice   Decimal @db.Decimal(10, 2)
+  priceMod    Decimal @default(0) @db.Decimal(10, 2)
   active      Boolean @default(true)
   sortOrder   Int     @default(0)
   designs     SavedDesign[]
+  sizes       Size[]
+  products    ProductShape[]
+}
+
+model ProductShape {
+  productId String
+  shapeId   String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  shape     Shape   @relation(fields: [shapeId], references: [id], onDelete: Cascade)
+
+  @@id([productId, shapeId])
+}
+
+model ProductFabric {
+  productId String
+  fabricId  String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  fabric    Fabric  @relation(fields: [fabricId], references: [id], onDelete: Cascade)
+
+  @@id([productId, fabricId])
+}
+
+model ProductSize {
+  productId String
+  sizeId    String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size      Size    @relation(fields: [sizeId], references: [id], onDelete: Cascade)
+
+  @@id([productId, sizeId])
+}
+
+model ProductLining {
+  productId String
+  liningId  String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  lining    Lining  @relation(fields: [liningId], references: [id], onDelete: Cascade)
+
+  @@id([productId, liningId])
+}
+
+model ProductFitting {
+  productId String
+  fittingId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  fitting   Fitting @relation(fields: [fittingId], references: [id], onDelete: Cascade)
+
+  @@id([productId, fittingId])
 }
 
 model Wishlist {
@@ -393,6 +517,7 @@ model Order {
   email             String
   status            OrderStatus   @default(PENDING)
   paymentStatus     PaymentStatus @default(UNPAID)
+  productionStatus  ProductionStatus @default(NONE)
   currency          String        @default("gbp")
   subtotal          Decimal       @db.Decimal(10, 2)
   shippingTotal     Decimal       @db.Decimal(10, 2)
@@ -413,6 +538,10 @@ model Order {
   shippingPostcode  String?
   shippingCountry   String?       @default("GB")
   shippingPhone     String?
+  trackingProvider  String?
+  trackingNumber    String?
+  dispatchedAt      DateTime?
+  staffNotes        String?       @db.Text
   notes             String?       @db.Text
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
@@ -425,6 +554,7 @@ model Order {
   @@index([userId])
   @@index([status])
   @@index([paymentStatus])
+  @@index([productionStatus])
   @@index([email])
   @@index([createdAt])
 }
@@ -537,21 +667,25 @@ model ShippingMethod {
 }
 
 model TradeApplication {
-  id           String      @id @default(cuid())
-  userId       String?
-  businessName String
-  contactName  String
-  email        String
-  phone        String?
-  website      String?
-  vatNumber    String?
-  address      String?     @db.Text
-  message      String?     @db.Text
-  status       TradeStatus @default(PENDING)
-  adminNotes   String?     @db.Text
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  user         User?       @relation(fields: [userId], references: [id])
+  id                 String      @id @default(cuid())
+  userId             String?
+  businessName       String
+  contactName        String
+  email              String
+  phone              String?
+  website            String?
+  businessType       String?
+  estimatedVolume    String?
+  vatNumber          String?
+  address            String?     @db.Text
+  message            String?     @db.Text
+  status             TradeStatus @default(NEW)
+  discountPercent    Decimal?    @db.Decimal(5, 2)
+  tradePricingEnabled Boolean    @default(false)
+  adminNotes         String?     @db.Text
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  user               User?       @relation(fields: [userId], references: [id])
 
   @@index([status])
   @@index([email])
@@ -579,12 +713,19 @@ model MediaAsset {
   id        String   @id @default(cuid())
   key       String   @unique
   url       String
+  filename  String?
   alt       String?
+  caption   String?
+  type      String   @default("image")
   width     Int?
   height    Int?
   provider  String   @default("local")
   folder    String?
   createdAt DateTime @default(now())
+
+  @@index([folder])
+  @@index([type])
+  @@index([createdAt])
 }
 
 model CmsPage {
@@ -606,10 +747,13 @@ model SiteSetting {
 }
 
 model NewsletterSubscriber {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  source    String?
-  createdAt DateTime @default(now())
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  source         String?
+  status         String    @default("subscribed")
+  createdAt      DateTime  @default(now())
+  unsubscribedAt DateTime?
 }
 
 model AuditLog {
@@ -625,4 +769,135 @@ model AuditLog {
 
   @@index([createdAt])
   @@index([entity, entityId])
+  @@index([userId])
+  @@index([action])
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  label       String
+  module      String
+  description String?
+  roles       RolePermission[]
+
+  @@index([module])
+}
+
+model RolePermission {
+  role         Role
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([role, permissionId])
+  @@index([permissionId])
+}
+
+model InventoryItem {
+  id           String              @id @default(cuid())
+  sku          String              @unique
+  name         String
+  kind         InventoryKind       @default(OTHER)
+  productId    String?
+  fabricId     String?
+  available    Int                 @default(0)
+  reserved     Int                 @default(0)
+  incoming     Int                 @default(0)
+  reorderLevel Int                 @default(0)
+  trackStock   Boolean             @default(true)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  product      Product?            @relation(fields: [productId], references: [id])
+  fabric       Fabric?             @relation(fields: [fabricId], references: [id])
+  movements    InventoryMovement[]
+
+  @@index([kind])
+  @@index([productId])
+  @@index([fabricId])
+}
+
+model InventoryMovement {
+  id        String        @id @default(cuid())
+  itemId    String
+  delta     Int
+  reason    String
+  note      String?
+  userId    String?
+  createdAt DateTime      @default(now())
+  item      InventoryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId, createdAt])
+}
+
+model ContactEnquiry {
+  id        String        @id @default(cuid())
+  userId    String?
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String        @db.Text
+  status    EnquiryStatus @default(NEW)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User?         @relation(fields: [userId], references: [id])
+
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+}
+
+model CustomerNote {
+  id         String   @id @default(cuid())
+  customerId String
+  authorId   String?
+  body       String   @db.Text
+  createdAt  DateTime @default(now())
+  customer   User     @relation("CustomerNotes", fields: [customerId], references: [id], onDelete: Cascade)
+  author     User?    @relation("NoteAuthor", fields: [authorId], references: [id])
+
+  @@index([customerId])
+}
+
+model NavigationMenu {
+  id        String           @id @default(cuid())
+  key       String           @unique
+  label     String
+  items     NavigationItem[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model NavigationItem {
+  id        String          @id @default(cuid())
+  menuId    String
+  label     String
+  url       String
+  sortOrder Int             @default(0)
+  enabled   Boolean         @default(true)
+  parentId  String?
+  menu      NavigationMenu  @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parent    NavigationItem? @relation("NavChildren", fields: [parentId], references: [id])
+  children  NavigationItem[] @relation("NavChildren")
+
+  @@index([menuId, sortOrder])
+}
+
+model HomepageSection {
+  id        String              @id @default(cuid())
+  type      HomepageSectionType
+  title     String?
+  subtitle  String?
+  body      String?             @db.Text
+  imageUrl  String?
+  ctaLabel  String?
+  ctaHref   String?
+  payload   Json?
+  sortOrder Int                 @default(0)
+  enabled   Boolean             @default(true)
+  updatedAt DateTime            @updatedAt
+  createdAt DateTime            @default(now())
+
+  @@index([enabled, sortOrder])
+  @@index([type])
 }

@@ -4,9 +4,13 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { rateLimit, clientIp } from "@/lib/security/rate-limit";
 import { writeAuditLog } from "@/lib/security/audit";
+import { getPermissionsForRole, isStaffRole } from "@/lib/auth/permissions";
+
+export type AppRole = Role;
 
 declare module "next-auth" {
   interface Session {
@@ -15,18 +19,20 @@ declare module "next-auth" {
       email: string;
       name?: string | null;
       image?: string | null;
-      role: "CUSTOMER" | "TRADE" | "ADMIN";
+      role: AppRole;
+      permissions: string[];
     };
   }
   interface User {
-    role: "CUSTOMER" | "TRADE" | "ADMIN";
+    role: AppRole;
   }
 }
 
 declare module "@auth/core/jwt" {
   interface JWT {
     id?: string;
-    role?: "CUSTOMER" | "TRADE" | "ADMIN";
+    role?: AppRole;
+    permissions?: string[];
   }
 }
 
@@ -92,13 +98,19 @@ export const authConfig: NextAuthConfig = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        if (isStaffRole(user.role)) {
+          token.permissions = await getPermissionsForRole(user.role);
+        } else {
+          token.permissions = [];
+        }
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = (token.role as "CUSTOMER" | "TRADE" | "ADMIN") ?? "CUSTOMER";
+        session.user.role = (token.role as AppRole) ?? "CUSTOMER";
+        session.user.permissions = token.permissions ?? [];
       }
       return session;
     },

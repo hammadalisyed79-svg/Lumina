@@ -1,4 +1,4 @@
-﻿-- AlterTable
+-- AlterTable
 ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "shopifyProductId" TEXT;
 ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "shopifyHandle" TEXT;
 ALTER TABLE "Product" ADD COLUMN IF NOT EXISTS "sourceTitle" TEXT;

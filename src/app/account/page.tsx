@@ -27,7 +27,9 @@ export default async function AccountIndexPage() {
           </li>
         ))}
       </ul>
-      {session.user.role === "ADMIN" && (
+      {(session.user.role === "ADMIN" ||
+        session.user.role === "SUPER_ADMIN" ||
+        session.user.role === "STAFF") && (
         <Link href="/admin" className="btn-primary mt-8 inline-flex">
           Admin dashboard
         </Link>

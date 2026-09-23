@@ -4,10 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { CartDrawer } from "@/components/cart/CartDrawer";
-import { SearchOverlay } from "@/components/search/SearchOverlay";
+import { StorefrontShell } from "@/components/layout/StorefrontShell";
 import { SITE } from "@/lib/site";
 
 const display = Cormorant_Garamond({
@@ -62,11 +59,7 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
-              <Header />
-              <main className="min-h-[60vh]">{children}</main>
-              <Footer />
-              <CartDrawer />
-              <SearchOverlay />
+              <StorefrontShell>{children}</StorefrontShell>
             </WishlistProvider>
           </CartProvider>
         </AuthProvider>

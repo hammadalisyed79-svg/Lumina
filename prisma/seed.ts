@@ -22,6 +22,13 @@ async function main() {
   await prisma.productRelation.deleteMany();
   await prisma.productImage.deleteMany();
   await prisma.productVariant.deleteMany();
+  await prisma.productShape.deleteMany();
+  await prisma.productFabric.deleteMany();
+  await prisma.productSize.deleteMany();
+  await prisma.productLining.deleteMany();
+  await prisma.productFitting.deleteMany();
+  await prisma.inventoryMovement.deleteMany();
+  await prisma.inventoryItem.deleteMany();
   await prisma.product.deleteMany();
   await prisma.collection.deleteMany();
   await prisma.fabric.deleteMany();
@@ -37,6 +44,13 @@ async function main() {
   await prisma.newsletterSubscriber.deleteMany();
   await prisma.tradeApplication.deleteMany();
   await prisma.bespokeEnquiry.deleteMany();
+  await prisma.contactEnquiry.deleteMany();
+  await prisma.customerNote.deleteMany();
+  await prisma.homepageSection.deleteMany();
+  await prisma.navigationItem.deleteMany();
+  await prisma.navigationMenu.deleteMany();
+  await prisma.rolePermission.deleteMany();
+  await prisma.permission.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.stripeWebhookEvent.deleteMany();
   await prisma.session.deleteMany();
@@ -53,7 +67,7 @@ async function main() {
     data: {
       email: adminEmail,
       name: "Lumina Admin",
-      role: Role.ADMIN,
+      role: Role.SUPER_ADMIN,
       passwordHash,
     },
   });
@@ -480,6 +494,9 @@ async function main() {
       },
     ],
   });
+
+  const { seedPermissions } = await import("../src/lib/auth/permissions");
+  await seedPermissions();
 
   console.log("Seed complete.");
   console.log(`Admin: ${adminEmail} / ${adminPassword}`);

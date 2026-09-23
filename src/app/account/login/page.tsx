@@ -42,6 +42,11 @@ function LoginForm() {
         </button>
       </form>
       <p className="text-sm text-[color:var(--muted)] mt-6">
+        <Link href="/account/forgot-password" className="underline">
+          Forgot password?
+        </Link>
+      </p>
+      <p className="text-sm text-[color:var(--muted)] mt-3">
         New here?{" "}
         <Link href="/account/register" className="underline">
           Create an account
