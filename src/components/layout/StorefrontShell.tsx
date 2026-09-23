@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { SearchOverlay } from "@/components/search/SearchOverlay";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
+import { StudioChat } from "@/components/chat/StudioChat";
 import type { NavLink } from "@/lib/navigation";
 
 export function StorefrontShell({
@@ -28,6 +29,7 @@ export function StorefrontShell({
       <main className="min-h-[60vh]">{children}</main>
       <Footer />
       <WhatsAppFloat />
+      <StudioChat />
       <CartDrawer />
       <SearchOverlay />
     </>
