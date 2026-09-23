@@ -7,6 +7,7 @@ import { ReviewsStrip } from "@/components/home/ReviewsStrip";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
 import { toNumber } from "@/lib/pricing";
 import { isWebImageUrl, shortDisplayTitle } from "@/lib/utils";
+import { COPY } from "@/lib/copy";
 import type { Product, ProductImage, ProductType } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -226,24 +227,23 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-[rgba(28,25,21,0.45)] via-[rgba(28,25,21,0.18)] to-transparent" />
         <div className="relative container-site py-16 md:py-24 text-white max-w-3xl">
           <p className="eyebrow text-white/85 mb-3">
-            {heroPayload.eyebrow || "Lighting · Home decor"}
+            {heroPayload.eyebrow || COPY.hero.eyebrow}
           </p>
           <h1 className="font-display text-5xl md:text-7xl leading-[1.05] mb-3">
-            {heroSection?.title || "Welcome to Lumina Hub"}
+            {heroSection?.title || COPY.hero.title}
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-xl mb-8">
-            {heroSection?.subtitle ||
-              "Where light meets craftsmanship — handmade lampshades, cushions and printed fabrics from our UK studio."}
+            {heroSection?.subtitle || COPY.hero.subtitle}
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href={heroSection?.ctaHref || "/shop/lampshades"} className="btn-primary">
-              {heroSection?.ctaLabel || "Shop now"}
+              {heroSection?.ctaLabel || COPY.hero.cta}
             </Link>
             <Link
               href={heroPayload.secondaryCtaHref || "/about"}
               className="btn-ghost"
             >
-              {heroPayload.secondaryCtaLabel || "Our story"}
+              {heroPayload.secondaryCtaLabel || COPY.hero.secondary}
             </Link>
           </div>
         </div>
@@ -252,14 +252,12 @@ export default async function HomePage() {
       <section className="section-pad container-site">
         <div className="flex items-end justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <p className="eyebrow mb-2">Categories</p>
-            <h2 className="font-display text-4xl md:text-5xl">Shop by shape</h2>
-            <p className="prose-muted mt-2 max-w-lg">
-              Discover premium handmade lamp shades for every space.
-            </p>
+            <p className="eyebrow mb-2">{COPY.shopByShape.eyebrow}</p>
+            <h2 className="font-display text-4xl md:text-5xl">{COPY.shopByShape.title}</h2>
+            <p className="prose-muted mt-2 max-w-lg">{COPY.shopByShape.body}</p>
           </div>
           <Link href="/shop/lampshades" className="text-sm underline hidden sm:inline">
-            Explore our range
+            {COPY.shopByShape.link}
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
@@ -290,14 +288,11 @@ export default async function HomePage() {
       <section className="bg-[color:var(--charcoal)] text-[color:var(--ivory)]">
         <div className="container-site section-pad grid md:grid-cols-2 gap-8 md:gap-10 items-center">
           <div>
-            <p className="eyebrow text-[color:var(--champagne)] mb-3">Made for your room</p>
-            <h2 className="font-display text-4xl md:text-5xl mb-4">Design your shade</h2>
-            <p className="text-white/75 max-w-md mb-6">
-              Explore shape, fabric, size, lining and fitting in the studio tool, then add your
-              configuration to the bag and pay securely with Stripe on this site.
-            </p>
+            <p className="eyebrow text-[color:var(--champagne)] mb-3">{COPY.design.eyebrow}</p>
+            <h2 className="font-display text-4xl md:text-5xl mb-4">{COPY.design.title}</h2>
+            <p className="text-white/75 max-w-md mb-6">{COPY.design.body}</p>
             <Link href="/design-your-shade" className="btn-primary">
-              Start designing
+              {COPY.design.cta}
             </Link>
           </div>
           <div className="relative aspect-[4/3] overflow-hidden bg-[color:var(--ink)]">
@@ -315,11 +310,11 @@ export default async function HomePage() {
       <section className="section-pad container-site">
         <div className="flex items-end justify-between gap-4 mb-6 md:mb-8">
           <div>
-            <p className="eyebrow mb-2">Featured</p>
-            <h2 className="font-display text-4xl md:text-5xl">Drum lampshades</h2>
+            <p className="eyebrow mb-2">{COPY.featured.eyebrow}</p>
+            <h2 className="font-display text-4xl md:text-5xl">{COPY.featured.title}</h2>
           </div>
           <Link href="/shop/lampshades?shape=drum" className="text-sm underline hidden sm:inline">
-            Shop more
+            {COPY.featured.link}
           </Link>
         </div>
         <FeaturedSlider products={selected} />
@@ -336,15 +331,11 @@ export default async function HomePage() {
           />
         </div>
         <div>
-          <p className="eyebrow mb-3">Our story</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-4">Light &amp; texture</h2>
-          <p className="prose-muted max-w-md mb-6">
-            We craft handmade lampshades and lighting, one piece at a time, in the UK. Our
-            studio blends timeless silhouettes with rich textures — velvet, linen and bespoke
-            prints — so your space feels warm, refined and personal.
-          </p>
+          <p className="eyebrow mb-3">{COPY.story.eyebrow}</p>
+          <h2 className="font-display text-4xl md:text-5xl mb-4">{COPY.story.title}</h2>
+          <p className="prose-muted max-w-md mb-6">{COPY.story.body}</p>
           <Link href="/about" className="btn-secondary">
-            Read more
+            {COPY.story.cta}
           </Link>
         </div>
       </section>
@@ -352,8 +343,8 @@ export default async function HomePage() {
       {moodCards.length > 0 && (
       <section className="section-pad bg-[color:var(--stone)]/35">
         <div className="container-site">
-          <p className="eyebrow mb-2">Atmospheres</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">Shop by mood</h2>
+          <p className="eyebrow mb-2">{COPY.mood.eyebrow}</p>
+          <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">{COPY.mood.title}</h2>
           <div className="grid md:grid-cols-3 gap-4 md:gap-5">
             {moodCards.map((m) => (
               <Link
@@ -383,27 +374,26 @@ export default async function HomePage() {
       )}
 
       <section className="section-pad container-site max-w-3xl text-center">
-        <p className="eyebrow mb-3">Editorial</p>
+        <p className="eyebrow mb-3">{COPY.editorial.eyebrow}</p>
         <h2 className="font-display text-4xl md:text-5xl mb-4">
-          {editorialSection?.title || "Light as an interior material"}
+          {editorialSection?.title || COPY.editorial.title}
         </h2>
         <p className="prose-muted text-lg mb-8">
-          {editorialSection?.body ||
-            "We treat fabric, frame and lining as a composition — so each shade feels considered in the room, not merely functional."}
+          {editorialSection?.body || COPY.editorial.body}
         </p>
         <Link href={editorialSection?.ctaHref || "/about"} className="btn-secondary">
-          {editorialSection?.ctaLabel || "Our atelier"}
+          {editorialSection?.ctaLabel || COPY.editorial.cta}
         </Link>
       </section>
 
       <section className="section-pad container-site">
         <div className="flex items-end justify-between mb-6 md:mb-8">
           <div>
-            <p className="eyebrow mb-2">Favourites</p>
-            <h2 className="font-display text-4xl md:text-5xl">Bestsellers</h2>
+            <p className="eyebrow mb-2">{COPY.bestsellers.eyebrow}</p>
+            <h2 className="font-display text-4xl md:text-5xl">{COPY.bestsellers.title}</h2>
           </div>
           <Link href="/shop/bestsellers" className="text-sm underline">
-            Shop all
+            {COPY.bestsellers.link}
           </Link>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -415,8 +405,8 @@ export default async function HomePage() {
 
       <section className="bg-[color:var(--charcoal)] text-white">
         <div className="container-site section-pad">
-          <p className="eyebrow text-[color:var(--champagne)] mb-2">In situ</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">Customer homes</h2>
+          <p className="eyebrow text-[color:var(--champagne)] mb-2">{COPY.homes.eyebrow}</p>
+          <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">{COPY.homes.title}</h2>
           <div className="grid md:grid-cols-3 gap-3 md:gap-4">
             {homeImages.map((src, i) => (
               <div key={`${src}-${i}`} className="relative aspect-[4/5] overflow-hidden">
@@ -434,8 +424,8 @@ export default async function HomePage() {
       </section>
 
       <section className="section-pad container-site">
-        <p className="eyebrow mb-2">Kind words</p>
-        <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">Reviews</h2>
+        <p className="eyebrow mb-2">{COPY.reviews.eyebrow}</p>
+        <h2 className="font-display text-4xl md:text-5xl mb-6 md:mb-8">{COPY.reviews.title}</h2>
         <ReviewsStrip
           reviews={reviews.map((r) => ({
             id: r.id,
@@ -450,14 +440,11 @@ export default async function HomePage() {
 
       <section className="container-site section-pad grid md:grid-cols-2 gap-8 md:gap-10 items-center border-y border-[color:var(--line)]">
         <div>
-          <p className="eyebrow mb-3">Professionals</p>
-          <h2 className="font-display text-4xl md:text-5xl mb-4">Trade programme</h2>
-          <p className="prose-muted max-w-md mb-6">
-            Interior designers and retailers can apply for trade access, project support and
-            priority lead times.
-          </p>
+          <p className="eyebrow mb-3">{COPY.trade.eyebrow}</p>
+          <h2 className="font-display text-4xl md:text-5xl mb-4">{COPY.trade.title}</h2>
+          <p className="prose-muted max-w-md mb-6">{COPY.trade.body}</p>
           <Link href="/trade" className="btn-secondary">
-            Apply for trade
+            {COPY.trade.cta}
           </Link>
         </div>
         <div className="relative aspect-[16/11] overflow-hidden bg-[color:var(--stone)]">
@@ -472,11 +459,9 @@ export default async function HomePage() {
       </section>
 
       <section className="section-pad container-site max-w-xl text-center">
-        <p className="eyebrow mb-3">Stay close</p>
-        <h2 className="font-display text-4xl mb-4">Studio notes</h2>
-        <p className="prose-muted mb-6">
-          New fabrics, seasonal shades and atelier news — a few times a year, never noisy.
-        </p>
+        <p className="eyebrow mb-3">{COPY.newsletter.eyebrow}</p>
+        <h2 className="font-display text-4xl mb-4">{COPY.newsletter.title}</h2>
+        <p className="prose-muted mb-6">{COPY.newsletter.body}</p>
         <NewsletterForm />
       </section>
     </>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { COPY } from "@/lib/copy";
 
 export default function TradePage() {
   const [message, setMessage] = useState("");
@@ -22,30 +23,27 @@ export default function TradePage() {
       setError(data.error || "Submission failed");
       return;
     }
-    setMessage("Thank you — we’ll review your trade application shortly.");
+    setMessage("Thank you — we’ll review your application and reply shortly.");
     e.currentTarget.reset();
   }
 
   return (
     <div className="container-site py-12 max-w-4xl">
-      <p className="eyebrow mb-2">Professionals</p>
-      <h1 className="font-display text-4xl md:text-5xl mb-4">Trade programme</h1>
-      <p className="prose-muted mb-10 max-w-2xl">
-        Interior designers, architects and retailers are welcome to apply. Approved accounts receive
-        trade guidance, project support and priority communication.
-      </p>
+      <p className="eyebrow mb-2">{COPY.tradePage.eyebrow}</p>
+      <h1 className="font-display text-4xl md:text-5xl mb-4">{COPY.tradePage.title}</h1>
+      <p className="prose-muted mb-10 max-w-2xl">{COPY.tradePage.body}</p>
 
       <div className="grid md:grid-cols-3 gap-6 mb-12">
         <div className="border-t border-[color:var(--line)] pt-4">
-          <p className="font-medium mb-2">Project support</p>
+          <p className="font-medium mb-2">Scheme support</p>
           <p className="prose-muted text-sm">
-            Help matching fabrics, shapes and sizes across rooms and schemes.
+            Help matching fabrics, silhouettes and sizes across rooms and client briefs.
           </p>
         </div>
         <div className="border-t border-[color:var(--line)] pt-4">
-          <p className="font-medium mb-2">Priority lead times</p>
+          <p className="font-medium mb-2">Clearer lead times</p>
           <p className="prose-muted text-sm">
-            Clearer scheduling for client deadlines once your account is approved.
+            Priority communication once approved — so deadlines stay realistic.
           </p>
         </div>
         <div className="border-t border-[color:var(--line)] pt-4">

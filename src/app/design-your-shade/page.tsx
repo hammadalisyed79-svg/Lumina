@@ -7,6 +7,7 @@ import { calculateUnitPrice } from "@/lib/pricing";
 import { formatMoney } from "@/lib/utils";
 import { useCart } from "@/components/cart/CartProvider";
 import { SITE } from "@/lib/site";
+import { COPY } from "@/lib/copy";
 
 type Opt = { id: string; slug: string; name: string; priceMod: number; imageUrl?: string; description?: string; diameterCm?: number | null; heightCm?: number | null };
 type Shape = { key: string; name: string; basePrice: number; imageUrl?: string; description?: string };
@@ -94,13 +95,9 @@ export default function DesignYourShadePage() {
 
   return (
     <div className="container-site py-10 md:py-14">
-      <p className="eyebrow mb-2">Configurator</p>
-      <h1 className="font-display text-4xl md:text-5xl mb-3">Design your shade</h1>
-      <p className="prose-muted max-w-xl mb-10">
-        Explore shape, fabric, size, lining and fitting. This studio tool does not add items to
-        checkout yet — configured shades become purchasable once each option maps to a Shopify
-        variant. You can save a design or contact the studio for a quote.
-      </p>
+      <p className="eyebrow mb-2">{COPY.designPage.eyebrow}</p>
+      <h1 className="font-display text-4xl md:text-5xl mb-3">{COPY.designPage.title}</h1>
+      <p className="prose-muted max-w-2xl mb-10">{COPY.designPage.body}</p>
 
       <div className="flex flex-wrap gap-2 mb-10">
         {STEPS.map((label, i) => (

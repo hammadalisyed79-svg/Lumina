@@ -1,7 +1,7 @@
 export const SITE = {
   name: "Lumina Hub",
   legalName: "Lumina Hub Ltd",
-  tagline: "Handmade lampshades & interior textiles",
+  tagline: "Lampshades & textiles, crafted for how light feels",
   domain: "luminahub.co.uk",
   email: "Sales@luminahub.co.uk",
   phone: "+44 7889 451166",
@@ -9,12 +9,11 @@ export const SITE = {
   address: "Electric Parade, Seven Kings, Ilford IG3 8BS, United Kingdom",
   currency: "gbp" as const,
   locale: "en-GB" as const,
-  // Do not advertise free-shipping thresholds until Shopify shipping rules are configured.
   maxContent: "max-w-[1440px]",
 };
 
 export const ANNOUNCEMENT =
-  "Handmade to order in Britain · Secure checkout with Stripe";
+  "Handmade in Britain · Made to order · Quiet luxury for the home";
 
 export const NAV_MEGA = {
   lampshades: {

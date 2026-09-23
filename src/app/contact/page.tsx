@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SITE } from "@/lib/site";
+import { COPY } from "@/lib/copy";
 
 export default function ContactPage() {
   const [message, setMessage] = useState("");
@@ -29,12 +30,9 @@ export default function ContactPage() {
     <div className="container-site py-12">
       <div className="grid md:grid-cols-2 gap-10 md:gap-14 max-w-5xl">
         <div>
-          <p className="eyebrow mb-2">Studio</p>
-          <h1 className="font-display text-4xl md:text-5xl mb-4">Contact</h1>
-          <p className="prose-muted mb-8">
-            Questions about sizing, fabrics or a project? Reach the studio directly or send a note
-            below.
-          </p>
+          <p className="eyebrow mb-2">{COPY.contact.eyebrow}</p>
+          <h1 className="font-display text-4xl md:text-5xl mb-4">{COPY.contact.title}</h1>
+          <p className="prose-muted mb-8">{COPY.contact.body}</p>
           <ul className="space-y-4 text-[15px]">
             <li>
               <span className="eyebrow block mb-1">Email</span>

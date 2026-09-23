@@ -33,11 +33,11 @@ export function NewsletterForm() {
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email address"
+        placeholder="Your email"
         className="input"
       />
       <button type="submit" className="btn-primary whitespace-nowrap">
-        Subscribe
+        Join
       </button>
       {message && (
         <p className={`text-sm sm:col-span-2 ${status === "err" ? "text-red-700" : "text-[color:var(--muted)]"}`}>

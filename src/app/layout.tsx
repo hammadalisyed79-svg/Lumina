@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE.name}`,
   },
   description:
-    "Premium UK handmade lampshades, fabrics, cushions and kits. Design your shade or shop ready-made collections.",
+    "British handmade lampshades, printed fabrics and cushion covers. Design your shade or shop classic forms — velvet, linen and bespoke prints from our UK studio.",
   openGraph: {
     type: "website",
     locale: "en_GB",

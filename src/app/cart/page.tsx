@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatMoney } from "@/lib/utils";
+import { COPY } from "@/lib/copy";
 
 export default function CartPage() {
   const { items, subtotal, updateQty, remove } = useCart();
@@ -12,11 +13,17 @@ export default function CartPage() {
     <div className="container-site py-10 md:py-14">
       <h1 className="font-display text-4xl md:text-5xl mb-8">Shopping bag</h1>
       {items.length === 0 ? (
-        <div className="py-16 text-center">
-          <p className="prose-muted mb-6">Your bag is empty.</p>
-          <Link href="/shop/lampshades" className="btn-primary">
-            Shop lampshades
-          </Link>
+        <div className="py-16 text-center max-w-md mx-auto">
+          <h2 className="font-display text-3xl mb-3">{COPY.cartEmpty.title}</h2>
+          <p className="prose-muted mb-6">{COPY.cartEmpty.body}</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/shop/lampshades" className="btn-primary">
+              {COPY.cartEmpty.cta}
+            </Link>
+            <Link href="/design-your-shade" className="btn-secondary">
+              Design a shade
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid lg:grid-cols-[1fr_320px] gap-12">

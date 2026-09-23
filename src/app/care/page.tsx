@@ -3,28 +3,27 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Care",
-  description: "Care guidance for handmade lampshades and fabrics.",
+  description: "How to care for handmade Lumina Hub lampshades and textiles.",
 };
 
 export default function CarePage() {
   return (
     <div className="container-site section-pad max-w-3xl">
-      <p className="eyebrow mb-3">Guidance</p>
-      <h1 className="font-display text-5xl mb-8">Care</h1>
+      <p className="eyebrow mb-3">Longevity</p>
+      <h1 className="font-display text-5xl mb-4">Care for your shade</h1>
+      <p className="prose-muted text-lg mb-8">
+        A little gentleness keeps fabric, foil and frame looking considered for years. Follow any
+        notes on the product page for special finishes.
+      </p>
       <div className="space-y-6 text-[color:var(--muted)] leading-relaxed">
-        <p>
-          Handmade shades and printed textiles benefit from gentle handling.
-          Always follow product-specific notes on the product page when
-          provided.
-        </p>
         <ul className="list-disc pl-5 space-y-2">
-          <li>Dust with a soft, dry cloth or soft brush.</li>
-          <li>Avoid water, steam and abrasive cleaners on fabric and foil linings.</li>
-          <li>Prefer LED bulbs within the wattage guidance on the product or Terms page.</li>
-          <li>Keep shades clear of open flames and heaters.</li>
+          <li>Dust with a soft, dry cloth or soft brush — never scrub.</li>
+          <li>Keep water, steam and abrasive cleaners away from fabric and foil linings.</li>
+          <li>Prefer LED bulbs within the guidance on the product or Terms page.</li>
+          <li>Keep shades clear of open flames, heaters and direct midday sun when possible.</li>
         </ul>
         <p className="text-sm">
-          Need advice for a specific fabric?{" "}
+          Unsure about a velvet, linen or foil finish?{" "}
           <Link href="/contact" className="underline">
             Ask the studio
           </Link>

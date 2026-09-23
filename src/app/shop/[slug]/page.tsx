@@ -1,10 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { listProductsForShop, getCollectionBySlug } from "@/lib/catalog";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ShopFilters } from "@/components/shop/ShopFilters";
 import { ShopPagination } from "@/components/shop/ShopPagination";
 import { ProductType } from "@prisma/client";
-import type { Metadata } from "next";
+import { COPY } from "@/lib/copy";
 
 export const dynamic = "force-dynamic";
 
@@ -78,16 +79,16 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
           <p className="prose-muted">{collection.description}</p>
         )}
         {type === "LAMPSHADE" && (
-          <p className="prose-muted">Handmade lampshades in classic British forms.</p>
+          <p className="prose-muted">{COPY.shopIntros.LAMPSHADE}</p>
         )}
         {type === "FABRIC" && (
-          <p className="prose-muted">Printed and woven textiles for interiors.</p>
+          <p className="prose-muted">{COPY.shopIntros.FABRIC}</p>
         )}
         {type === "CUSHION" && (
-          <p className="prose-muted">Cushion covers made to order.</p>
+          <p className="prose-muted">{COPY.shopIntros.CUSHION}</p>
         )}
         {type === "KIT" && (
-          <p className="prose-muted">Lampshade kits for makers.</p>
+          <p className="prose-muted">{COPY.shopIntros.KIT}</p>
         )}
       </div>
       <ShopFilters slug={slug} current={sp} showShape={showShape} />

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SITE } from "@/lib/site";
+import { COPY } from "@/lib/copy";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
 
 export function Footer() {
@@ -8,10 +9,7 @@ export function Footer() {
       <div className="container-site section-pad grid gap-12 md:grid-cols-4">
         <div className="md:col-span-2">
           <p className="font-display text-3xl mb-3">{SITE.name}</p>
-          <p className="prose-muted max-w-md">
-            Handmade lampshades and interior textiles, made to order in Britain. Quiet materials,
-            considered proportions, lasting light.
-          </p>
+          <p className="prose-muted max-w-md">{COPY.footer.blurb}</p>
           <ul className="mt-5 space-y-1 text-sm text-[color:var(--muted)]">
             <li>
               <a href={`mailto:${SITE.email}`} className="hover:text-[color:var(--ink)]">
@@ -39,7 +37,7 @@ export function Footer() {
             <li>{SITE.address}</li>
           </ul>
           <div className="mt-8 max-w-md">
-            <p className="eyebrow mb-3">Newsletter</p>
+            <p className="eyebrow mb-3">{COPY.footer.newsletter}</p>
             <NewsletterForm />
           </div>
         </div>

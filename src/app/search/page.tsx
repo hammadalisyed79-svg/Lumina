@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listProductsForShop } from "@/lib/catalog";
 import { ProductCard } from "@/components/shop/ProductCard";
+import { COPY } from "@/lib/copy";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ export default async function SearchPage({ searchParams }: Props) {
 
       {!query && (
         <div className="max-w-2xl">
-          <p className="prose-muted mb-4">Try a colour, pattern or shape — or browse:</p>
+          <p className="prose-muted mb-4">{COPY.searchEmpty}</p>
           <div className="flex flex-wrap gap-2">
             {SUGGESTIONS.map((s) => (
               <Link key={s.href} href={s.href} className="btn-secondary text-sm">
