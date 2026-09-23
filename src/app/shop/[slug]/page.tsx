@@ -48,12 +48,14 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
   });
 
   // mood routes like linen-calm, botanical, bestsellers, new
+  const typeTitles: Partial<Record<ProductType, string>> = {
+    LAMPSHADE: "Lampshades",
+    FABRIC: "Fabrics",
+    CUSHION: "Cushions",
+    KIT: "Kits",
+  };
   const title =
-    (type
-      ? { LAMPSHADE: "Lampshades", FABRIC: "Fabrics", CUSHION: "Cushions", KIT: "Kits" }[
-          type
-        ]
-      : null) ||
+    (type ? typeTitles[type] : null) ||
     collection?.title ||
     slug.replace(/-/g, " ");
 
