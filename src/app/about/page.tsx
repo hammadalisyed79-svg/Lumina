@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { MediaImage } from "@/components/media/MediaImage";
 import Link from "next/link";
 import { SITE } from "@/lib/site";
 import { COPY } from "@/lib/copy";
@@ -25,13 +25,12 @@ export default function AboutPage() {
           </div>
         </div>
         <div className="relative aspect-[4/5] overflow-hidden bg-[color:var(--stone)]">
-          <Image
+          <MediaImage
             src="/media/homepage/story-craft.png"
             alt="Lumina Hub handmade lampshades in an interior"
             fill
             className="object-cover object-center"
             sizes="(max-width:768px) 100vw, 50vw"
-            priority
           />
         </div>
       </div>

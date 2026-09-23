@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { MediaImage } from "@/components/media/MediaImage";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useCart } from "@/components/cart/CartProvider";
@@ -58,7 +58,13 @@ export function CartDrawer() {
             <div key={item.id} className="flex gap-4">
               <div className="relative h-24 w-20 bg-[color:var(--stone)] shrink-0">
                 {item.imageUrl && (
-                  <Image src={item.imageUrl} alt="" fill unoptimized className="object-cover" />
+                  <MediaImage
+                    src={item.imageUrl}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="80px"
+                  />
                 )}
               </div>
               <div className="flex-1 min-w-0">

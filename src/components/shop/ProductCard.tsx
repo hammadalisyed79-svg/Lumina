@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { formatMoney, shortDisplayTitle } from "@/lib/utils";
 import { useWishlist } from "@/components/wishlist/WishlistProvider";
+import { MediaImage } from "@/components/media/MediaImage";
 
 export type ProductCardData = {
   id: string;
@@ -25,24 +25,22 @@ export function ProductCard({ product }: { product: ProductCardData }) {
     <article className="group">
       <div className="relative aspect-[4/5] bg-stone overflow-hidden">
         <Link href={`/product/${product.slug}`} className="absolute inset-0 block">
-          <Image
+          <MediaImage
             src={product.imageUrl}
             alt={product.title}
             fill
-            unoptimized
             className={`object-cover img-zoom transition-opacity duration-700 ${
               hasHover ? "group-hover:opacity-0" : ""
             }`}
-            sizes="(max-width:768px) 50vw, 25vw"
+            sizes="(max-width:768px) 50vw, (max-width:1200px) 33vw, 25vw"
           />
           {hasHover && (
-            <Image
+            <MediaImage
               src={product.hoverImageUrl!}
               alt=""
               fill
-              unoptimized
               className="object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100"
-              sizes="(max-width:768px) 50vw, 25vw"
+              sizes="(max-width:768px) 50vw, (max-width:1200px) 33vw, 25vw"
             />
           )}
         </Link>

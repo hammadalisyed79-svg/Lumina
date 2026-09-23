@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { MediaImage } from "@/components/media/MediaImage";
 import { FABRIC_FILTERS, fabricFamily, type FabricFamily } from "@/lib/studio/fabric-family";
 import { formatMoney } from "@/lib/utils";
 
@@ -80,11 +80,10 @@ export function FabricSwatchGrid({
               >
                 <div className="relative aspect-square bg-stone">
                   {img ? (
-                    <Image
+                    <MediaImage
                       src={img}
                       alt={f.name}
                       fill
-                      unoptimized
                       className="object-cover"
                       sizes="(max-width:640px) 50vw, 180px"
                     />

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { MediaImage } from "@/components/media/MediaImage";
 import Link from "next/link";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatMoney } from "@/lib/utils";
@@ -33,7 +33,13 @@ export default function CartPage() {
               <div key={item.id} className="flex gap-4 border-b border-line pb-6">
                 <div className="relative h-28 w-24 bg-stone shrink-0">
                   {item.imageUrl && (
-                    <Image src={item.imageUrl} alt="" fill unoptimized className="object-cover" />
+                    <MediaImage
+                      src={item.imageUrl}
+                      alt=""
+                      fill
+                      className="object-cover"
+                      sizes="96px"
+                    />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">

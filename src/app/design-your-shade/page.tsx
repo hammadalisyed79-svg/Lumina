@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import { MediaImage } from "@/components/media/MediaImage";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { calculateUnitPrice } from "@/lib/pricing";
@@ -266,11 +266,10 @@ function DesignStudioInner() {
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
           <div className="lg:sticky lg:top-28 lg:self-start">
             <div className="relative aspect-[4/5] overflow-hidden bg-stone group">
-              <Image
+              <MediaImage
                 src={previewSrc}
                 alt="Shade preview"
                 fill
-                unoptimized
                 className="object-cover object-center img-zoom"
                 sizes="(max-width:1024px) 100vw, 50vw"
               />
@@ -505,11 +504,10 @@ function OptionGrid({
           >
             {o.image && (
               <div className="relative h-28 mb-3 bg-stone overflow-hidden">
-                <Image
+                <MediaImage
                   src={o.image}
                   alt=""
                   fill
-                  unoptimized
                   className="object-cover"
                   sizes="200px"
                 />

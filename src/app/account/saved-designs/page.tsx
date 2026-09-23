@@ -1,7 +1,7 @@
 import { requireUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
-import Image from "next/image";
+import { MediaImage } from "@/components/media/MediaImage";
 import { formatMoney } from "@/lib/utils";
 import { toNumber } from "@/lib/pricing";
 import { EmptyState } from "@/components/commerce/EmptyState";
@@ -91,11 +91,10 @@ export default async function SavedDesignsPage() {
                 <div className="flex gap-4">
                   <div className="relative h-24 w-20 shrink-0 bg-stone overflow-hidden">
                     {imageUrl && (
-                      <Image
+                      <MediaImage
                         src={imageUrl}
                         alt=""
                         fill
-                        unoptimized
                         className="object-cover"
                         sizes="80px"
                       />

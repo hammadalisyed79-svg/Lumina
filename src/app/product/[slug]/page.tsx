@@ -1,10 +1,11 @@
-import Image from "next/image";
+import { MediaImage } from "@/components/media/MediaImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getProductBySlug } from "@/lib/catalog";
 import { toNumber } from "@/lib/pricing";
 import { formatMoney, isWebImageUrl, shortDisplayTitle } from "@/lib/utils";
+import { normalizeImageSrc } from "@/lib/image";
 import { ProductConfigurator } from "@/components/product/ProductConfigurator";
 import { ProductAccordions } from "@/components/product/ProductAccordions";
 import { ProductCard } from "@/components/shop/ProductCard";
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: product.images
         .filter((i) => isWebImageUrl(i.url))
         .slice(0, 1)
-        .map((i) => ({ url: i.url })),
+        .map((i) => ({ url: normalizeImageSrc(i.url) })),
     },
   };
 }
@@ -112,14 +113,19 @@ export default async function ProductPage({ params }: Props) {
                   idx === 0 ? "col-span-2 aspect-[4/5]" : "aspect-square"
                 }`}
               >
-                <Image
+                <MediaImage
                   src={img.url}
                   alt={img.alt || product.title}
                   fill
-                  unoptimized
                   className="object-cover object-center img-zoom"
-                  priority={idx === 0}
-                  sizes="(max-width:1024px) 100vw, 50vw"
+                  {...(idx === 0
+                    ? { priority: true as const }
+                    : { loading: "lazy" as const })}
+                  sizes={
+                    idx === 0
+                      ? "(max-width:1024px) 100vw, 50vw"
+                      : "(max-width:1024px) 50vw, 25vw"
+                  }
                 />
               </div>
             ))}

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { MediaImage } from "@/components/media/MediaImage";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { ProductCard } from "@/components/shop/ProductCard";
@@ -7,6 +7,7 @@ import { ReviewsStrip } from "@/components/home/ReviewsStrip";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
 import { toNumber } from "@/lib/pricing";
 import { isWebImageUrl, shortDisplayTitle } from "@/lib/utils";
+import { normalizeImageSrc } from "@/lib/image";
 import { COPY } from "@/lib/copy";
 import type { Product, ProductImage, ProductType } from "@prisma/client";
 
@@ -15,7 +16,8 @@ export const dynamic = "force-dynamic";
 type ProductWithImages = Product & { images: ProductImage[] };
 
 function firstWebImage(images: { url: string }[]) {
-  return images.find((i) => isWebImageUrl(i.url))?.url || null;
+  const url = images.find((i) => isWebImageUrl(i.url))?.url || null;
+  return url ? normalizeImageSrc(url) : null;
 }
 
 function toCard(p: ProductWithImages) {
@@ -28,7 +30,10 @@ function toCard(p: ProductWithImages) {
     subtitle: p.subtitle,
     basePrice: toNumber(p.basePrice),
     imageUrl,
-    hoverImageUrl: p.images.find((i, idx) => idx > 0 && isWebImageUrl(i.url))?.url,
+    hoverImageUrl: (() => {
+      const h = p.images.find((i, idx) => idx > 0 && isWebImageUrl(i.url))?.url;
+      return h ? normalizeImageSrc(h) : undefined;
+    })(),
   };
 }
 
@@ -216,7 +221,7 @@ export default async function HomePage() {
   return (
     <>
       <section className="relative min-h-[86vh] md:min-h-[92vh] flex items-end md:items-center overflow-hidden bg-ink">
-        <Image
+        <MediaImage
           src={heroImage}
           alt="Lumina Hub handmade lampshades styled in a living room"
           fill
@@ -275,11 +280,10 @@ export default async function HomePage() {
             return (
               <Link key={s.id} href={`/shop/lampshades?shape=${s.key}`} className="group block">
                 <div className="relative aspect-[4/5] overflow-hidden bg-stone mb-3">
-                  <Image
+                  <MediaImage
                     src={src}
                     alt={`${s.name} lampshade`}
                     fill
-                    unoptimized
                     className="object-cover object-center img-zoom"
                     sizes="(max-width:768px) 50vw, 16vw"
                   />
@@ -305,11 +309,10 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="relative aspect-[4/5] md:aspect-[4/3] overflow-hidden bg-ink">
-            <Image
+            <MediaImage
               src={designImage}
               alt="Handmade lampshade designed in the Lumina studio"
               fill
-              unoptimized
               className="object-cover object-center"
               sizes="(max-width:768px) 100vw, 50vw"
             />
@@ -335,11 +338,10 @@ export default async function HomePage() {
 
       <section className="container-site section-pad grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <div className="relative aspect-[4/5] overflow-hidden bg-stone order-2 md:order-1">
-          <Image
+          <MediaImage
             src={storyImage}
             alt="Lumina Hub craftsmanship — shades bringing spaces to life"
             fill
-            unoptimized
             className="object-cover object-center"
             sizes="(max-width:768px) 100vw, 50vw"
           />
@@ -367,11 +369,10 @@ export default async function HomePage() {
                   href={`/shop/${m.slug}`}
                   className="group relative aspect-[5/6] overflow-hidden bg-stone"
                 >
-                  <Image
+                  <MediaImage
                     src={m.imageUrl}
                     alt={m.title}
                     fill
-                    unoptimized
                     className="object-cover object-center img-zoom"
                     sizes="(max-width:768px) 100vw, 33vw"
                   />
@@ -432,11 +433,10 @@ export default async function HomePage() {
           <div className="grid md:grid-cols-3 gap-3 md:gap-4">
             {homeImages.map((src, i) => (
               <div key={`${src}-${i}`} className="relative aspect-[4/5] overflow-hidden group">
-                <Image
+                <MediaImage
                   src={src}
                   alt="Lumina Hub lampshade in an interior setting"
                   fill
-                  unoptimized
                   className="object-cover object-center img-zoom"
                   sizes="(max-width:768px) 100vw, 33vw"
                 />
@@ -473,11 +473,10 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="relative aspect-[16/11] overflow-hidden bg-stone">
-            <Image
+            <MediaImage
               src={tradeImage}
               alt="Lumina Hub trade and project shades"
               fill
-              unoptimized
               className="object-cover object-center"
               sizes="(max-width:768px) 100vw, 50vw"
             />
