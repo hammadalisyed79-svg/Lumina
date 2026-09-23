@@ -187,6 +187,25 @@ export default function CheckoutClient() {
     }
   }
 
+  const cancelledParam = searchParams.get("cancelled");
+  const failedParam = searchParams.get("failed");
+
+  if (items.length === 0 && (failedParam || cancelledParam)) {
+    const failed = Boolean(failedParam);
+    const copy = failed ? COPY.paymentFailed : COPY.paymentCancelled;
+    return (
+      <div className="container-site section-pad">
+        <EmptyState
+          eyebrow={failed ? "Payment" : "Checkout"}
+          title={copy.title}
+          body={copy.body}
+          primary={{ href: "/cart", label: "View bag" }}
+          secondary={{ href: "/shop/lampshades", label: "Continue shopping" }}
+        />
+      </div>
+    );
+  }
+
   if (items.length === 0 && !notice && !error) {
     return (
       <div className="container-site section-pad">

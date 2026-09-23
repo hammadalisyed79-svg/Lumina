@@ -48,7 +48,7 @@ export default async function AccountOrdersPage() {
               <div className="flex flex-wrap justify-between gap-4">
                 <div>
                   <Link
-                    href={`/order/${o.orderNumber}`}
+                    href={`/account/orders/${o.orderNumber}`}
                     className="font-medium underline underline-offset-4 hover:text-bronze"
                   >
                     {o.orderNumber}

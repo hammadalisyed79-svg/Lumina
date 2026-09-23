@@ -93,11 +93,19 @@ export function calculateOrderTotals(args: {
   const subtotal = roundMoney(
     args.lines.reduce((sum, line) => sum + calculateLineTotal(line), 0),
   );
-  const { discount } = applyCoupon(subtotal, args.coupon);
+  const applied = applyCoupon(subtotal, args.coupon);
+  const discount = applied.valid ? applied.discount : 0;
   const afterDiscount = roundMoney(Math.max(0, subtotal - discount));
-  // Local estimate only; Shopify checkout remains SoT for live shipping.
   const shippingTotal = calculateShipping(afterDiscount, args.shipping);
   const taxTotal = 0;
   const total = roundMoney(afterDiscount + shippingTotal + taxTotal);
-  return { subtotal, discountTotal: discount, shippingTotal, taxTotal, total };
+  return {
+    subtotal,
+    discountTotal: discount,
+    shippingTotal,
+    taxTotal,
+    total,
+    couponValid: applied.valid,
+    couponReason: applied.reason,
+  };
 }

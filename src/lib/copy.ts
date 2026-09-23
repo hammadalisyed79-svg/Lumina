@@ -261,4 +261,16 @@ export const COPY = {
     cancelled: "Checkout was cancelled. No payment was taken — your bag is unchanged.",
     failed: "Payment was not completed. Your bag is unchanged; you can try again when ready.",
   },
+
+  paymentFailed: {
+    title: "Payment not completed",
+    body: "No charge was taken. Return to checkout when you are ready, or continue browsing the catalogue.",
+    cta: "Back to checkout",
+  },
+
+  paymentCancelled: {
+    title: "Checkout cancelled",
+    body: "No payment was taken. Your bag is unchanged — you can resume whenever you like.",
+    cta: "Back to checkout",
+  },
 };

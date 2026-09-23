@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { prisma } from "@/lib/db";
 import { listProductsForShop, getCollectionBySlug } from "@/lib/catalog";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ShopFilters } from "@/components/shop/ShopFilters";
@@ -12,6 +13,7 @@ import {
   breadcrumbJsonLd,
 } from "@/lib/seo/json-ld";
 import { normalizeImageSrc } from "@/lib/image";
+import { isWebImageUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +28,28 @@ type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<Record<string, string | undefined>>;
 };
+
+async function resolveShopOgImage(slug: string, collectionImageUrl?: string | null) {
+  if (collectionImageUrl && isWebImageUrl(collectionImageUrl)) {
+    return normalizeImageSrc(collectionImageUrl);
+  }
+  const type = TYPE_MAP[slug];
+  const product = await prisma.product.findFirst({
+    where: {
+      published: true,
+      ...(type
+        ? { type }
+        : {
+            collections: { some: { collection: { slug } } },
+          }),
+      images: { some: { NOT: { url: { contains: ".heic" } } } },
+    },
+    include: { images: { orderBy: { sortOrder: "asc" }, take: 3 } },
+    orderBy: [{ featured: "desc" }, { updatedAt: "desc" }],
+  });
+  const url = product?.images.find((i) => isWebImageUrl(i.url))?.url;
+  return url ? normalizeImageSrc(url) : DEFAULT_OG_IMAGE;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -44,9 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     typeMeta?.description ||
     COPY.metaDescription;
 
-  const ogImage = collection?.imageUrl
-    ? normalizeImageSrc(collection.imageUrl)
-    : DEFAULT_OG_IMAGE;
+  const ogImage = await resolveShopOgImage(slug, collection?.imageUrl);
 
   return {
     title,
