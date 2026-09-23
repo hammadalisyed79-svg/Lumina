@@ -3,19 +3,20 @@ export const SITE = {
   legalName: "Lumina Hub Ltd",
   tagline: "Handmade lampshades & interior textiles",
   domain: "luminahub.co.uk",
-  email: "hello@luminahub.co.uk",
-  phone: "+44 20 0000 0000",
-  whatsapp: "https://wa.me/447000000000",
-  address: "Made in the United Kingdom",
+  email: "Sales@luminahub.co.uk",
+  phone: "+44 7889 451166",
+  whatsapp: "https://wa.me/447889451166",
+  address: "Electric Parade, Seven Kings, Ilford IG3 8BS, United Kingdom",
   currency: "gbp" as const,
   locale: "en-GB" as const,
+  // Provisional UI defaults only — replace with Shopify shipping settings before launch.
   freeShippingFrom: 75,
   defaultShipping: 4.95,
   maxContent: "max-w-[1440px]",
 };
 
 export const ANNOUNCEMENT =
-  "Complimentary UK mainland delivery on orders over £75 · Made to order in Britain";
+  "Handmade to order in Britain · Delivery options confirmed at checkout";
 
 export const NAV_MEGA = {
   lampshades: {

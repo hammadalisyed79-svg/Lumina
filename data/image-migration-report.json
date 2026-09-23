@@ -1,0 +1,12 @@
+{
+  "completedAt": "2026-09-23T06:33:51.710Z",
+  "totals": {
+    "jobs": 1243,
+    "downloaded": 1243,
+    "skippedExisting": 0,
+    "failed": 0
+  },
+  "heicCount": 3,
+  "failures": [],
+  "note": "HEIC files downloaded for archive but browsers need converted JPG/WebP for display."
+}

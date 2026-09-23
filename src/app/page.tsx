@@ -48,26 +48,30 @@ export default async function HomePage() {
   return (
     <>
       {/* 1 Hero */}
-      <section className="relative min-h-[88vh] flex items-end overflow-hidden">
+      <section className="relative min-h-[88vh] flex items-end overflow-hidden bg-[color:var(--ink)]">
         <Image
-          src="/demo-assets/lifestyle/hero.svg"
-          alt="Handmade lampshade in a British interior"
+          src="/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg"
+          alt="Handmade teal and gold velvet drum lampshade"
           fill
           priority
-          className="object-cover"
+          className="object-cover object-center"
+          sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(28,25,21,0.55)] via-[rgba(28,25,21,0.15)] to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(28,25,21,0.72)] via-[rgba(28,25,21,0.28)] to-[rgba(28,25,21,0.12)]" />
         <div className="relative container-site pb-16 md:pb-24 text-white max-w-3xl">
-          <p className="font-display text-5xl md:text-7xl leading-[1.05] mb-4">Lumina Hub</p>
+          <h1 className="font-display text-5xl md:text-7xl leading-[1.05] mb-4">
+            Light, made personal.
+          </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-xl mb-8">
-            Handmade lampshades and interior textiles, crafted to order in Britain.
+            Handcrafted lampshades, expressive fabrics and bespoke finishes made for
+            interiors with character.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/shop/lampshades" className="btn-primary">
+            <Link href="/shop/drum" className="btn-primary">
               Shop lampshades
             </Link>
             <Link href="/design-your-shade" className="btn-ghost">
-              Design your shade
+              Design your own
             </Link>
           </div>
         </div>

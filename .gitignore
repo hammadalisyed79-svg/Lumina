@@ -28,10 +28,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files (keep example)
 .env
 .env.local
 .env.*.local
+.env.vercel
+.env.production.local
 !.env.example
 
 # vercel
@@ -49,3 +51,6 @@ data/*.db
 data/*.db-*
 data/products-raw.json
 data/luminahub.db
+data/catalog-zip-inspect/
+
+# optional large raw dumps (catalog JSON + media are kept)

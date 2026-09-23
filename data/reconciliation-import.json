@@ -1,0 +1,33 @@
+{
+  "importedAt": "2026-09-23T06:37:40.550Z",
+  "source": "https://www.luminahub.co.uk/products.json",
+  "authority": "PRELIMINARY — public products.json; Admin API required for authoritative migration",
+  "sourceCounts": {
+    "products": 179,
+    "variants": 25468,
+    "images": 1243,
+    "heicImages": 3,
+    "categories": {
+      "fabrics": 27,
+      "rectangular": 12,
+      "drum": 95,
+      "lampshade-kits": 4,
+      "cushion-covers": 23,
+      "empire": 1,
+      "foil-lined": 6,
+      "square": 3,
+      "oval": 3,
+      "coolie": 1,
+      "lampshades": 1,
+      "linen-lampshades": 3
+    }
+  },
+  "imported": {
+    "products": 179,
+    "variants": 25468,
+    "images": 1243,
+    "collections": 12,
+    "missingLocalImages": 0
+  },
+  "failures": []
+}

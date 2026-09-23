@@ -1,0 +1,34 @@
+{
+  "fetchedAt": "2026-09-23T06:32:41.995Z",
+  "sourceCounts": {
+    "products": 179,
+    "variants": 25468,
+    "images": 1243,
+    "heicImages": 3,
+    "categories": {
+      "fabrics": 27,
+      "rectangular": 12,
+      "drum": 95,
+      "lampshade-kits": 4,
+      "cushion-covers": 23,
+      "empire": 1,
+      "foil-lined": 6,
+      "square": 3,
+      "oval": 3,
+      "coolie": 1,
+      "lampshades": 1,
+      "linen-lampshades": 3
+    }
+  },
+  "notes": [
+    "Public products.json does not include draft/archived products.",
+    "Variant option semantics may be incomplete vs Admin API.",
+    "HEIC files require conversion before web display.",
+    "Etsy unique items not included until authorized export provided."
+  ],
+  "heicSample": [
+    "https://cdn.shopify.com/s/files/1/0926/4408/2042/files/IMG-7374.heic?v=1779627184",
+    "https://cdn.shopify.com/s/files/1/0926/4408/2042/files/FullSizeRender.heic?v=1779627185",
+    "https://cdn.shopify.com/s/files/1/0926/4408/2042/files/FullSizeRender_880f408f-550b-45e2-be34-b1b51908dcbf.heic?v=1779627185"
+  ]
+}

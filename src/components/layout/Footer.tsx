@@ -31,6 +31,9 @@ export function Footer() {
           <p className="eyebrow mb-4">Studio</p>
           <ul className="space-y-2 text-[15px]">
             <li><Link href="/about">About</Link></li>
+            <li><Link href="/faq">FAQ</Link></li>
+            <li><Link href="/care">Care</Link></li>
+            <li><Link href="/size-guide">Size &amp; fitting</Link></li>
             <li><Link href="/trade">Trade</Link></li>
             <li><Link href="/bespoke">Bespoke</Link></li>
             <li><Link href="/contact">Contact</Link></li>
@@ -40,7 +43,13 @@ export function Footer() {
       </div>
       <div className="container-site py-6 border-t border-[color:var(--line)] flex flex-col md:flex-row gap-3 justify-between text-sm text-[color:var(--muted)]">
         <p>© {new Date().getFullYear()} {SITE.legalName}. All rights reserved.</p>
-        <p>Made in the United Kingdom</p>
+        <div className="flex flex-wrap gap-4">
+          <Link href="/shipping">Shipping</Link>
+          <Link href="/refunds">Refunds</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
+          <span>Made in the United Kingdom</span>
+        </div>
       </div>
     </footer>
   );

@@ -245,7 +245,82 @@ export async function POST(req: Request) {
     meta: { orderNumber: number, total: totals.total },
   });
 
-  // Stripe Checkout Session when configured
+  // Prefer Shopify hosted checkout when Storefront API is configured (brief SoT).
+  const { createShopifyCheckout, isShopifyConfigured, variantGid } = await import(
+    "@/lib/shopify"
+  );
+  if (isShopifyConfigured()) {
+    const shopifyLines = [];
+    for (const l of pricedLines) {
+      if (!l.variantId) continue;
+      const variant = await prisma.productVariant.findUnique({
+        where: { id: l.variantId },
+      });
+      const shopifyId = variant?.shopifyVariantId;
+      if (!shopifyId) {
+        return NextResponse.json(
+          {
+            error:
+              "Checkout blocked: a line item is missing Shopify variant mapping. Provide Storefront/Admin sync.",
+            orderNumber: order.orderNumber,
+          },
+          { status: 409 }
+        );
+      }
+      shopifyLines.push({
+        merchandiseId: variantGid(shopifyId),
+        quantity: l.quantity,
+        attributes: l.configJson
+          ? Object.entries(l.configJson as Record<string, string>).map(([key, value]) => ({
+              key,
+              value: String(value),
+            }))
+          : undefined,
+      });
+    }
+    if (!shopifyLines.length) {
+      return NextResponse.json(
+        {
+          error:
+            "Shopify checkout requires product variants with shopifyVariantId. Configurator-only lines need Shopify custom products.",
+          orderNumber: order.orderNumber,
+        },
+        { status: 409 }
+      );
+    }
+    try {
+      const cart = await createShopifyCheckout(shopifyLines);
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          status: "AWAITING_PAYMENT",
+          paymentStatus: "PENDING",
+          events: {
+            create: {
+              type: "shopify_checkout",
+              message: `Redirecting to Shopify cart ${cart.id}`,
+            },
+          },
+        },
+      });
+      return NextResponse.json({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        url: cart.checkoutUrl,
+        mode: "shopify",
+      });
+    } catch (e) {
+      return NextResponse.json(
+        {
+          error: e instanceof Error ? e.message : "Shopify checkout failed",
+          orderNumber: order.orderNumber,
+        },
+        { status: 502 }
+      );
+    }
+  }
+
+  // Legacy Stripe path only when explicitly configured (not the brief SoT).
   if (isStripeConfigured()) {
     const stripe = getStripe()!;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -277,18 +352,11 @@ export async function POST(req: Request) {
           },
         },
       ],
-      discounts:
-        toNumber(order.discountTotal) > 0
-          ? undefined
-          : undefined,
       success_url: `${siteUrl}/order/${order.orderNumber}?success=1`,
       cancel_url: `${siteUrl}/checkout?cancelled=1`,
       metadata: { orderId: order.id, orderNumber: order.orderNumber },
     });
 
-    // Adjust: if discount, add negative line via metadata only — apply by reducing via coupon in totals already.
-    // Stripe session total may not include discount if we use line_items only — recalculate by adjusting.
-    // For accuracy with discounts, use payment_intent amount via custom: recreate with adjusted last item.
     await prisma.order.update({
       where: { id: order.id },
       data: { stripeSessionId: checkoutSession.id },
@@ -302,41 +370,20 @@ export async function POST(req: Request) {
     });
   }
 
-  // Dev / no-Stripe path: mark paid for local testing
-  await prisma.order.update({
-    where: { id: order.id },
-    data: {
-      status: "PAID",
-      paymentStatus: "PAID",
-      events: { create: { type: "paid_dev", message: "Marked paid (Stripe not configured)" } },
-    },
-  });
-
-  const itemsHtml = order.items
-    .map(
-      (i) =>
-        `<p>${i.quantity}× ${i.title} — ${formatMoney(i.lineTotal)}${
-          i.configJson ? `<br/><small>${JSON.stringify(i.configJson)}</small>` : ""
-        }</p>`,
-    )
-    .join("");
-
-  await sendEmail({
-    to: order.email,
-    subject: `Order confirmed ${order.orderNumber}`,
-    html: orderConfirmationHtml({
+  // Do not fake a paid order — surface the credential blocker clearly.
+  return NextResponse.json(
+    {
+      error:
+        "Checkout is not live: set SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN for Shopify hosted checkout (preferred), or Stripe keys for interim card checkout.",
+      orderId: order.id,
       orderNumber: order.orderNumber,
-      email: order.email,
-      total: formatMoney(order.total),
-      itemsHtml,
-      configNote: "Your configuration details are saved with this order.",
-    }),
-  });
-
-  return NextResponse.json({
-    orderId: order.id,
-    orderNumber: order.orderNumber,
-    url: `/order/${order.orderNumber}?success=1`,
-    mode: "dev",
-  });
+      mode: "blocked",
+      blockers: [
+        "SHOPIFY_STORE_DOMAIN",
+        "SHOPIFY_STOREFRONT_TOKEN",
+        "Verified shipping rates in Shopify",
+      ],
+    },
+    { status: 503 }
+  );
 }

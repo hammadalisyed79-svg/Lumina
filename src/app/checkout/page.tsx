@@ -70,7 +70,14 @@ export default function CheckoutPage() {
     const data = await res.json();
     setLoading(false);
     if (!res.ok) {
-      setError(data.error || "Checkout failed");
+      const blockers = Array.isArray(data.blockers)
+        ? `\nRequired: ${data.blockers.join(", ")}`
+        : "";
+      setError(`${data.error || "Checkout failed"}${blockers}`);
+      return;
+    }
+    if (data.mode === "blocked") {
+      setError(data.error || "Checkout is not configured");
       return;
     }
     clear();
@@ -133,10 +140,18 @@ export default function CheckoutPage() {
             />
           </label>
 
-          {error && <p className="text-sm text-red-700">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-700 whitespace-pre-wrap border border-red-200 bg-red-50 p-3">
+              {error}
+            </p>
+          )}
           <button type="submit" className="btn-primary w-full" disabled={loading}>
-            {loading ? "Processing…" : "Place order"}
+            {loading ? "Processing…" : "Continue to secure checkout"}
           </button>
+          <p className="text-xs text-[color:var(--muted)]">
+            Live payments require Shopify Storefront checkout credentials. Until those are
+            set, checkout will explain what is missing instead of simulating a paid order.
+          </p>
         </form>
       </div>
       <aside className="border border-[color:var(--line)] p-6 h-fit bg-white/60">
