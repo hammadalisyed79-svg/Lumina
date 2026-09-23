@@ -485,7 +485,7 @@ a {
   transform: scale(1.04);
 }
 
-/* —— Admin back-office (atelier-aligned) —— */
+/* â€"â€" Admin back-office (atelier-aligned) â€"â€" */
 .admin-app {
   --admin-bg: #ece8e1;
   --admin-panel: #f8f6f1;
@@ -1164,7 +1164,7 @@ a {
   text-underline-offset: 3px;
 }
 
-/* Shop discovery � sticky bar + mobile filter drawer */
+/* Shop discovery - sticky bar + mobile filter drawer */
 .shop-filter-bar {
   position: sticky;
   top: 5.5rem;
