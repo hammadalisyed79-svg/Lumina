@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getProductBySlug } from "@/lib/catalog";
 import { toNumber } from "@/lib/pricing";
-import { formatMoney } from "@/lib/utils";
+import { formatMoney, isWebImageUrl, shortDisplayTitle } from "@/lib/utils";
 import { ProductConfigurator } from "@/components/product/ProductConfigurator";
 import { ProductAccordions } from "@/components/product/ProductAccordions";
 import { ProductCard } from "@/components/shop/ProductCard";
@@ -23,7 +23,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: product.seoTitle || product.title,
     description: product.seoDesc || product.shortDesc || undefined,
     openGraph: {
-      images: product.images[0]?.url ? [{ url: product.images[0].url }] : [],
+      images: product.images
+        .filter((i) => isWebImageUrl(i.url))
+        .slice(0, 1)
+        .map((i) => ({ url: i.url })),
     },
   };
 }
@@ -33,22 +36,41 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const related = product.relatedFrom.map((r) => ({
-    id: r.to.id,
-    slug: r.to.slug,
-    title: r.to.title,
-    subtitle: r.to.subtitle,
-    basePrice: toNumber(r.to.basePrice),
-    imageUrl: r.to.images[0]?.url || "/demo-assets/products/placeholder.svg",
-    hoverImageUrl: r.to.images[1]?.url,
-  }));
+  const gallery = product.images.filter((i) => isWebImageUrl(i.url));
+  const primaryImage = gallery[0]?.url;
+
+  const related = product.relatedFrom
+    .map((r) => {
+      const imageUrl = r.to.images.find((i) => isWebImageUrl(i.url))?.url;
+      if (!imageUrl) return null;
+      return {
+        id: r.to.id,
+        slug: r.to.slug,
+        title: r.to.title,
+        subtitle: r.to.subtitle,
+        basePrice: toNumber(r.to.basePrice),
+        imageUrl,
+        hoverImageUrl: r.to.images.find(
+          (i, idx) => idx > 0 && isWebImageUrl(i.url)
+        )?.url,
+      };
+    })
+    .filter(Boolean) as {
+    id: string;
+    slug: string;
+    title: string;
+    subtitle: string | null;
+    basePrice: number;
+    imageUrl: string;
+    hoverImageUrl?: string;
+  }[];
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.title,
     description: product.shortDesc || product.description,
-    image: product.images.map((i) => i.url),
+    image: gallery.map((i) => i.url),
     brand: { "@type": "Brand", name: SITE.name },
     offers: {
       "@type": "Offer",
@@ -59,31 +81,34 @@ export default async function ProductPage({ params }: Props) {
   };
 
   return (
-    <div className="container-site py-10 md:py-14">
+    <div className="container-site py-8 md:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <nav className="text-sm text-[color:var(--muted)] mb-6">
+      <nav className="text-sm text-[color:var(--muted)] mb-4 md:mb-6">
         <Link href="/">Home</Link>
         <span className="mx-2">/</span>
         <Link href="/shop/lampshades">Shop</Link>
         <span className="mx-2">/</span>
-        <span className="text-[color:var(--ink)]">{product.title}</span>
+        <span className="text-[color:var(--ink)]">{shortDisplayTitle(product.title, 40)}</span>
       </nav>
 
-      <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
+      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
         <div className="grid grid-cols-2 gap-3">
-          {(product.images.length ? product.images : [{ id: "ph", url: "/demo-assets/products/placeholder.svg", alt: product.title }]).map((img, idx) => (
+          {(gallery.length
+            ? gallery
+            : [{ id: "ph", url: primaryImage || "/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg", alt: product.title }]
+          ).map((img, idx) => (
             <div
               key={img.id}
-              className={`relative bg-[color:var(--stone)] ${idx === 0 ? "col-span-2 aspect-[4/5]" : "aspect-square"}`}
+              className={`relative overflow-hidden bg-[color:var(--stone)] ${idx === 0 ? "col-span-2 aspect-[4/5]" : "aspect-square"}`}
             >
               <Image
                 src={img.url}
                 alt={img.alt || product.title}
                 fill
-                className="object-cover"
+                className="object-cover object-center"
                 priority={idx === 0}
                 sizes="(max-width:1024px) 100vw, 50vw"
               />
@@ -105,7 +130,7 @@ export default async function ProductPage({ params }: Props) {
               slug: product.slug,
               title: product.title,
               basePrice: toNumber(product.basePrice),
-              imageUrl: product.images[0]?.url,
+              imageUrl: primaryImage || gallery[0]?.url,
               configEnabled: product.configEnabled,
               type: product.type,
               shapeKey: product.shapeKey,

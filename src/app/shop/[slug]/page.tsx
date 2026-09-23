@@ -56,15 +56,15 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
         <span className="mx-2">/</span>
         <span className="text-[color:var(--ink)] capitalize">{title}</span>
       </nav>
-      <div className="mb-10 max-w-2xl">
+      <div className="mb-6 md:mb-8 max-w-2xl">
         <h1 className="font-display text-4xl md:text-5xl capitalize mb-3">{title}</h1>
         {collection?.description && (
           <p className="prose-muted">{collection.description}</p>
         )}
       </div>
       <ShopFilters slug={slug} current={sp} showShape={slug === "lampshades" || !!TYPE_MAP[slug] === false} />
-      <p className="text-sm text-[color:var(--muted)] mb-6">{products.length} pieces</p>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-8">
+      <p className="text-sm text-[color:var(--muted)] mb-4">{products.length} pieces</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}

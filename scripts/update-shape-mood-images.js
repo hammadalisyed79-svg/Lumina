@@ -22,12 +22,14 @@ async function main() {
     console.log(key, url);
   }
 
-  for (const slug of ["linen-calm", "botanical", "bestsellers"]) {
+  const moodOrder = ["bestsellers", "botanical", "linen-calm"];
+  const used = new Set();
+  for (const slug of moodOrder) {
     const col = await prisma.collection.findUnique({
       where: { slug },
       include: {
         products: {
-          take: 8,
+          take: 12,
           include: {
             product: { include: { images: { orderBy: { sortOrder: "asc" }, take: 4 } } },
           },
@@ -36,8 +38,18 @@ async function main() {
     });
     let url = null;
     for (const row of col?.products || []) {
-      url = web(row.product.images);
-      if (url) break;
+      const candidate = web(row.product.images);
+      if (candidate && !used.has(candidate)) {
+        url = candidate;
+        used.add(candidate);
+        break;
+      }
+    }
+    if (!url) {
+      for (const row of col?.products || []) {
+        url = web(row.product.images);
+        if (url) break;
+      }
     }
     if (url) {
       await prisma.collection.update({ where: { slug }, data: { imageUrl: url } });

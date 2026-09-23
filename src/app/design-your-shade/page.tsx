@@ -59,6 +59,18 @@ export default function DesignYourShadePage() {
     });
   }, [shape, fabric, size, lining, fitting]);
 
+  const previewSrc = (() => {
+    const fabricUrl = fabric?.imageUrl;
+    const shapeUrl = shape?.imageUrl;
+    if (fabricUrl && !fabricUrl.includes("demo-assets")) return fabricUrl;
+    if (shapeUrl && !shapeUrl.includes("demo-assets")) return shapeUrl;
+    return (
+      shapes.find((s) => s.imageUrl && !s.imageUrl.includes("demo-assets"))
+        ?.imageUrl ||
+      "/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg"
+    );
+  })();
+
   async function saveDesign() {
     if (!shape || !fabric || !size || !lining || !fitting) return;
     const res = await fetch("/api/saved-designs", {
@@ -107,10 +119,10 @@ export default function DesignYourShadePage() {
       <div className="grid lg:grid-cols-2 gap-12">
         <div className="relative aspect-[4/5] bg-[color:var(--stone)]">
           <Image
-            src={fabric?.imageUrl || shape?.imageUrl || "/demo-assets/shapes/drum.svg"}
+            src={previewSrc}
             alt="Shade preview"
             fill
-            className="object-cover"
+            className="object-cover object-center"
           />
           <div className="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/55 to-transparent text-white">
             <p className="font-display text-3xl">{shape?.name || "Shade"}</p>
@@ -140,7 +152,9 @@ export default function DesignYourShadePage() {
                 id: f.id,
                 name: f.name,
                 meta: f.priceMod ? `+£${f.priceMod}` : "Included",
-                image: f.imageUrl,
+                image: f.imageUrl && !f.imageUrl.includes("demo-assets")
+                  ? f.imageUrl
+                  : undefined,
               }))}
               value={fabricId}
               onChange={setFabricId}

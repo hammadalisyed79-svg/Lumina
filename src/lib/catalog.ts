@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { ProductType, Prisma } from "@prisma/client";
 import { toNumber } from "@/lib/pricing";
+import { isWebImageUrl } from "@/lib/utils";
 
 export type ShopQuery = {
   shape?: string;
@@ -71,15 +72,32 @@ export async function listProductsForShop(opts: {
   });
 
   return {
-    products: products.map((p) => ({
-      id: p.id,
-      slug: p.slug,
-      title: p.title,
-      subtitle: p.subtitle,
-      basePrice: toNumber(p.basePrice),
-      imageUrl: p.images[0]?.url || "/demo-assets/products/placeholder.svg",
-      hoverImageUrl: p.images[1]?.url,
-    })),
+    products: products
+      .map((p) => {
+        const imageUrl =
+          p.images.find((i) => isWebImageUrl(i.url))?.url || null;
+        if (!imageUrl) return null;
+        return {
+          id: p.id,
+          slug: p.slug,
+          title: p.title,
+          subtitle: p.subtitle,
+          basePrice: toNumber(p.basePrice),
+          imageUrl,
+          hoverImageUrl: p.images.find(
+            (img, idx) => idx > 0 && isWebImageUrl(img.url)
+          )?.url,
+        };
+      })
+      .filter(Boolean) as {
+      id: string;
+      slug: string;
+      title: string;
+      subtitle: string | null;
+      basePrice: number;
+      imageUrl: string;
+      hoverImageUrl?: string;
+    }[],
   };
 }
 
