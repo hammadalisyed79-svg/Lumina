@@ -10,11 +10,11 @@ export function HeaderActions() {
   const { ids } = useWishlist();
 
   return (
-    <div className="flex items-center gap-0.5 sm:gap-2 md:gap-3 text-[color:var(--ink)] shrink-0 justify-self-end">
+    <div className="flex items-center gap-0.5 sm:gap-2 md:gap-3 text-ink shrink-0">
       <button
         type="button"
         aria-label="Open search"
-        className="flex h-10 w-10 items-center justify-center hover:text-[color:var(--bronze)]"
+        className="flex h-10 w-10 items-center justify-center hover:text-bronze"
         onClick={() => window.dispatchEvent(new CustomEvent("lumina:search-open"))}
       >
         <Search size={20} strokeWidth={1.75} />
@@ -22,18 +22,18 @@ export function HeaderActions() {
       <Link
         href="/account"
         aria-label="Account"
-        className="hidden sm:flex h-10 w-10 items-center justify-center hover:text-[color:var(--bronze)]"
+        className="hidden sm:flex h-10 w-10 items-center justify-center hover:text-bronze"
       >
         <User size={20} strokeWidth={1.75} />
       </Link>
       <Link
         href="/wishlist"
         aria-label="Wishlist"
-        className="relative flex h-10 w-10 items-center justify-center hover:text-[color:var(--bronze)]"
+        className="relative flex h-10 w-10 items-center justify-center hover:text-bronze"
       >
         <Heart size={20} strokeWidth={1.75} />
         {ids.length > 0 && (
-          <span className="absolute top-1 right-0.5 h-4 min-w-4 rounded-full bg-[color:var(--bronze)] text-[10px] text-[color:var(--ink)] flex items-center justify-center px-1">
+          <span className="absolute top-1 right-0.5 h-4 min-w-4 rounded-full bg-bronze text-[10px] text-ink flex items-center justify-center px-1">
             {ids.length}
           </span>
         )}
@@ -41,12 +41,12 @@ export function HeaderActions() {
       <button
         type="button"
         aria-label="Open cart"
-        className="relative flex h-10 w-10 items-center justify-center hover:text-[color:var(--bronze)]"
+        className="relative flex h-10 w-10 items-center justify-center hover:text-bronze"
         onClick={() => setDrawerOpen(true)}
       >
         <ShoppingBag size={20} strokeWidth={1.75} />
         {count > 0 && (
-          <span className="absolute top-1 right-0.5 h-4 min-w-4 rounded-full bg-[color:var(--bronze)] text-[10px] text-[color:var(--ink)] flex items-center justify-center px-1">
+          <span className="absolute top-1 right-0.5 h-4 min-w-4 rounded-full bg-bronze text-[10px] text-ink flex items-center justify-center px-1">
             {count}
           </span>
         )}

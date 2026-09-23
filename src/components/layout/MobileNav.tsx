@@ -31,25 +31,26 @@ export function MobileNav({ items }: { items: NavLink[] }) {
         type="button"
         aria-label="Open menu"
         aria-expanded={open}
-        className="flex h-10 w-10 items-center justify-center text-[color:var(--ink)]"
+        className="flex h-10 w-10 items-center justify-center text-ink"
         onClick={() => setOpen(true)}
       >
         <Menu size={22} strokeWidth={1.75} />
       </button>
       {open && (
         <div
-          className="fixed inset-0 z-[70] flex flex-col bg-[color:var(--ivory)] text-[color:var(--ink)]"
+          className="fixed inset-0 z-[70] flex flex-col bg-ivory text-ink"
+          style={{ backgroundColor: "#f7f5f1", color: "#1c1915" }}
           role="dialog"
           aria-modal="true"
           aria-label="Site menu"
         >
-          <div className="shrink-0 border-b border-[color:var(--line)] bg-[color:var(--ivory)]">
+          <div className="shrink-0 border-b border-line bg-ivory">
             <div className="container-site flex items-center justify-between py-3">
-              <span className="font-display text-2xl text-[color:var(--ink)]">Menu</span>
+              <span className="font-display text-2xl text-ink">Menu</span>
               <button
                 type="button"
                 aria-label="Close menu"
-                className="flex h-10 w-10 items-center justify-center text-[color:var(--ink)]"
+                className="flex h-10 w-10 items-center justify-center text-ink"
                 onClick={() => setOpen(false)}
               >
                 <X size={22} strokeWidth={1.75} />
@@ -62,19 +63,19 @@ export function MobileNav({ items }: { items: NavLink[] }) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="block py-3 font-display text-2xl text-[color:var(--ink)]"
+                    className="block py-3 font-display text-2xl text-ink"
                     onClick={() => setOpen(false)}
                   >
                     {item.label}
                   </Link>
                   {item.mega && (
-                    <ul className="mb-3 ml-1 space-y-2 border-l border-[color:var(--line)] pl-4">
+                    <ul className="mb-3 ml-1 space-y-2 border-l border-line pl-4">
                       {NAV_MEGA.lampshades.columns.flatMap((col) =>
                         col.links.map((l) => (
                           <li key={l.href}>
                             <Link
                               href={l.href}
-                              className="block py-1 text-[15px] text-[color:var(--muted)]"
+                              className="block py-1.5 text-[15px] text-muted"
                               onClick={() => setOpen(false)}
                             >
                               {l.label}
@@ -87,22 +88,22 @@ export function MobileNav({ items }: { items: NavLink[] }) {
                 </li>
               ))}
             </ul>
-            <div className="mt-6 border-t border-[color:var(--line)] pt-4 space-y-1">
+            <div className="mt-6 border-t border-line pt-4 space-y-1">
               {EXTRA_LINKS.filter(
                 (l) => !items.some((i) => i.href === l.href)
               ).map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="block py-2.5 text-[15px] tracking-wide text-[color:var(--ink)]"
+                  className="block py-2.5 text-[15px] tracking-wide text-ink"
                   onClick={() => setOpen(false)}
                 >
                   {l.label}
                 </Link>
               ))}
             </div>
-            <p className="mt-8 text-sm text-[color:var(--muted)]">
-              <a href={`mailto:${SITE.email}`} className="underline">
+            <p className="mt-8 text-sm text-muted">
+              <a href={`mailto:${SITE.email}`} className="underline text-ink">
                 {SITE.email}
               </a>
             </p>
