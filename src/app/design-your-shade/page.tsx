@@ -9,10 +9,33 @@ import { useCart } from "@/components/cart/CartProvider";
 import { SITE } from "@/lib/site";
 import { COPY } from "@/lib/copy";
 
-type Opt = { id: string; slug: string; name: string; priceMod: number; imageUrl?: string; description?: string; diameterCm?: number | null; heightCm?: number | null };
-type Shape = { key: string; name: string; basePrice: number; imageUrl?: string; description?: string };
+type Opt = {
+  id: string;
+  slug: string;
+  name: string;
+  priceMod: number;
+  imageUrl?: string | null;
+  description?: string;
+  diameterCm?: number | null;
+  heightCm?: number | null;
+};
+type Shape = {
+  key: string;
+  name: string;
+  basePrice: number;
+  imageUrl?: string | null;
+  description?: string;
+};
 
 const STEPS = ["Shape", "Fabric", "Size", "Lining", "Fitting", "Review"] as const;
+const FALLBACK_PREVIEW =
+  "/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg";
+
+function usableImage(url?: string | null): string | null {
+  if (!url) return null;
+  if (url.includes(".heic") || url.includes("placeholder")) return null;
+  return url;
+}
 
 export default function DesignYourShadePage() {
   const { addConfigured, setDrawerOpen } = useCart();
@@ -33,16 +56,16 @@ export default function DesignYourShadePage() {
     fetch("/api/config-options")
       .then((r) => r.json())
       .then((d) => {
-        setShapes(d.shapes);
-        setFabrics(d.fabrics);
-        setSizes(d.sizes);
-        setLinings(d.linings);
-        setFittings(d.fittings);
-        setShapeKey(d.shapes[0]?.key || "drum");
-        setFabricId(d.fabrics[0]?.id || "");
-        setSizeId(d.sizes[1]?.id || d.sizes[0]?.id || "");
-        setLiningId(d.linings[0]?.id || "");
-        setFittingId(d.fittings[0]?.id || "");
+        setShapes(d.shapes || []);
+        setFabrics(d.fabrics || []);
+        setSizes(d.sizes || []);
+        setLinings(d.linings || []);
+        setFittings(d.fittings || []);
+        setShapeKey(d.shapes?.[0]?.key || "drum");
+        setFabricId(d.fabrics?.[0]?.id || "");
+        setSizeId(d.sizes?.[1]?.id || d.sizes?.[0]?.id || "");
+        setLiningId(d.linings?.[0]?.id || "");
+        setFittingId(d.fittings?.[0]?.id || "");
       });
   }, []);
 
@@ -63,17 +86,11 @@ export default function DesignYourShadePage() {
     });
   }, [shape, fabric, size, lining, fitting]);
 
-  const previewSrc = (() => {
-    const fabricUrl = fabric?.imageUrl;
-    const shapeUrl = shape?.imageUrl;
-    if (fabricUrl && !fabricUrl.includes("demo-assets")) return fabricUrl;
-    if (shapeUrl && !shapeUrl.includes("demo-assets")) return shapeUrl;
-    return (
-      shapes.find((s) => s.imageUrl && !s.imageUrl.includes("demo-assets"))
-        ?.imageUrl ||
-      "/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg"
-    );
-  })();
+  const previewSrc =
+    usableImage(fabric?.imageUrl) ||
+    usableImage(shape?.imageUrl) ||
+    usableImage(shapes.find((s) => usableImage(s.imageUrl))?.imageUrl) ||
+    FALLBACK_PREVIEW;
 
   async function saveDesign() {
     if (!shape || !fabric || !size || !lining || !fitting) return;
@@ -122,7 +139,9 @@ export default function DesignYourShadePage() {
             src={previewSrc}
             alt="Shade preview"
             fill
+            unoptimized
             className="object-cover object-center"
+            sizes="(max-width:1024px) 100vw, 50vw"
           />
           <div className="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/55 to-transparent text-white">
             <p className="font-display text-3xl">{shape?.name || "Shade"}</p>
@@ -139,7 +158,7 @@ export default function DesignYourShadePage() {
                 id: s.key,
                 name: s.name,
                 meta: s.description,
-                image: s.imageUrl,
+                image: usableImage(s.imageUrl) || undefined,
               }))}
               value={shapeKey}
               onChange={setShapeKey}
@@ -152,9 +171,7 @@ export default function DesignYourShadePage() {
                 id: f.id,
                 name: f.name,
                 meta: f.priceMod ? `+£${f.priceMod}` : "Included",
-                image: f.imageUrl && !f.imageUrl.includes("demo-assets")
-                  ? f.imageUrl
-                  : undefined,
+                image: usableImage(f.imageUrl) || undefined,
               }))}
               value={fabricId}
               onChange={setFabricId}
@@ -257,7 +274,11 @@ export default function DesignYourShadePage() {
               <p className="text-xs text-[color:var(--muted)]">
                 Pay on this site with Stripe. Studio price updates as you choose options.
               </p>
-              {saved && <p className="text-sm text-[color:var(--muted)]">Design saved to your account / guest key.</p>}
+              {saved && (
+                <p className="text-sm text-[color:var(--muted)]">
+                  Design saved to your account / guest key.
+                </p>
+              )}
             </div>
           )}
 
@@ -313,8 +334,15 @@ function OptionGrid({
             }`}
           >
             {o.image && (
-              <div className="relative h-24 mb-3 bg-[color:var(--stone)]">
-                <Image src={o.image} alt="" fill className="object-cover" />
+              <div className="relative h-24 mb-3 bg-[color:var(--stone)] overflow-hidden">
+                <Image
+                  src={o.image}
+                  alt=""
+                  fill
+                  unoptimized
+                  className="object-cover"
+                  sizes="200px"
+                />
               </div>
             )}
             <p className="font-medium">{o.name}</p>
