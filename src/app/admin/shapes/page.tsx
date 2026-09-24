@@ -19,20 +19,26 @@ export default async function AdminShapesPage() {
     active: s.active,
     sortOrder: s.sortOrder,
     imageUrl: s.imageUrl,
+    description: s.description,
   }));
 
   return (
-    <div>
-      <h1 className="admin-h1">Shapes</h1>
+    <div className="space-y-8">
+      <div>
+        <h1 className="admin-h1">Shapes</h1>
+        <p className="text-sm text-[color:var(--admin-muted)] mt-1">
+          Silhouettes for the design studio and product shape keys.
+        </p>
+      </div>
       <ShapeCreateForm />
-      <div className="admin-table-wrap mt-8">
+      <div className="admin-table-wrap">
         <table className="admin-table">
           <thead>
             <tr>
               <th>Name</th>
               <th>Key</th>
               <th>Base price</th>
-              <th>Price mod</th>
+              <th>Mod</th>
               <th>Sort</th>
               <th>Active</th>
               <th>Actions</th>
@@ -41,7 +47,14 @@ export default async function AdminShapesPage() {
           <tbody>
             {shapes.map((shape) => (
               <tr key={shape.id}>
-                <td>{shape.name}</td>
+                <td>
+                  <div className="font-medium">{shape.name}</div>
+                  {shape.description && (
+                    <div className="text-xs text-[color:var(--admin-muted)] mt-0.5 line-clamp-1">
+                      {shape.description}
+                    </div>
+                  )}
+                </td>
                 <td>{shape.key}</td>
                 <td>{formatMoney(shape.basePrice)}</td>
                 <td>{formatMoney(shape.priceMod)}</td>
