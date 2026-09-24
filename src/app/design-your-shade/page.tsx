@@ -133,6 +133,7 @@ function DesignStudioInner() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
+  const [bagError, setBagError] = useState<string | null>(null);
   const startedRef = useRef(false);
   const sectionRefs = useRef<Partial<Record<ConfigStepId, HTMLElement | null>>>({});
 
@@ -435,28 +436,78 @@ function DesignStudioInner() {
 
   function addToBag() {
     if (!shape || !fabric || !size || !lining || !fitting || !price || !validation.valid) return;
-    addConfigured({
-      title: `Custom ${shape.name} · ${fabric.name}`,
-      imageUrl: textureUrl || fabric.swatchUrl || fabric.imageUrl || undefined,
-      quantity: selection.quantity,
-      config: {
-        shapeKey: shape.key,
-        shapeName: shape.name,
-        fabricSlug: fabric.slug,
-        fabricName: fabric.name,
-        sizeSlug: size.slug,
-        sizeName: size.name,
-        liningSlug: lining.slug,
-        liningName: lining.name,
-        fittingSlug: fitting.slug,
-        fittingName: fitting.name,
-        unitPrice: price.unitPrice,
-        useType: selection.useType,
-        personalisation: selection.personalisation || undefined,
-      },
-    });
-    setDrawerOpen(true);
-    trackConfigurator("design_completed", {});
+    const editCart = searchParams.get("editCart") || undefined;
+    const config = {
+      shapeKey: shape.key,
+      shapeName: shape.name,
+      fabricSlug: fabric.slug,
+      fabricName: fabric.name,
+      sizeSlug: size.slug,
+      sizeName: size.name,
+      liningSlug: lining.slug,
+      liningName: lining.name,
+      fittingSlug: fitting.slug,
+      fittingName: fitting.name,
+      unitPrice: price.unitPrice,
+      useType: selection.useType,
+      personalisation: selection.personalisation || undefined,
+    };
+
+    void (async () => {
+      let snapshot = undefined;
+      try {
+        const res = await fetch("/api/cart/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            lines: [
+              {
+                kind: "configured",
+                quantity: selection.quantity,
+                config: {
+                  shapeKey: config.shapeKey,
+                  sizeSlug: config.sizeSlug,
+                  fabricSlug: config.fabricSlug,
+                  liningSlug: config.liningSlug,
+                  fittingSlug: config.fittingSlug,
+                  useType: config.useType,
+                  personalisation: config.personalisation,
+                },
+              },
+            ],
+          }),
+        });
+        const data = await res.json();
+        const line = data.lines?.[0];
+        if (!line?.ok) {
+          const msg =
+            line?.blocks?.map((b: { message: string }) => b.message).join(" ") ||
+            "This configuration cannot be ordered yet.";
+          setBagError(msg);
+          return;
+        }
+        snapshot = line.snapshot;
+        config.unitPrice = line.unitPrice;
+      } catch {
+        setBagError("Could not verify configuration with the server. Try again.");
+        return;
+      }
+
+      setBagError(null);
+      addConfigured({
+        title: `Custom ${shape.name} · ${fabric.name}`,
+        imageUrl: textureUrl || fabric.swatchUrl || fabric.imageUrl || undefined,
+        quantity: selection.quantity,
+        config,
+        snapshot,
+        replaceLineId: editCart || undefined,
+      });
+      setDrawerOpen(true);
+      trackConfigurator("design_completed", {});
+      if (editCart) {
+        router.replace("/cart");
+      }
+    })();
   }
 
   const shapesAvail = catalog ? getValidShapes(catalog, selection.useType) : [];
@@ -975,6 +1026,11 @@ function DesignStudioInner() {
                         </p>
                       )}
                       {saveError && <p className="text-sm text-red-700">{saveError}</p>}
+                      {bagError && (
+                        <p className="text-sm text-red-700" role="alert">
+                          {bagError}
+                        </p>
+                      )}
                       {shareNote && (
                         <p className="text-sm break-all prose-muted">Share link: {shareNote}</p>
                       )}

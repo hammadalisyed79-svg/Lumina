@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { CartMerge } from "@/components/cart/CartMerge";
+import { WishlistMerge } from "@/components/wishlist/WishlistMerge";
 import { SearchOverlay } from "@/components/search/SearchOverlay";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { StudioChat } from "@/components/chat/StudioChat";
@@ -25,6 +27,8 @@ export function StorefrontShell({
 
   return (
     <>
+      <CartMerge />
+      <WishlistMerge />
       <Header nav={nav} />
       <main className="min-h-[60vh]">{children}</main>
       <Footer />

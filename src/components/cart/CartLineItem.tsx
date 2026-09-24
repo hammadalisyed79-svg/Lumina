@@ -6,6 +6,7 @@ import { useCart } from "@/components/cart/CartProvider";
 import {
   cartLineHref,
   cartLineKindLabel,
+  editConfiguredHref,
   formatCartConfig,
 } from "@/lib/cart/display";
 import type { CartLine } from "@/lib/cart/types";
@@ -22,8 +23,9 @@ export function CartLineItem({
   variant?: Variant;
   onNavigate?: () => void;
 }) {
-  const { updateQty, remove } = useCart();
+  const { updateQty, remove, beginEditConfigured } = useCart();
   const href = cartLineHref(item);
+  const editHref = editConfiguredHref(item);
   const compact = variant === "summary";
   const imgSize = variant === "drawer" ? "80px" : variant === "page" ? "96px" : "64px";
   const boxClass =
@@ -74,6 +76,11 @@ export function CartLineItem({
             {formatCartConfig(item.config, compact)}
           </p>
         )}
+        {item.validationError && (
+          <p className="text-xs text-error mt-1.5" role="alert">
+            {item.validationError}
+          </p>
+        )}
         {!compact && (
           <p className="text-xs text-muted mt-1">
             {formatMoney(item.unitPrice)} each
@@ -111,13 +118,16 @@ export function CartLineItem({
               >
                 Remove
               </button>
-              {item.kind === "configured" && href && (
+              {item.kind === "configured" && editHref && (
                 <Link
-                  href={href}
+                  href={editHref}
                   className="text-xs text-muted underline underline-offset-4 hover:text-bronze"
-                  onClick={onNavigate}
+                  onClick={() => {
+                    beginEditConfigured(item);
+                    onNavigate?.();
+                  }}
                 >
-                  Edit in studio
+                  Edit bag configuration
                 </Link>
               )}
               {item.kind === "product" && href && (

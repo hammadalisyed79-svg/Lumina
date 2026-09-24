@@ -20,6 +20,7 @@
     "import:luminahub": "tsx scripts/import-luminahub.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:phase3": "tsx scripts/phase3-selftest.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {

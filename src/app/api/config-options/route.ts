@@ -30,8 +30,11 @@ export async function GET() {
 
   const shapeKeyById = new Map(shapes.map((s) => [s.id, s.key]));
 
+  // Only confirmed eligibility (needsReview=false) is storefront-orderable.
+  // NEEDS_REVIEW links stay visible in admin migration review, not the bag.
   const sizesByShape = new Map<string, string[]>();
   for (const row of shapeSizes) {
+    if (row.needsReview) continue;
     const key = shapeKeyById.get(row.shapeId);
     if (!key) continue;
     if (!sizesByShape.has(row.sizeId)) sizesByShape.set(row.sizeId, []);
@@ -40,6 +43,7 @@ export async function GET() {
 
   const fabricsByShape = new Map<string, string[]>();
   for (const row of shapeFabrics) {
+    if (row.needsReview) continue;
     const key = shapeKeyById.get(row.shapeId);
     if (!key) continue;
     if (!fabricsByShape.has(row.fabricId)) fabricsByShape.set(row.fabricId, []);
@@ -48,6 +52,7 @@ export async function GET() {
 
   const liningsByShape = new Map<string, string[]>();
   for (const row of shapeLinings) {
+    if (row.needsReview) continue;
     const key = shapeKeyById.get(row.shapeId);
     if (!key) continue;
     if (!liningsByShape.has(row.liningId)) liningsByShape.set(row.liningId, []);
@@ -56,6 +61,7 @@ export async function GET() {
 
   const fittingsByShape = new Map<string, string[]>();
   for (const row of shapeFittings) {
+    if (row.needsReview) continue;
     const key = shapeKeyById.get(row.shapeId);
     if (!key) continue;
     if (!fittingsByShape.has(row.fittingId)) fittingsByShape.set(row.fittingId, []);

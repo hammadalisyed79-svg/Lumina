@@ -139,6 +139,7 @@ model User {
   addresses     Address[]
   orders        Order[]
   wishlist      Wishlist?
+  cart          Cart?
   reviews       Review[]
   savedDesigns  SavedDesign[]
   tradeApps     TradeApplication[]
@@ -692,6 +693,22 @@ model OrderEvent {
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
+}
+
+/// Atomic counter for LH-###### order numbers
+model OrderSequence {
+  id        Int @id @default(1)
+  nextValue Int @default(1)
+}
+
+/// Server-persisted bag for signed-in users (guest bag lives in localStorage)
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  itemsJson Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model StripeWebhookEvent {

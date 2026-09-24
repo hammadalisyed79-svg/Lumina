@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const FAQS = [
+const FAQS = [
   {
     q: "Are shades made to order?",
     a: "Yes. Most lampshades are handmade to order in the UK. Lead times are shown on product pages and typically allow a few business days for production before dispatch.",

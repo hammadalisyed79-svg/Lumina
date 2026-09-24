@@ -1,12 +1,14 @@
 import { auth } from "@/lib/auth";
-import { calculateOrderTotals, calculateUnitPrice, toNumber, applyCoupon } from "@/lib/pricing";
+import { calculateOrderTotals, applyCoupon } from "@/lib/pricing";
 import { prisma } from "@/lib/db";
-import { orderNumber } from "@/lib/utils";
+import { nextOrderNumber } from "@/lib/orders/numbering";
+import { validateCartLines, type CartValidateInput } from "@/lib/cart/validate";
 import { writeAuditLog } from "@/lib/security/audit";
 import { rateLimit, clientIp } from "@/lib/security/rate-limit";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 
 const lineSchema = z.object({
   kind: z.enum(["product", "configured"]),
@@ -56,7 +58,7 @@ type PricedLine = {
   variantId?: string;
   sku?: string;
   imageUrl?: string;
-  configJson?: object;
+  configJson?: Prisma.InputJsonValue;
 };
 
 function siteBaseUrl() {
@@ -102,95 +104,67 @@ export async function POST(req: Request) {
 
   const session = await auth();
   const data = parsed.data;
-  const pricedLines: PricedLine[] = [];
 
-  for (const line of data.lines) {
+  const validateInputs: CartValidateInput[] = data.lines.map((line) => {
     if (line.kind === "configured" && line.config) {
-      const cfg = line.config;
-      const [shape, fabric, size, lining, fitting] = await Promise.all([
-        prisma.shape.findUnique({ where: { key: cfg.shapeKey } }),
-        prisma.fabric.findUnique({ where: { slug: cfg.fabricSlug } }),
-        prisma.size.findUnique({ where: { slug: cfg.sizeSlug } }),
-        prisma.lining.findUnique({ where: { slug: cfg.liningSlug } }),
-        prisma.fitting.findUnique({ where: { slug: cfg.fittingSlug } }),
-      ]);
-
-      if (!shape || !fabric || !size || !lining || !fitting) {
-        return NextResponse.json(
-          { error: "Configured shade options are incomplete or unavailable" },
-          { status: 400 }
-        );
-      }
-
-      const unitPrice = calculateUnitPrice({
-        basePrice: toNumber(shape.basePrice),
-        fabricMod: toNumber(fabric.priceMod),
-        sizeMod: toNumber(size.priceMod),
-        liningMod: toNumber(lining.priceMod),
-        fittingMod: toNumber(fitting.priceMod),
-      });
-
-      pricedLines.push({
-        title: `Custom ${shape.name} · ${fabric.name} · ${size.name}`,
+      return {
+        kind: "configured" as const,
         quantity: line.quantity,
-        unitPrice,
-        lineTotal: unitPrice * line.quantity,
-        imageUrl: fabric.imageUrl || shape.imageUrl || undefined,
-        configJson: {
-          shapeKey: shape.key,
-          fabricSlug: fabric.slug,
-          sizeSlug: size.slug,
-          liningSlug: lining.slug,
-          fittingSlug: fitting.slug,
-          shapeName: shape.name,
-          fabricName: fabric.name,
-          sizeName: size.name,
-          liningName: lining.name,
-          fittingName: fitting.name,
-          unitPrice,
+        config: {
+          shapeKey: line.config.shapeKey,
+          sizeSlug: line.config.sizeSlug,
+          fabricSlug: line.config.fabricSlug,
+          liningSlug: line.config.liningSlug,
+          fittingSlug: line.config.fittingSlug,
+          personalisation: undefined,
+          unitPrice: line.config.unitPrice,
         },
-      });
-      continue;
+      };
     }
-
-    if (!line.productId) {
-      return NextResponse.json({ error: "Invalid line item" }, { status: 400 });
-    }
-
-    const product = await prisma.product.findUnique({
-      where: { id: line.productId },
-      include: { images: { take: 1 }, variants: true },
-    });
-    if (!product || !product.published) {
-      return NextResponse.json({ error: "Product unavailable" }, { status: 400 });
-    }
-
-    const variant = line.variantId
-      ? product.variants.find((v) => v.id === line.variantId && v.active)
-      : product.variants.find((v) => v.active);
-
-    if (!variant) {
-      return NextResponse.json(
-        { error: "No purchasable variant available for this product", mode: "blocked" },
-        { status: 409 }
-      );
-    }
-
-    const unitPrice = variant.priceOverride
-      ? toNumber(variant.priceOverride)
-      : toNumber(product.basePrice);
-
-    pricedLines.push({
-      title: `${product.title}${variant.title && variant.title !== "Default Title" ? ` · ${variant.title}` : ""}`,
+    return {
+      kind: "product" as const,
       quantity: line.quantity,
-      unitPrice,
-      lineTotal: unitPrice * line.quantity,
-      productId: product.id,
-      variantId: variant.id,
-      sku: variant.sku,
-      imageUrl: product.images[0]?.url,
-    });
+      productId: line.productId!,
+      variantId: line.variantId,
+    };
+  });
+
+  const validated = await validateCartLines(validateInputs);
+  if (!validated.ok) {
+    return NextResponse.json(
+      {
+        error: "One or more bag items can no longer be ordered",
+        details: validated.lines.filter((l) => !l.ok),
+      },
+      { status: 409 }
+    );
   }
+
+  const pricedLines: PricedLine[] = (
+    validated.lines as Extract<(typeof validated.lines)[number], { ok: true }>[]
+  ).map((l) => {
+    if (l.kind === "configured") {
+      return {
+        title: l.title,
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        lineTotal: l.lineTotal,
+        imageUrl: l.imageUrl,
+        configJson: l.snapshot as unknown as Prisma.InputJsonValue,
+      };
+    }
+    return {
+      title: l.title,
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+      lineTotal: l.lineTotal,
+      productId: l.productId,
+      variantId: l.variantId,
+      sku: l.sku,
+      imageUrl: l.imageUrl,
+      configJson: l.snapshot as unknown as Prisma.InputJsonValue,
+    };
+  });
 
   let coupon = null;
   if (data.couponCode) {
@@ -260,7 +234,7 @@ export async function POST(req: Request) {
   });
 
   const stripe = getStripe()!;
-  const number = orderNumber();
+  const number = await nextOrderNumber();
   const base = siteBaseUrl();
 
   try {

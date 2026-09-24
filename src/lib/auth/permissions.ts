@@ -28,6 +28,8 @@ export const PERMISSION_CATALOG: {
   { key: "inventory.edit", label: "Edit inventory", module: "inventory" },
   { key: "orders.view", label: "View orders", module: "orders" },
   { key: "orders.edit", label: "Edit orders", module: "orders" },
+  { key: "orders.fulfil", label: "Fulfil orders", module: "orders" },
+  { key: "orders.notes", label: "Order internal notes", module: "orders" },
   { key: "customers.view", label: "View customers", module: "customers" },
   { key: "customers.edit", label: "Edit customers", module: "customers" },
   { key: "discounts.view", label: "View discounts", module: "discounts" },

@@ -10,6 +10,7 @@ import type {
   SizeOpt,
   UseType,
 } from "./types";
+import { TAPER_SHAPES } from "@/lib/cart/orderability";
 
 /** Explicit Shape → Size via eligibleShapeKeys (from ShapeSize). */
 export function sizeCompatibleWithShape(
@@ -22,6 +23,37 @@ export function sizeCompatibleWithShape(
   }
   // No eligibility rows yet — deny rather than guess
   return false;
+}
+
+/** Block Empire/Coolie sizes missing real top/bottom diameters (never invent). */
+export function sizeOrderableForShape(
+  size: SizeOpt,
+  shapeKey: string | null
+): { ok: boolean; reason?: string } {
+  if (!sizeCompatibleWithShape(size, shapeKey)) {
+    return {
+      ok: false,
+      reason: shapeKey
+        ? `Not available for this ${shapeKey} silhouette.`
+        : "Choose a shape first.",
+    };
+  }
+  if (!size.eligibleShapeKeys?.length) {
+    return {
+      ok: false,
+      reason: "Unscoped size — not linked for ordering.",
+    };
+  }
+  if (shapeKey && TAPER_SHAPES.has(shapeKey.toLowerCase())) {
+    if (size.topDiameterCm == null || size.bottomDiameterCm == null) {
+      return {
+        ok: false,
+        reason:
+          "Top/bottom diameters not confirmed — cannot order this Empire/Coolie size.",
+      };
+    }
+  }
+  return { ok: true };
 }
 
 export function parseFittingUseTypes(fitting: {
@@ -53,15 +85,11 @@ export function getValidSizes(
   shapeKey: string | null
 ): OptionAvailability<SizeOpt>[] {
   return catalog.sizes.map((option) => {
-    const ok = sizeCompatibleWithShape(option, shapeKey);
+    const check = sizeOrderableForShape(option, shapeKey);
     return {
       option,
-      available: ok,
-      reason: ok
-        ? undefined
-        : shapeKey
-          ? `Not available for this ${shapeKey} silhouette.`
-          : "Choose a shape first.",
+      available: check.ok,
+      reason: check.reason,
     };
   });
 }
@@ -230,8 +258,11 @@ export function validateConfiguration(
 
   const warnings: ConfigWarnings = [];
   const size = catalog.sizes.find((s) => s.id === selection.sizeId);
-  if (size && !sizeCompatibleWithShape(size, selection.shapeKey)) {
-    warnings.push("Selected size is not compatible with the current shape.");
+  if (size) {
+    const sizeCheck = sizeOrderableForShape(size, selection.shapeKey);
+    if (!sizeCheck.ok && sizeCheck.reason) {
+      warnings.push(sizeCheck.reason);
+    }
   }
   const fabric = catalog.fabrics.find((f) => f.id === selection.fabricId);
   if (

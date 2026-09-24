@@ -5,17 +5,21 @@ import { formatMoney } from "@/lib/utils";
 import { toNumber } from "@/lib/pricing";
 import { OrderStatusForm } from "@/components/admin/OrderStatusForm";
 import { OrderFulfillmentForm } from "@/components/admin/OrderFulfillmentForm";
+import { OrderNotesForm } from "@/components/admin/OrderNotesForm";
 import {
   formatConfigSnippet,
   orderBadgeClass,
   paymentBadgeClass,
 } from "@/lib/admin/orders";
+import { requirePermission } from "@/lib/auth/guards";
+import { isConfiguredSnapshot } from "@/lib/orders/workshop";
 
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function AdminOrderDetailPage({ params }: Props) {
+  await requirePermission("orders.view");
   const { id } = await params;
   const order = await prisma.order.findUnique({
     where: { id },
@@ -50,7 +54,10 @@ export default async function AdminOrderDetailPage({ params }: Props) {
           </div>
         </div>
         <div className="admin-actions">
-          <Link href={`/admin/orders/${order.id}/print`} className="btn-secondary">
+          <Link href={`/admin/orders/${order.id}/workshop`} className="btn-secondary">
+            Workshop pack
+          </Link>
+          <Link href={`/admin/orders/${order.id}/print`} className="btn-quiet text-sm">
             Packing note
           </Link>
           <Link href={`/order/${order.orderNumber}`} className="btn-quiet text-sm">
@@ -132,7 +139,17 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                 <tr key={i.id}>
                   <td>
                     {i.title}
-                    {i.configJson ? (
+                    {isConfiguredSnapshot(i.configJson) ? (
+                      <span className="admin-muted block text-xs">
+                        {formatConfigSnippet(i.configJson)}
+                        <Link
+                          href={`/admin/orders/${order.id}/workshop/${i.id}`}
+                          className="underline ml-2"
+                        >
+                          Sheet
+                        </Link>
+                      </span>
+                    ) : i.configJson ? (
                       <span className="admin-muted block text-xs">
                         {formatConfigSnippet(i.configJson)}
                       </span>
@@ -159,8 +176,12 @@ export default async function AdminOrderDetailPage({ params }: Props) {
         />
       </div>
 
+      <div className="admin-no-print mb-4">
+        <OrderNotesForm id={order.id} staffNotes={order.staffNotes} />
+      </div>
+
       <div className="admin-panel admin-no-print">
-        <h2 className="admin-h2">Timeline</h2>
+        <h2 className="admin-h2">Status history</h2>
         {order.events.length === 0 ? (
           <p className="admin-muted">No events yet.</p>
         ) : (

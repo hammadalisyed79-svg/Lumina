@@ -141,7 +141,9 @@ export default async function AdminMigrationReviewPage() {
       <h1 className="admin-h1">Migration review queue</h1>
       <p className="admin-muted mb-6 max-w-2xl">
         Uncertain migrated catalogue and configurator relationships. Do not hide these — confirm
-        in admin before treating as production-final.
+        in admin before treating as production-final. Phase 3 blocks ordering for Empire/Coolie
+        sizes missing top/bottom diameters, unscoped sizes, and NEEDS_REVIEW fabric×shape (and
+        other eligibility) links — measurements are never invented.
       </p>
       <p className="text-sm mb-4">
         <strong>{items.length}</strong> items flagged ·{" "}

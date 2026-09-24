@@ -136,6 +136,9 @@ export default async function AccountOrderDetailPage({ params }: Props) {
           <span>Total</span>
           <span>{formatMoney(order.total)}</span>
         </div>
+        <p className="text-[10px] text-muted pt-2">
+          Order summary — not a VAT invoice. Tax shown when calculated.
+        </p>
       </div>
 
       <div className="mb-8">

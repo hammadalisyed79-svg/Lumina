@@ -1,3 +1,4 @@
+import { requirePermission } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { formatMoney } from "@/lib/utils";
@@ -22,6 +23,7 @@ type Props = {
 };
 
 export default async function AdminOrdersPage({ searchParams }: Props) {
+  await requirePermission("orders.view");
   const sp = await searchParams;
   const where: Prisma.OrderWhereInput = {};
   if (sp.status && ORDER_STATUSES.includes(sp.status as (typeof ORDER_STATUSES)[number])) {
