@@ -23,6 +23,7 @@ import {
 import { catalogImageUrl, liningSwatchHex } from "@/lib/studio/images";
 import {
   pickPreviewImage,
+  studioPreviewApiPath,
   type PreviewCandidate,
 } from "@/lib/studio/preview";
 
@@ -207,15 +208,23 @@ function DesignStudioInner() {
 
   const shapeCandidates = previewCatalog[shapeKey] || [];
 
-  const previewUrl = useMemo(
-    () =>
+  const previewUrl = useMemo(() => {
+    if (fabric?.slug) {
+      return studioPreviewApiPath({
+        shape: shapeKey,
+        fabric: fabric.slug,
+        lining: lining?.slug,
+        diameter: size?.diameterCm,
+      });
+    }
+    return (
       pickPreviewImage(shapeCandidates, fabric || null, [
         catalogImageUrl(shape?.imageUrl),
         catalogImageUrl(fabric?.imageUrl, fabric?.swatchUrl),
         "/media/homepage/hero-lifestyle.png",
-      ]) || "/media/homepage/hero-lifestyle.png",
-    [shapeCandidates, fabric, shape]
-  );
+      ]) || "/media/homepage/hero-lifestyle.png"
+    );
+  }, [shapeCandidates, fabric, shape, shapeKey, lining?.slug, size?.diameterCm]);
 
   const syncUrl = useCallback(
     (nextStep = step) => {
@@ -430,6 +439,7 @@ function DesignStudioInner() {
                   diameterCm={size?.diameterCm}
                   liningName={lining?.name}
                   liningColour={lining?.colour}
+                  liningSlug={lining?.slug}
                   fittingName={fitting?.name}
                   showFitting={step >= 4}
                   unitPrice={unitPrice}

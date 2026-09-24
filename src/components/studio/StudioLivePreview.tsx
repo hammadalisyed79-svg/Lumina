@@ -1,15 +1,12 @@
 "use client";
 
-import { useId, useMemo } from "react";
+import { useMemo } from "react";
 import { MediaImage } from "@/components/media/MediaImage";
 import { formatMoney } from "@/lib/utils";
-import { normalizeImageSrc } from "@/lib/image";
 import { liningSwatchHex } from "@/lib/studio/images";
 import {
-  pickCatalogMatch,
   pickShapeReference,
-  shapePath,
-  sizePreviewScale,
+  studioPreviewApiPath,
   type PreviewCandidate,
 } from "@/lib/studio/preview";
 
@@ -33,6 +30,7 @@ type Props = {
   diameterCm?: number | null;
   liningName?: string | null;
   liningColour?: string | null;
+  liningSlug?: string | null;
   fittingName?: string | null;
   showFitting?: boolean;
   unitPrice: number;
@@ -40,6 +38,12 @@ type Props = {
   step: number;
 };
 
+/**
+ * Single-image live preview:
+ * - Shape step → catalog silhouette photo
+ * - Fabric step → fabric cloth only
+ * - Later steps → server-generated combination PNG (no overlays)
+ */
 export function StudioLivePreview({
   ready,
   shapeKey,
@@ -50,178 +54,68 @@ export function StudioLivePreview({
   diameterCm,
   liningName,
   liningColour,
+  liningSlug,
   fittingName,
   showFitting,
   unitPrice,
   candidates,
   step,
 }: Props) {
-  const uid = useId().replace(/:/g, "");
   const fabricSrc = fabric?.imageUrl || fabric?.swatchUrl || null;
-  const fabricHref = fabricSrc ? normalizeImageSrc(fabricSrc) : null;
   const liningHex = liningSwatchHex(liningName, liningColour);
-  const path = shapePath(shapeKey);
-  const scale = sizePreviewScale(diameterCm);
-  const fabricPatId = `fabric-pat-${uid}`;
-
-  const catalogMatch = useMemo(
-    () => pickCatalogMatch(candidates, fabric),
-    [candidates, fabric]
-  );
 
   const shapeRef = useMemo(
     () => pickShapeReference(candidates, shapeImage),
     [candidates, shapeImage]
   );
 
-  /** Shape step: catalog photo. Fabric step: cloth only. Later: match or SVG composite. */
-  const showFabricOnly = step === 1 && Boolean(fabricHref);
-  const showPhotoOnly = !showFabricOnly && (step === 0 || Boolean(catalogMatch));
-  const photoSrc = step === 0 ? shapeRef : catalogMatch;
-  const showComposite = !showFabricOnly && !showPhotoOnly && Boolean(fabricHref);
+  const composedSrc = useMemo(() => {
+    if (!fabric?.slug) return null;
+    return studioPreviewApiPath({
+      shape: shapeKey,
+      fabric: fabric.slug,
+      lining: liningSlug,
+      diameter: diameterCm,
+    });
+  }, [shapeKey, fabric?.slug, liningSlug, diameterCm]);
+
+  const showFabricOnly = step === 1 && Boolean(fabricSrc);
+  const showShapeOnly = step === 0;
+  const showComposed = step >= 2 && Boolean(composedSrc);
+
+  const previewSrc = showFabricOnly
+    ? fabricSrc
+    : showShapeOnly
+      ? shapeRef
+      : showComposed
+        ? composedSrc
+        : composedSrc || fabricSrc || shapeRef;
+
+  const unoptimized = Boolean(previewSrc?.startsWith("/api/"));
 
   return (
     <div className="relative aspect-[4/5] overflow-hidden studio-preview-frame">
-      {!ready ? (
+      {!ready || !previewSrc ? (
         <div className="absolute inset-0 animate-pulse bg-stone" />
       ) : (
-        <>
-          {showFabricOnly ? (
-            <div className="studio-preview-photo studio-preview-fabric-only">
-              <MediaImage
-                key={fabricHref!}
-                src={fabricHref!}
-                alt={fabric?.name || "Selected fabric"}
-                fill
-                className="object-cover object-center"
-                sizes="(max-width:1024px) 100vw, 50vw"
-                priority
-              />
-            </div>
-          ) : null}
-
-          {showPhotoOnly && photoSrc ? (
-            <div className="studio-preview-photo">
-              <MediaImage
-                key={photoSrc}
-                src={photoSrc}
-                alt=""
-                fill
-                className="object-cover object-center"
-                sizes="(max-width:1024px) 100vw, 50vw"
-                priority
-              />
-              {step > 1 && (
-                <div
-                  className="studio-preview-lining-wash"
-                  style={{
-                    background: `radial-gradient(ellipse 55% 40% at 50% 92%, ${liningHex}99 0%, transparent 65%)`,
-                  }}
-                />
-              )}
-            </div>
-          ) : null}
-
-          {showComposite ? (
-            <div className="studio-preview-stage" aria-hidden>
-              <div
-                className="studio-preview-shade"
-                style={{ transform: `scale(${scale})` }}
-              >
-                <svg
-                  className="studio-preview-svg"
-                  viewBox="0 0 100 120"
-                  preserveAspectRatio="xMidYMid meet"
-                  role="img"
-                  aria-label={`${shapeName || "Shade"} in ${fabric?.name || "fabric"}`}
-                >
-                  <defs>
-                    <pattern
-                      id={fabricPatId}
-                      patternUnits="userSpaceOnUse"
-                      width="100"
-                      height="120"
-                    >
-                      <image
-                        href={fabricHref!}
-                        x="0"
-                        y="0"
-                        width="100"
-                        height="120"
-                        preserveAspectRatio="xMidYMid slice"
-                      />
-                    </pattern>
-                    <linearGradient id={`${uid}-cyl`} x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#000" stopOpacity="0.35" />
-                      <stop offset="22%" stopColor="#000" stopOpacity="0.05" />
-                      <stop offset="50%" stopColor="#fff" stopOpacity="0.12" />
-                      <stop offset="78%" stopColor="#000" stopOpacity="0.05" />
-                      <stop offset="100%" stopColor="#000" stopOpacity="0.35" />
-                    </linearGradient>
-                    <linearGradient id={`${uid}-vert`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#fff" stopOpacity="0.2" />
-                      <stop offset="35%" stopColor="#000" stopOpacity="0" />
-                      <stop offset="100%" stopColor="#000" stopOpacity="0.28" />
-                    </linearGradient>
-                    <radialGradient id={`${uid}-lining`} cx="50%" cy="92%" r="45%">
-                      <stop offset="0%" stopColor={liningHex} stopOpacity="0.85" />
-                      <stop offset="55%" stopColor={liningHex} stopOpacity="0.25" />
-                      <stop offset="100%" stopColor={liningHex} stopOpacity="0" />
-                    </radialGradient>
-                    <filter id={`${uid}-soft`} x="-8%" y="-8%" width="116%" height="116%">
-                      <feDropShadow
-                        dx="0"
-                        dy="4"
-                        stdDeviation="3"
-                        floodColor="#14110e"
-                        floodOpacity="0.28"
-                      />
-                    </filter>
-                  </defs>
-
-                  <line
-                    x1="50"
-                    y1="0"
-                    x2="50"
-                    y2="10"
-                    stroke="#8a8174"
-                    strokeWidth="0.6"
-                    opacity="0.55"
-                  />
-
-                  <g filter={`url(#${uid}-soft)`}>
-                    <path d={path} fill={`url(#${fabricPatId})`} />
-                    <path d={path} fill={`url(#${uid}-cyl)`} />
-                    <path d={path} fill={`url(#${uid}-vert)`} />
-                    <path d={path} fill={`url(#${uid}-lining)`} />
-                    <path
-                      d={path}
-                      fill="none"
-                      stroke="rgba(255,255,255,0.22)"
-                      strokeWidth="0.4"
-                    />
-                  </g>
-                </svg>
-              </div>
-            </div>
-          ) : null}
-
-          {!showFabricOnly && !showPhotoOnly && !showComposite && shapeRef ? (
-            <div className="studio-preview-photo">
-              <MediaImage
-                key={shapeRef}
-                src={shapeRef}
-                alt=""
-                fill
-                className="object-cover object-center"
-                sizes="(max-width:1024px) 100vw, 50vw"
-                priority
-              />
-            </div>
-          ) : null}
-
-          <div className="studio-preview-vignette" />
-        </>
+        <div
+          className={`studio-preview-photo ${showFabricOnly ? "studio-preview-fabric-only" : ""}`}
+        >
+          <MediaImage
+            key={previewSrc}
+            src={previewSrc!}
+            alt={
+              showFabricOnly
+                ? fabric?.name || "Selected fabric"
+                : `${shapeName || "Shade"} in ${fabric?.name || "fabric"}`
+            }
+            fill
+            className="object-cover object-center"
+            sizes="(max-width:1024px) 100vw, 50vw"
+            priority
+            unoptimized={unoptimized}
+          />
+        </div>
       )}
 
       <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 bg-gradient-to-t from-[rgba(20,17,14,0.82)] via-[rgba(20,17,14,0.38)] to-transparent text-white z-[2]">

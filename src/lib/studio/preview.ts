@@ -128,7 +128,7 @@ export function pickCatalogMatch(
       best = c;
     }
   }
-  if (best && bestScore >= 5) return best.imageUrl;
+  if (best && bestScore >= 6) return best.imageUrl;
   return null;
 }
 
@@ -143,7 +143,6 @@ export function pickShapeReference(
   return productOnly?.imageUrl || shapeImage || null;
 }
 
-/** @deprecated kept for cart/save URL resolution */
 export function pickPreviewImage(
   candidates: PreviewCandidate[],
   fabric: {
@@ -163,4 +162,21 @@ export function pickPreviewImage(
     if (f) return f;
   }
   return null;
+}
+
+/** Client-safe URL for the server-generated combination preview image. */
+export function studioPreviewApiPath(params: {
+  shape: string;
+  fabric: string;
+  lining?: string | null;
+  diameter?: number | null;
+}): string {
+  const q = new URLSearchParams();
+  q.set("shape", params.shape);
+  q.set("fabric", params.fabric);
+  if (params.lining) q.set("lining", params.lining);
+  if (params.diameter != null && Number.isFinite(params.diameter)) {
+    q.set("diameter", String(params.diameter));
+  }
+  return `/api/studio-preview?${q.toString()}`;
 }
