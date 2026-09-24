@@ -209,21 +209,21 @@ function DesignStudioInner() {
   const shapeCandidates = previewCatalog[shapeKey] || [];
 
   const previewUrl = useMemo(() => {
+    const base =
+      catalogImageUrl(shape?.imageUrl) ||
+      pickPreviewImage(shapeCandidates, null, [
+        catalogImageUrl(fabric?.imageUrl, fabric?.swatchUrl),
+      ]);
     if (fabric?.slug) {
       return studioPreviewApiPath({
         shape: shapeKey,
         fabric: fabric.slug,
         lining: lining?.slug,
         diameter: size?.diameterCm,
+        base,
       });
     }
-    return (
-      pickPreviewImage(shapeCandidates, fabric || null, [
-        catalogImageUrl(shape?.imageUrl),
-        catalogImageUrl(fabric?.imageUrl, fabric?.swatchUrl),
-        "/media/homepage/hero-lifestyle.png",
-      ]) || "/media/homepage/hero-lifestyle.png"
-    );
+    return base || "/media/homepage/hero-lifestyle.png";
   }, [shapeCandidates, fabric, shape, shapeKey, lining?.slug, size?.diameterCm]);
 
   const syncUrl = useCallback(

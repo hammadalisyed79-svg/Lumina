@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { MediaImage } from "@/components/media/MediaImage";
-import { ShadeProductPreview } from "@/components/studio/ShadeProductPreview";
 import { formatMoney } from "@/lib/utils";
 import { liningSwatchHex } from "@/lib/studio/images";
 import {
@@ -40,10 +39,9 @@ type Props = {
 };
 
 /**
- * Live preview by step:
- * - Shape → catalog photo
- * - Fabric → cloth only
- * - Size / lining / fitting / review → live SVG lampshade (category product)
+ * - Shape step: exact catalog photo
+ * - Fabric step: fabric cloth only
+ * - Later steps: same catalog photo with selected fabric colour applied
  */
 export function StudioLivePreview({
   ready,
@@ -70,10 +68,20 @@ export function StudioLivePreview({
     [candidates, shapeImage]
   );
 
+  const resultSrc = useMemo(() => {
+    if (!fabric?.slug) return null;
+    return studioPreviewApiPath({
+      shape: shapeKey,
+      fabric: fabric.slug,
+      lining: liningSlug,
+      diameter: diameterCm,
+      base: shapeRef || shapeImage || null,
+    });
+  }, [shapeKey, fabric?.slug, liningSlug, diameterCm, shapeRef, shapeImage]);
+
   const showFabricOnly = step === 1 && Boolean(fabricSrc);
   const showShapeOnly = step === 0;
-  const showProduct =
-    step >= 2 && Boolean(fabricSrc) && Boolean(shapeKey);
+  const showResult = step >= 2 && Boolean(resultSrc);
 
   const shadeTitle = shapeName
     ? /lampshade|pendant/i.test(shapeName)
@@ -81,60 +89,49 @@ export function StudioLivePreview({
       : `${shapeName} lampshade`
     : "Lampshade";
 
-  const stepEyebrow = showFabricOnly
-    ? "Selected fabric"
-    : step === 3
-      ? "Lining on your shade"
-      : step === 4
-        ? "Fitting detail"
-        : showProduct
-          ? "Your lampshade"
-          : "Live preview";
+  const previewSrc = showFabricOnly
+    ? fabricSrc
+    : showShapeOnly
+      ? shapeRef
+      : showResult
+        ? resultSrc
+        : resultSrc || shapeRef || fabricSrc;
+
+  const unoptimized = Boolean(previewSrc?.startsWith("/api/"));
 
   return (
     <div className="relative aspect-[4/5] overflow-hidden studio-preview-frame">
-      {!ready ? (
+      {!ready || !previewSrc ? (
         <div className="absolute inset-0 animate-pulse bg-stone" />
-      ) : showProduct && fabricSrc ? (
-        <ShadeProductPreview
-          shapeKey={shapeKey}
-          fabricUrl={fabricSrc}
-          liningName={liningName}
-          liningColour={liningColour}
-          diameterCm={diameterCm}
-          emphasizeLining={step === 3}
-          emphasizeFitting={step === 4}
-        />
-      ) : showFabricOnly && fabricSrc ? (
-        <div className="studio-preview-photo studio-preview-fabric-only">
-          <MediaImage
-            key={fabricSrc}
-            src={fabricSrc}
-            alt={fabric?.name || "Selected fabric"}
-            fill
-            className="object-cover object-center"
-            sizes="(max-width:1024px) 100vw, 50vw"
-            priority
-          />
-        </div>
-      ) : showShapeOnly && shapeRef ? (
-        <div className="studio-preview-photo">
-          <MediaImage
-            key={shapeRef}
-            src={shapeRef}
-            alt={shadeTitle}
-            fill
-            className="object-cover object-center"
-            sizes="(max-width:1024px) 100vw, 50vw"
-            priority
-          />
-        </div>
       ) : (
-        <div className="absolute inset-0 animate-pulse bg-stone" />
+        <div
+          className={`studio-preview-photo ${showFabricOnly ? "studio-preview-fabric-only" : ""}`}
+        >
+          <MediaImage
+            key={previewSrc}
+            src={previewSrc!}
+            alt={
+              showFabricOnly
+                ? fabric?.name || "Selected fabric"
+                : `${shadeTitle} in ${fabric?.name || "fabric"}`
+            }
+            fill
+            className="object-cover object-center"
+            sizes="(max-width:1024px) 100vw, 50vw"
+            priority
+            unoptimized={unoptimized}
+          />
+        </div>
       )}
 
       <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 bg-gradient-to-t from-[rgba(20,17,14,0.82)] via-[rgba(20,17,14,0.38)] to-transparent text-white z-[2]">
-        <p className="eyebrow text-champagne mb-2">{stepEyebrow}</p>
+        <p className="eyebrow text-champagne mb-2">
+          {showFabricOnly
+            ? "Selected fabric"
+            : showResult
+              ? "Your lampshade"
+              : "Live preview"}
+        </p>
         {showFabricOnly ? (
           <>
             <p className="font-display text-2xl md:text-3xl tracking-tight">
@@ -146,22 +143,6 @@ export function StudioLivePreview({
               </p>
             )}
             <p className="text-xs text-white/55 mt-1">For {shadeTitle}</p>
-          </>
-        ) : step === 3 ? (
-          <>
-            <p className="font-display text-2xl md:text-3xl tracking-tight">
-              {liningName || "Lining"}
-            </p>
-            <p className="text-sm text-white/80 mt-1">
-              Inside {shadeTitle}
-              {fabric?.name ? ` · ${fabric.name}` : ""}
-            </p>
-            {sizeName && (
-              <p className="text-xs text-white/65 mt-1">
-                {sizeName}
-                {diameterCm != null ? ` · Ø ${diameterCm} cm` : ""}
-              </p>
-            )}
           </>
         ) : (
           <>
@@ -185,29 +166,13 @@ export function StudioLivePreview({
           <p className="text-lg tracking-wide">{formatMoney(unitPrice)}</p>
           {liningName && step >= 2 && (
             <span
-              className={`studio-preview-lining-chip ${step === 3 ? "is-emphasis" : ""}`}
+              className="studio-preview-lining-chip"
               style={{ background: liningHex }}
               title={`Lining: ${liningName}`}
             />
           )}
         </div>
       </div>
-
-      {/* Hidden prefetch for cart/save thumbnail */}
-      {fabric?.slug && step >= 2 && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={studioPreviewApiPath({
-            shape: shapeKey,
-            fabric: fabric.slug,
-            lining: liningSlug,
-            diameter: diameterCm,
-          })}
-          alt=""
-          className="sr-only"
-          aria-hidden
-        />
-      )}
     </div>
   );
 }

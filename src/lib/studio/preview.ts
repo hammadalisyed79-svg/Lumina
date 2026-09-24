@@ -132,15 +132,16 @@ export function pickCatalogMatch(
   return null;
 }
 
-/** Shape reference photo — avoid lifestyle frames. */
+/** Shape reference photo — prefer the curated shape image, then product-only shots. */
 export function pickShapeReference(
   candidates: PreviewCandidate[],
   shapeImage?: string | null
 ): string | null {
+  if (shapeImage) return shapeImage;
   const productOnly = candidates.find(
     (c) => !isLifestyleShot(c.title, c.imageUrl)
   );
-  return productOnly?.imageUrl || shapeImage || null;
+  return productOnly?.imageUrl || candidates[0]?.imageUrl || null;
 }
 
 export function pickPreviewImage(
@@ -170,6 +171,8 @@ export function studioPreviewApiPath(params: {
   fabric: string;
   lining?: string | null;
   diameter?: number | null;
+  /** Exact shape-step photo so the result matches the first picture. */
+  base?: string | null;
 }): string {
   const q = new URLSearchParams();
   q.set("shape", params.shape);
@@ -178,6 +181,7 @@ export function studioPreviewApiPath(params: {
   if (params.diameter != null && Number.isFinite(params.diameter)) {
     q.set("diameter", String(params.diameter));
   }
-  q.set("v", "4");
+  if (params.base) q.set("base", params.base);
+  q.set("v", "6");
   return `/api/studio-preview?${q.toString()}`;
 }
