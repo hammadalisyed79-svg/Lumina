@@ -51,6 +51,16 @@ function variantLabel(v: CatalogVariant) {
 
 const CHIP_LIMIT = 16;
 
+function optionGroupLabel(key: "option1" | "option2" | "option3", values: string[]) {
+  const sample = values.join(" ").toLowerCase();
+  if (/\d+\s*cm|\d+\s*"|diameter|height|size/.test(sample)) return "Size";
+  if (/ceiling|pendant|table|floor|fitting|e27|b22|reducer/.test(sample)) return "Fitting";
+  if (/lining|gold|silver|copper|white|foil/.test(sample)) return "Lining";
+  if (key === "option1") return "Option";
+  if (key === "option2") return "Detail";
+  return "Finish";
+}
+
 export function ProductConfigurator({ product }: Props) {
   const { addProduct, setDrawerOpen } = useCart();
   const purchasable = useMemo(
@@ -167,7 +177,7 @@ export function ProductConfigurator({ product }: Props) {
     <div className="space-y-6 border-t border-line pt-6 pb-24 md:pb-0">
       {option1Values.length > 1 && (
         <ChipGroup
-          label="Option"
+          label={optionGroupLabel("option1", option1Values)}
           values={option1Values}
           value={option1 || ""}
           onChange={(v) => pickOption("option1", v, setOption1)}
@@ -175,7 +185,7 @@ export function ProductConfigurator({ product }: Props) {
       )}
       {option2Values.length > 1 && (
         <ChipGroup
-          label="Detail"
+          label={optionGroupLabel("option2", option2Values)}
           values={option2Values}
           value={option2 || ""}
           onChange={(v) => pickOption("option2", v, setOption2)}
@@ -183,7 +193,7 @@ export function ProductConfigurator({ product }: Props) {
       )}
       {option3Values.length > 1 && (
         <ChipGroup
-          label="Finish"
+          label={optionGroupLabel("option3", option3Values)}
           values={option3Values}
           value={option3 || ""}
           onChange={(v) => pickOption("option3", v, setOption3)}

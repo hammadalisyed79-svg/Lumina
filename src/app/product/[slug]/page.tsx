@@ -1,4 +1,3 @@
-import { MediaImage } from "@/components/media/MediaImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -8,6 +7,7 @@ import { formatMoney, isWebImageUrl, shortDisplayTitle } from "@/lib/utils";
 import { normalizeImageSrc } from "@/lib/image";
 import { ProductConfigurator } from "@/components/product/ProductConfigurator";
 import { ProductAccordions } from "@/components/product/ProductAccordions";
+import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { ReviewForm } from "@/components/product/ReviewForm";
 import { ProductReviewsList } from "@/components/product/ProductReviewsList";
@@ -141,34 +141,24 @@ export default async function ProductPage({ params }: Props) {
         </nav>
 
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
-          <div className="grid grid-cols-2 gap-3">
-            {(gallery.length
-              ? gallery
-              : [{ id: "ph", url: primaryImage || fallbackImg, alt: product.title }]
-            ).map((img, idx) => (
-              <div
-                key={img.id}
-                className={`group relative overflow-hidden bg-stone ${
-                  idx === 0 ? "col-span-2 aspect-[4/5]" : "aspect-square"
-                }`}
-              >
-                <MediaImage
-                  src={img.url}
-                  alt={img.alt || product.title}
-                  fill
-                  className="object-cover object-center img-zoom"
-                  {...(idx === 0
-                    ? { priority: true as const }
-                    : { loading: "lazy" as const })}
-                  sizes={
-                    idx === 0
-                      ? "(max-width:1024px) 100vw, 50vw"
-                      : "(max-width:1024px) 50vw, 25vw"
-                  }
-                />
-              </div>
-            ))}
-          </div>
+          <ProductGallery
+            title={product.title}
+            images={
+              gallery.length
+                ? gallery.map((img) => ({
+                    id: img.id,
+                    url: img.url,
+                    alt: img.alt,
+                  }))
+                : [
+                    {
+                      id: "ph",
+                      url: primaryImage || fallbackImg,
+                      alt: product.title,
+                    },
+                  ]
+            }
+          />
 
           <div className="lg:sticky lg:top-28 lg:self-start">
             <p className="eyebrow mb-3">
@@ -222,6 +212,7 @@ export default async function ProductPage({ params }: Props) {
             <ProductAccordions
               description={product.description}
               leadTimeDays={product.leadTimeDays}
+              productType={product.type}
             />
 
             <div className="mt-12 pt-2">
