@@ -215,6 +215,58 @@ export const COPY = {
     eyebrow: "Professionals",
     title: "Built for projects that matter",
     body: "Whether you’re specifying for a client home or stocking a showroom, we support considered choices — proportions, lead times and finishes that hold up in situ.",
+    benefits: [
+      {
+        title: "Scheme support",
+        body: "Help matching fabrics, silhouettes and sizes across rooms and client briefs.",
+      },
+      {
+        title: "Clearer lead times",
+        body: "Priority communication once approved — so deadlines stay realistic.",
+      },
+      {
+        title: "Bespoke options",
+        body: "Custom sizes and fabrics via a bespoke enquiry when the catalogue needs to stretch.",
+      },
+    ],
+  },
+
+  shippingPage: {
+    eyebrow: "Delivery",
+    title: "Shipping",
+    metaDescription:
+      "Made-to-order production and UK delivery for Lumina Hub handmade lampshades — processing times, tracking and costs.",
+    intro:
+      "Each Lumina Hub lampshade is handmade to order. Typical timings below; exact shipping options appear at checkout.",
+    sections: [
+      {
+        title: "Processing time",
+        body: "Please allow a few business days for production before dispatch, unless a longer lead time is shown on the product.",
+      },
+      {
+        title: "Delivery times",
+        points: [
+          "UK mainland: typically 2–4 business days after dispatch",
+          "International: approximately 5–7 business days after dispatch where offered",
+        ],
+      },
+      {
+        title: "Shipping costs",
+        body: "Costs are calculated at checkout from destination and parcel size. Large shades may require specialist packaging.",
+      },
+      {
+        title: "Tracking",
+        body: "Once dispatched, you receive confirmation with tracking details where the carrier provides them.",
+      },
+    ],
+  },
+
+  bespokePage: {
+    eyebrow: "Atelier",
+    title: "Bespoke enquiry",
+    metaDescription:
+      "Request a custom Lumina Hub lampshade — share dimensions, fabrics or inspiration and the Ilford studio will reply with feasibility and timing.",
+    body: "Share dimensions, fabric preferences or inspiration images. We’ll respond with feasibility and timing for a custom shade.",
   },
 
   designPage: {

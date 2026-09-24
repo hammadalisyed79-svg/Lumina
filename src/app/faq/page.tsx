@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd, faqPageJsonLd, DEFAULT_OG_IMAGE } from "@/lib/seo/json-ld";
+import { ContentCtas } from "@/components/content/ContentHero";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -63,14 +64,25 @@ export default function FaqPage() {
           </section>
         ))}
       </div>
-      <p className="mt-10 text-sm text-muted">
+
+      <ContentCtas
+        primary={{ href: "/design-your-shade", label: "Design your shade" }}
+        secondary={{ href: "/shop/lampshades", label: "Shop lampshades", variant: "secondary" }}
+        tertiary={{ href: "/size-guide", label: "Size guide", variant: "quiet" }}
+      />
+
+      <p className="mt-8 text-sm text-muted">
         Still unsure?{" "}
         <Link href="/contact" className="underline underline-offset-4 hover:text-bronze">
           Contact us
-        </Link>{" "}
-        or read the{" "}
-        <Link href="/size-guide" className="underline underline-offset-4 hover:text-bronze">
-          size guide
+        </Link>
+        {" · "}
+        <Link href="/shipping" className="underline underline-offset-4 hover:text-bronze">
+          Shipping
+        </Link>
+        {" · "}
+        <Link href="/care" className="underline underline-offset-4 hover:text-bronze">
+          Care
         </Link>
         .
       </p>
