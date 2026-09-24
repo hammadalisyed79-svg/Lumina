@@ -419,21 +419,25 @@ a {
   box-shadow: var(--shadow-soft);
 }
 
-.cfg-mobile-sticky-preview {
+.cfg-preview-sticky {
   position: sticky;
   top: 0;
   z-index: 20;
   background: rgba(248, 246, 241, 0.94);
   backdrop-filter: blur(10px);
   margin-inline: -0.25rem;
-  padding: 0.5rem 0.25rem 0.75rem;
+  padding: 0.35rem 0.25rem 0.75rem;
   border-bottom: 1px solid var(--line);
 }
 
 @media (min-width: 1024px) {
-  .studio-sticky-preview {
-    position: sticky;
+  .cfg-preview-sticky {
     top: 6.5rem;
+    margin-inline: 0;
+    padding: 0;
+    border-bottom: none;
+    background: transparent;
+    backdrop-filter: none;
   }
 }
 

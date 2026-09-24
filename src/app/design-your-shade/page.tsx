@@ -533,26 +533,7 @@ function DesignStudioInner() {
 
             <div className="studio-layout">
               <div className="studio-preview-col">
-                <div className="cfg-mobile-sticky-preview lg:hidden mb-6">
-                  <ConfiguratorPreview
-                    shapeKey={selection.shapeKey || "drum"}
-                    dims={dims}
-                    fabricUrl={fabric?.imageUrl || fabric?.swatchUrl}
-                    fabricName={fabric?.name}
-                    patternScale={fabric?.patternScale}
-                    liningName={lining?.name}
-                    liningColour={lining?.colour}
-                    mode={previewMode}
-                    room={room}
-                    showDimensions={showDims}
-                    onModeChange={setPreviewMode}
-                    onRoomChange={setRoom}
-                    onShowDimensionsChange={setShowDims}
-                    onZoomFabric={() => setZoomFabric(true)}
-                    compact
-                  />
-                </div>
-                <div className="hidden lg:block studio-sticky-preview">
+                <div className="cfg-preview-sticky">
                   <ConfiguratorPreview
                     shapeKey={selection.shapeKey || "drum"}
                     dims={dims}
@@ -853,24 +834,6 @@ function DesignStudioInner() {
                     <p className="prose-muted mt-4">{nextHint(validation.missing)}</p>
                   ) : (
                     <div className="mt-6 space-y-6">
-                      <div className="lg:hidden">
-                        <ConfiguratorPreview
-                          shapeKey={selection.shapeKey || "drum"}
-                          dims={dims}
-                          fabricUrl={fabric?.imageUrl || fabric?.swatchUrl}
-                          fabricName={fabric?.name}
-                          patternScale={fabric?.patternScale}
-                          liningName={lining?.name}
-                          liningColour={lining?.colour}
-                          mode={previewMode}
-                          room={room}
-                          showDimensions={showDims}
-                          onModeChange={setPreviewMode}
-                          onRoomChange={setRoom}
-                          onShowDimensionsChange={setShowDims}
-                        />
-                      </div>
-
                       <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
                         <div>
                           <dt className="text-muted text-[11px] uppercase tracking-[0.1em]">Use</dt>
@@ -985,16 +948,19 @@ function DesignStudioInner() {
                   )}
                 </section>
 
-                <div className="lg:hidden">
-                  <SpecSummary
-                    catalog={catalog}
-                    selection={selection}
-                    price={price}
-                    nextHint={nextHint(validation.missing)}
-                    showPriceDetails={showPriceDetails}
-                    onTogglePriceDetails={() => setShowPriceDetails((v) => !v)}
-                  />
-                </div>
+                {/* Mobile summary only while configuring — review already lists the full spec */}
+                {!validation.valid && (
+                  <div className="lg:hidden">
+                    <SpecSummary
+                      catalog={catalog}
+                      selection={selection}
+                      price={price}
+                      nextHint={nextHint(validation.missing)}
+                      showPriceDetails={showPriceDetails}
+                      onTogglePriceDetails={() => setShowPriceDetails((v) => !v)}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
