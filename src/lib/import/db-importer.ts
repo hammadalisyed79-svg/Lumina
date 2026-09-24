@@ -130,7 +130,7 @@ export async function importProductsToDatabase(
   for (const c of [
     { slug: "lampshades", title: "Lampshades" },
     { slug: "fabrics", title: "Fabrics" },
-    { slug: "cushions", title: "Cushions" },
+    { slug: "cushions", title: "Cushion covers" },
     { slug: "kits", title: "Lampshade Kits" },
     { slug: "bestsellers", title: "Bestsellers" },
     { slug: "new", title: "New arrivals" },

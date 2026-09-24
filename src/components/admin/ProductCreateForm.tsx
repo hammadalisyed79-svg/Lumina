@@ -40,7 +40,7 @@ export function ProductCreateForm({ fabrics }: { fabrics: { id: string; name: st
       <select name="type" className="input" defaultValue="LAMPSHADE">
         <option value="LAMPSHADE">Lampshade</option>
         <option value="FABRIC">Fabric</option>
-        <option value="CUSHION">Cushion</option>
+        <option value="CUSHION">Cushion cover</option>
         <option value="KIT">Kit</option>
       </select>
       <input name="basePrice" type="number" step="0.01" required placeholder="Base price" className="input" />

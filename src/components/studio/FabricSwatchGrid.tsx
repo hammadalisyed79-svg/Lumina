@@ -2,6 +2,7 @@
 
 import { MediaImage } from "@/components/media/MediaImage";
 import { FABRIC_FILTERS, fabricFamily, type FabricFamily } from "@/lib/studio/fabric-family";
+import { catalogImageUrl } from "@/lib/studio/images";
 import { formatMoney } from "@/lib/utils";
 
 export type FabricOpt = {
@@ -16,11 +17,6 @@ export type FabricOpt = {
   pattern?: string | null;
   description?: string | null;
 };
-
-function usable(url?: string | null) {
-  if (!url || url.includes(".heic") || url.includes("placeholder")) return null;
-  return url;
-}
 
 export function FabricSwatchGrid({
   fabrics,
@@ -78,7 +74,7 @@ export function FabricSwatchGrid({
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {filtered.map((f) => {
-            const img = usable(f.swatchUrl) || usable(f.imageUrl);
+            const img = catalogImageUrl(f.swatchUrl, f.imageUrl);
             const selected = value === f.id;
             return (
               <button

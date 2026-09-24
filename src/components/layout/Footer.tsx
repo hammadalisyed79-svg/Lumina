@@ -57,7 +57,7 @@ export function Footer() {
             </li>
             <li>
               <Link href="/shop/cushions" className="hover:text-ivory">
-                Cushions
+                Cushion covers
               </Link>
             </li>
             <li>

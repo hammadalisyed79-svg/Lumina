@@ -116,17 +116,18 @@ export default async function ShopCollectionPage({ params, searchParams }: Props
   const typeTitles: Partial<Record<ProductType, string>> = {
     LAMPSHADE: "Lampshades",
     FABRIC: "Fabrics",
-    CUSHION: "Cushions",
+    CUSHION: "Cushion covers",
     KIT: "Kits",
   };
   const typeEyebrows: Partial<Record<ProductType, string>> = {
     LAMPSHADE: "Lampshade",
     FABRIC: "Fabric",
-    CUSHION: "Cushion",
+    CUSHION: "Cushion cover",
     KIT: "Kit",
   };
   const title =
     (type ? typeTitles[type] : null) ||
+    (slug === "cushions" ? "Cushion covers" : null) ||
     collection?.title ||
     slug.replace(/-/g, " ");
 

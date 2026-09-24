@@ -32,8 +32,8 @@ export const FAQS = [
     a: "Yes, where offered at checkout. International delivery times and any customs charges are outlined in Shipping and Terms.",
   },
   {
-    q: "Can I order fabric or a cushion to match?",
-    a: "Many patterns are available as fabric and cushion covers. Browse Fabrics and Cushions, or contact us for matching advice.",
+    q: "Can I order fabric or a cushion cover to match?",
+    a: "Many patterns are available as fabric and cushion covers. Browse Fabrics and Cushion covers, or contact us for matching advice.",
   },
   {
     q: "How do I pay?",

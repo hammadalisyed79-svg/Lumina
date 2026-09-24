@@ -19,6 +19,7 @@ import {
   buildStudioSharePath,
   type FabricFamily,
 } from "@/lib/studio/fabric-family";
+import { catalogImageUrl, liningSwatchHex } from "@/lib/studio/images";
 
 type Opt = {
   id: string;
@@ -43,15 +44,8 @@ type Shape = {
 };
 
 const STEPS = ["Shape", "Fabric", "Size", "Lining", "Fitting", "Review"] as const;
-const FALLBACK_PREVIEW =
-  "/media/products/handmade-by-order-luxury-teal-golden-wave-pattern-abstract-art-print-on-velvet-drum-lamp-shade-pendant-light-lamp-shade-all-shapes-and-sizes/03-83136991330682.jpg";
+const FALLBACK_PREVIEW = "/media/homepage/hero-lifestyle.png";
 const GUEST_KEY = "luminahub_studio_guest";
-
-function usableImage(url?: string | null): string | null {
-  if (!url) return null;
-  if (url.includes(".heic") || url.includes("placeholder")) return null;
-  return url;
-}
 
 function guestKey(): string {
   if (typeof window === "undefined") return "";
@@ -206,36 +200,37 @@ function DesignStudioInner() {
   const previewSrc = useMemo(() => {
     if (step === 0) {
       return (
-        usableImage(shape?.imageUrl) ||
-        usableImage(fabric?.swatchUrl) ||
-        usableImage(fabric?.imageUrl) ||
+        catalogImageUrl(shape?.imageUrl, fabric?.imageUrl, fabric?.swatchUrl) ||
         FALLBACK_PREVIEW
       );
     }
     if (step === 3) {
       return (
-        usableImage(lining?.swatchUrl) ||
-        usableImage(fabric?.swatchUrl) ||
-        usableImage(fabric?.imageUrl) ||
-        usableImage(shape?.imageUrl) ||
-        FALLBACK_PREVIEW
+        catalogImageUrl(
+          lining?.swatchUrl,
+          fabric?.imageUrl,
+          fabric?.swatchUrl,
+          shape?.imageUrl
+        ) || FALLBACK_PREVIEW
       );
     }
     if (step === 4) {
       return (
-        usableImage(fitting?.imageUrl) ||
-        usableImage(fabric?.swatchUrl) ||
-        usableImage(fabric?.imageUrl) ||
-        usableImage(shape?.imageUrl) ||
-        FALLBACK_PREVIEW
+        catalogImageUrl(
+          fitting?.imageUrl,
+          fabric?.imageUrl,
+          fabric?.swatchUrl,
+          shape?.imageUrl
+        ) || FALLBACK_PREVIEW
       );
     }
     return (
-      usableImage(fabric?.swatchUrl) ||
-      usableImage(fabric?.imageUrl) ||
-      usableImage(shape?.imageUrl) ||
-      usableImage(shapes.find((s) => usableImage(s.imageUrl))?.imageUrl) ||
-      FALLBACK_PREVIEW
+      catalogImageUrl(
+        fabric?.imageUrl,
+        fabric?.swatchUrl,
+        shape?.imageUrl,
+        shapes.find((s) => catalogImageUrl(s.imageUrl))?.imageUrl
+      ) || FALLBACK_PREVIEW
     );
   }, [step, shape, fabric, lining, fitting, shapes]);
 
@@ -490,7 +485,7 @@ function DesignStudioInner() {
                       id: s.key,
                       name: s.name,
                       meta: s.description,
-                      image: usableImage(s.imageUrl) || undefined,
+                      image: catalogImageUrl(s.imageUrl) || undefined,
                     }))}
                     value={shapeKey}
                     onChange={setShapeKey}
@@ -538,7 +533,8 @@ function DesignStudioInner() {
                       ]
                         .filter(Boolean)
                         .join(" · "),
-                      image: usableImage(l.swatchUrl) || undefined,
+                      image: catalogImageUrl(l.swatchUrl) || undefined,
+                      color: liningSwatchHex(l.name, l.colour),
                     }))}
                     value={liningId}
                     onChange={setLiningId}
@@ -555,7 +551,7 @@ function DesignStudioInner() {
                           f.description ||
                           f.compatibility ||
                           (f.priceMod ? `+£${f.priceMod}` : "Included"),
-                        image: usableImage(f.imageUrl) || undefined,
+                        image: catalogImageUrl(f.imageUrl) || undefined,
                       }))}
                       value={fittingId}
                       onChange={setFittingId}
@@ -739,7 +735,13 @@ function OptionGrid({
   onChange,
 }: {
   label: string;
-  options: { id: string; name: string; meta?: string | null; image?: string }[];
+  options: {
+    id: string;
+    name: string;
+    meta?: string | null;
+    image?: string;
+    color?: string;
+  }[];
   value: string;
   onChange: (id: string) => void;
 }) {
@@ -755,7 +757,7 @@ function OptionGrid({
             onClick={() => onChange(o.id)}
             className={`studio-option ${value === o.id ? "is-selected" : ""}`}
           >
-            {o.image && (
+            {o.image ? (
               <div className="relative h-28 mb-3 bg-stone overflow-hidden">
                 <MediaImage
                   src={o.image}
@@ -765,7 +767,13 @@ function OptionGrid({
                   sizes="200px"
                 />
               </div>
-            )}
+            ) : o.color ? (
+              <div
+                className="h-14 mb-3 border border-line"
+                style={{ background: o.color }}
+                aria-hidden
+              />
+            ) : null}
             <p className="font-medium text-[15px]">{o.name}</p>
             {o.meta && <p className="text-sm text-muted mt-1.5 leading-snug">{o.meta}</p>}
           </button>

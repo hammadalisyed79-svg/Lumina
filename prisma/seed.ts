@@ -130,7 +130,8 @@ async function main() {
           ...f,
           description: `${f.name} — selected for lampshade work and lasting colour.`,
           imageUrl: img("fabrics", f.slug),
-          swatchUrl: img("fabrics", f.slug),
+          // Prefer real product photos; never seed demo SVG placeholders as swatches
+          swatchUrl: null,
           sortOrder: i,
         },
       }),

@@ -69,7 +69,7 @@ export const NAV_MEGA = {
 export const PRIMARY_NAV = [
   { href: "/shop/lampshades", label: "Lampshades", mega: "lampshades" as const },
   { href: "/shop/fabrics", label: "Fabrics" },
-  { href: "/shop/cushions", label: "Cushions" },
+  { href: "/shop/cushions", label: "Cushion covers" },
   { href: "/shop/kits", label: "Kits" },
   { href: "/design-your-shade", label: "Design your shade" },
   { href: "/trade", label: "Trade" },

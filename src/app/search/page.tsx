@@ -12,7 +12,7 @@ const SUGGESTIONS = [
   { href: "/shop/lampshades?shape=drum", label: "Drum lampshades" },
   { href: "/shop/lampshades?shape=empire", label: "Empire" },
   { href: "/shop/fabrics", label: "Fabrics" },
-  { href: "/shop/cushions", label: "Cushions" },
+  { href: "/shop/cushions", label: "Cushion covers" },
   { href: "/shop/bestsellers", label: "Bestsellers" },
   { href: "/design-your-shade", label: "Design your shade" },
 ];

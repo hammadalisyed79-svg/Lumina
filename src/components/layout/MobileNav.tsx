@@ -54,7 +54,7 @@ function buildSections(items: NavLink[]): AccordionItem[] {
   // Ensure core shop categories if CMS nav omitted them
   for (const fallback of [
     { href: "/shop/fabrics", label: "Fabrics" },
-    { href: "/shop/cushions", label: "Cushions" },
+    { href: "/shop/cushions", label: "Cushion covers" },
     { href: "/shop/kits", label: "Kits" },
   ]) {
     if (!seen.has(fallback.href) && !sections.some((s) => s.href === fallback.href)) {

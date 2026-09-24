@@ -167,7 +167,7 @@ export default async function ProductPage({ params }: Props) {
                 : product.type === "FABRIC"
                   ? "Fabric"
                   : product.type === "CUSHION"
-                    ? "Cushion"
+                    ? "Cushion cover"
                     : "Studio piece"}
             </p>
             <h1 className="font-display text-[2.15rem] sm:text-4xl md:text-5xl leading-[1.05] tracking-tight mb-3">

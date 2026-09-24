@@ -39,7 +39,7 @@ FAQ highlights
 - Lead times: shown on product pages; typically a few UK working days for production before dispatch.
 - Returns: many made-to-order items are non-returnable (including shades over 35cm and multi-shade orders). Damaged/incorrect items: report within 48 hours with photos.
 - International shipping: where offered at checkout; customs may apply.
-- Matching: many patterns continue as fabric and cushions.
+- Matching: many patterns continue as fabric and cushion covers.
 - Trade: designers/architects/retailers apply via /trade.
 
 Marketing copy cues

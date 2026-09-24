@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { toNumber } from "@/lib/pricing";
+import { catalogImageUrl } from "@/lib/studio/images";
 
 export async function GET() {
   const [fabrics, sizes, linings, fittings, shapes] = await Promise.all([
@@ -16,18 +17,21 @@ export async function GET() {
   ]);
 
   return NextResponse.json({
-    fabrics: fabrics.map((f) => ({
-      id: f.id,
-      slug: f.slug,
-      name: f.name,
-      priceMod: toNumber(f.priceMod),
-      imageUrl: f.imageUrl,
-      swatchUrl: f.swatchUrl,
-      material: f.material,
-      colour: f.colour,
-      pattern: f.pattern,
-      description: f.description,
-    })),
+    fabrics: fabrics.map((f) => {
+      const photo = catalogImageUrl(f.imageUrl, f.swatchUrl);
+      return {
+        id: f.id,
+        slug: f.slug,
+        name: f.name,
+        priceMod: toNumber(f.priceMod),
+        imageUrl: photo,
+        swatchUrl: photo,
+        material: f.material,
+        colour: f.colour,
+        pattern: f.pattern,
+        description: f.description,
+      };
+    }),
     sizes: sizes.map((s) => ({
       id: s.id,
       slug: s.slug,
@@ -43,7 +47,7 @@ export async function GET() {
       name: l.name,
       priceMod: toNumber(l.priceMod),
       colour: l.colour,
-      swatchUrl: l.swatchUrl,
+      swatchUrl: catalogImageUrl(l.swatchUrl),
       description: l.description,
     })),
     fittings: fittings.map((f) => ({
@@ -52,14 +56,14 @@ export async function GET() {
       name: f.name,
       priceMod: toNumber(f.priceMod),
       description: f.description,
-      imageUrl: f.imageUrl,
+      imageUrl: catalogImageUrl(f.imageUrl),
       compatibility: f.compatibility,
     })),
     shapes: shapes.map((s) => ({
       key: s.key,
       name: s.name,
       basePrice: toNumber(s.basePrice),
-      imageUrl: s.imageUrl,
+      imageUrl: catalogImageUrl(s.imageUrl),
       description: s.description,
     })),
   });
