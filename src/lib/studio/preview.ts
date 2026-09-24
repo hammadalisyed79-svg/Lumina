@@ -1,30 +1,4 @@
-/** Studio live-preview silhouettes (SVG path `d` in a 100×120 viewBox). */
-
-export const SHAPE_PATHS: Record<string, string> = {
-  drum: "M28 14 H72 Q78 14 78 20 V100 Q78 106 72 106 H28 Q22 106 22 100 V20 Q22 14 28 14 Z",
-  empire:
-    "M36 12 H64 Q68 12 70 18 L88 102 Q90 108 84 108 H16 Q10 108 12 102 L30 18 Q32 12 36 12 Z",
-  coolie:
-    "M38 10 H62 Q66 10 68 16 L94 104 Q96 110 90 110 H10 Q4 110 6 104 L32 16 Q34 10 38 10 Z",
-  oval: "M50 12 C72 12 86 36 86 60 C86 84 72 108 50 108 C28 108 14 84 14 60 C14 36 28 12 50 12 Z",
-  square:
-    "M26 16 H74 Q80 16 80 22 V98 Q80 104 74 104 H26 Q20 104 20 98 V22 Q20 16 26 16 Z",
-  rectangular:
-    "M12 28 H88 Q94 28 94 34 V86 Q94 92 88 92 H12 Q6 92 6 86 V34 Q6 28 12 28 Z",
-  tiered:
-    "M34 8 H66 Q70 8 70 12 V28 Q70 32 66 32 H34 Q30 32 30 28 V12 Q30 8 34 8 Z M26 36 H74 Q78 36 78 40 V58 Q78 62 74 62 H26 Q22 62 22 58 V40 Q22 36 26 36 Z M16 66 H84 Q90 66 90 70 V102 Q90 108 84 108 H16 Q10 108 10 102 V70 Q10 66 16 66 Z",
-};
-
-export function shapePath(shapeKey?: string | null): string {
-  if (!shapeKey) return SHAPE_PATHS.drum;
-  return SHAPE_PATHS[shapeKey] || SHAPE_PATHS.drum;
-}
-
-/** Soft size scale relative to a mid diameter (~35cm). */
-export function sizePreviewScale(diameterCm?: number | null): number {
-  if (diameterCm == null || !Number.isFinite(diameterCm)) return 1;
-  return Math.min(1.1, Math.max(0.82, diameterCm / 35));
-}
+/** Catalog matching helpers for Design Your Shade live preview. */
 
 export type PreviewCandidate = {
   imageUrl: string;
@@ -70,9 +44,8 @@ function tokens(...parts: (string | null | undefined)[]): string[] {
 }
 
 const LIFESTYLE_HINT =
-  /\b(room|sofa|interior|lifestyle|living|bedroom|wall|cushion|table setting)\b/i;
+  /\b(room|sofa|interior|lifestyle|living|bedroom|wall|cushion|table setting|armchair)\b/i;
 
-/** Prefer product-only shots over room lifestyle photos for form matching. */
 export function isLifestyleShot(title: string, url: string): boolean {
   return LIFESTYLE_HINT.test(title) || /lifestyle|room|interior/i.test(url);
 }
@@ -105,10 +78,7 @@ export function scorePreviewMatch(
   return score;
 }
 
-/**
- * Strong fabric↑shape catalog match → use that photo alone (no fabric overlay).
- * Otherwise return null so the UI renders an SVG silhouette composite.
- */
+/** Best catalog photo for shape + fabric tokens; null if no strong match. */
 export function pickCatalogMatch(
   candidates: PreviewCandidate[],
   fabric: {
@@ -128,11 +98,11 @@ export function pickCatalogMatch(
       best = c;
     }
   }
-  if (best && bestScore >= 6) return best.imageUrl;
+  if (best && bestScore >= 4) return best.imageUrl;
   return null;
 }
 
-/** Shape reference photo — prefer the curated shape image, then product-only shots. */
+/** Curated shape hero, then a non-lifestyle catalog shot. */
 export function pickShapeReference(
   candidates: PreviewCandidate[],
   shapeImage?: string | null
@@ -144,6 +114,9 @@ export function pickShapeReference(
   return productOnly?.imageUrl || candidates[0]?.imageUrl || null;
 }
 
+/**
+ * Review / cart thumbnail: fabric-matched catalog photo, else shape hero.
+ */
 export function pickPreviewImage(
   candidates: PreviewCandidate[],
   fabric: {
@@ -165,23 +138,13 @@ export function pickPreviewImage(
   return null;
 }
 
-/** Client-safe URL for the server-generated combination preview image. */
-export function studioPreviewApiPath(params: {
-  shape: string;
-  fabric: string;
-  lining?: string | null;
-  diameter?: number | null;
-  /** Exact shape-step photo so the result matches the first picture. */
-  base?: string | null;
-}): string {
-  const q = new URLSearchParams();
-  q.set("shape", params.shape);
-  q.set("fabric", params.fabric);
-  if (params.lining) q.set("lining", params.lining);
-  if (params.diameter != null && Number.isFinite(params.diameter)) {
-    q.set("diameter", String(params.diameter));
-  }
-  if (params.base) q.set("base", params.base);
-  q.set("v", "6");
-  return `/api/studio-preview?${q.toString()}`;
+export function shadeTitle(shapeName?: string | null): string {
+  if (!shapeName) return "Lampshade";
+  if (/lampshade|pendant/i.test(shapeName)) return shapeName;
+  return `${shapeName} lampshade`;
+}
+
+export function sizePreviewScale(diameterCm?: number | null): number {
+  if (diameterCm == null || !Number.isFinite(diameterCm)) return 1;
+  return Math.min(1.06, Math.max(0.88, diameterCm / 38));
 }

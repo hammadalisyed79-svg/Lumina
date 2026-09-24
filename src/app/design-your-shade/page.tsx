@@ -23,7 +23,6 @@ import {
 import { catalogImageUrl, liningSwatchHex } from "@/lib/studio/images";
 import {
   pickPreviewImage,
-  studioPreviewApiPath,
   type PreviewCandidate,
 } from "@/lib/studio/preview";
 
@@ -209,22 +208,14 @@ function DesignStudioInner() {
   const shapeCandidates = previewCatalog[shapeKey] || [];
 
   const previewUrl = useMemo(() => {
-    const base =
-      catalogImageUrl(shape?.imageUrl) ||
-      pickPreviewImage(shapeCandidates, null, [
+    return (
+      pickPreviewImage(shapeCandidates, fabric || null, [
+        catalogImageUrl(shape?.imageUrl),
         catalogImageUrl(fabric?.imageUrl, fabric?.swatchUrl),
-      ]);
-    if (fabric?.slug) {
-      return studioPreviewApiPath({
-        shape: shapeKey,
-        fabric: fabric.slug,
-        lining: lining?.slug,
-        diameter: size?.diameterCm,
-        base,
-      });
-    }
-    return base || "/media/homepage/hero-lifestyle.png";
-  }, [shapeCandidates, fabric, shape, shapeKey, lining?.slug, size?.diameterCm]);
+        "/media/homepage/hero-lifestyle.png",
+      ]) || "/media/homepage/hero-lifestyle.png"
+    );
+  }, [shapeCandidates, fabric, shape]);
 
   const syncUrl = useCallback(
     (nextStep = step) => {
@@ -437,11 +428,11 @@ function DesignStudioInner() {
                   fabric={fabric || null}
                   sizeName={size?.name}
                   diameterCm={size?.diameterCm}
+                  heightCm={size?.heightCm}
                   liningName={lining?.name}
                   liningColour={lining?.colour}
-                  liningSlug={lining?.slug}
                   fittingName={fitting?.name}
-                  showFitting={step >= 4}
+                  fittingHint={fitting?.compatibility || fitting?.description}
                   unitPrice={unitPrice}
                   candidates={shapeCandidates}
                   step={step}
