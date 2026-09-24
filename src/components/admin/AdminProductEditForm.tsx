@@ -23,13 +23,19 @@ type Props = {
     shortDesc: string | null;
     basePrice: number;
     published: boolean;
+    archived: boolean;
     featured: boolean;
     bestseller: boolean;
+    leadTimeDays: number;
     shopifyProductId: string | null;
     shopifyHandle: string | null;
     seoTitle: string | null;
     seoDesc: string | null;
     shapeKey: string | null;
+    sourceTitle: string | null;
+    sourceUrl: string | null;
+    migrationStatus: string | null;
+    adminFieldsLocked: boolean;
     images: ImageRow[];
     variants: VariantRow[];
   };
@@ -59,8 +65,11 @@ export function AdminProductEditForm({ product }: Props) {
       shortDesc: String(fd.get("shortDesc") || "") || null,
       basePrice: Number(fd.get("basePrice")),
       published: fd.get("published") === "on",
+      archived: fd.get("archived") === "on",
       featured: fd.get("featured") === "on",
       bestseller: fd.get("bestseller") === "on",
+      leadTimeDays: Number(fd.get("leadTimeDays") || product.leadTimeDays || 7),
+      adminFieldsLocked: fd.get("adminFieldsLocked") === "on",
       shopifyProductId: String(fd.get("shopifyProductId") || "") || null,
       shopifyHandle: String(fd.get("shopifyHandle") || "") || null,
       seoTitle: String(fd.get("seoTitle") || "") || null,
@@ -144,11 +153,26 @@ export function AdminProductEditForm({ product }: Props) {
             <span className="admin-label">Shape key</span>
             <input name="shapeKey" defaultValue={product.shapeKey || ""} className="admin-input" />
           </label>
+          <label className="block">
+            <span className="admin-label">Lead time (days)</span>
+            <input
+              name="leadTimeDays"
+              type="number"
+              min={1}
+              max={120}
+              defaultValue={product.leadTimeDays}
+              className="admin-input"
+            />
+          </label>
         </div>
         <div className="admin-actions mt-4">
           <label className="flex items-center gap-2 text-sm">
             <input name="published" type="checkbox" defaultChecked={product.published} />
             Published
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input name="archived" type="checkbox" defaultChecked={product.archived} />
+            Archived
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input name="featured" type="checkbox" defaultChecked={product.featured} />
@@ -158,7 +182,32 @@ export function AdminProductEditForm({ product }: Props) {
             <input name="bestseller" type="checkbox" defaultChecked={product.bestseller} />
             Bestseller
           </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              name="adminFieldsLocked"
+              type="checkbox"
+              defaultChecked={product.adminFieldsLocked}
+            />
+            Lock customer fields (skip on re-import)
+          </label>
         </div>
+        {(product.sourceTitle || product.sourceUrl) && (
+          <div className="mt-4 text-sm admin-muted space-y-1">
+            <p>
+              <span className="uppercase tracking-wide text-[10px]">Source title</span>
+              <br />
+              {product.sourceTitle}
+            </p>
+            {product.sourceUrl && (
+              <p>
+                <a href={product.sourceUrl} className="underline" target="_blank" rel="noreferrer">
+                  Open source product
+                </a>
+                {product.migrationStatus ? ` · ${product.migrationStatus}` : ""}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="admin-panel">

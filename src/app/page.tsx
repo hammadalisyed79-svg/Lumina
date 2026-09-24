@@ -41,6 +41,7 @@ async function pickByType(type: ProductType, take: number) {
   const rows = await prisma.product.findMany({
     where: {
       published: true,
+      archived: false,
       type,
       images: { some: { NOT: { url: { contains: ".heic" } } } },
     },
@@ -60,6 +61,7 @@ async function shapeImageMap(keys: string[]) {
       const p = await prisma.product.findFirst({
         where: {
           published: true,
+          archived: false,
           shapeKey: key,
           type: "LAMPSHADE",
           images: { some: {} },
@@ -154,6 +156,7 @@ export default async function HomePage() {
       prisma.product.findMany({
         where: {
           published: true,
+          archived: false,
           type: "LAMPSHADE",
           images: { some: { NOT: { url: { contains: ".heic" } } } },
         },
@@ -218,6 +221,7 @@ export default async function HomePage() {
     await prisma.product.findMany({
       where: {
         published: true,
+        archived: false,
         bestseller: true,
         images: { some: { NOT: { url: { contains: ".heic" } } } },
       },

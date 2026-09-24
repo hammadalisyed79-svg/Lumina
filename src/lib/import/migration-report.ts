@@ -8,17 +8,24 @@ import type {
 } from "./migration-types";
 
 const ROOT = path.join(process.cwd());
+/** Legacy location kept for backward compatibility */
 export const MIGRATION_DIR = path.join(ROOT, "migration");
+/** Canonical Phase 2 report directory */
+export const DATA_MIGRATION_DIR = path.join(ROOT, "data", "migration");
 
 export function ensureMigrationDir() {
   fs.mkdirSync(MIGRATION_DIR, { recursive: true });
+  fs.mkdirSync(DATA_MIGRATION_DIR, { recursive: true });
 }
 
 export function writeJson(name: string, data: unknown) {
   ensureMigrationDir();
-  const p = path.join(MIGRATION_DIR, name);
-  fs.writeFileSync(p, JSON.stringify(data, null, 2));
-  return p;
+  const payload = JSON.stringify(data, null, 2);
+  const legacy = path.join(MIGRATION_DIR, name);
+  const canonical = path.join(DATA_MIGRATION_DIR, name);
+  fs.writeFileSync(legacy, payload);
+  fs.writeFileSync(canonical, payload);
+  return canonical;
 }
 
 export function buildImageAudit(products: SourceProduct[]): ImageAuditReport {
@@ -102,9 +109,13 @@ export function writeProductsCsv(products: SourceProduct[]) {
     ];
     lines.push(row.join(","));
   }
-  const p = path.join(MIGRATION_DIR, "luminahub-products.csv");
-  fs.writeFileSync(p, lines.join("\n"));
-  return p;
+  ensureMigrationDir();
+  const body = lines.join("\n");
+  const legacy = path.join(MIGRATION_DIR, "luminahub-products.csv");
+  const canonical = path.join(DATA_MIGRATION_DIR, "luminahub-products.csv");
+  fs.writeFileSync(legacy, body);
+  fs.writeFileSync(canonical, body);
+  return canonical;
 }
 
 function csv(s: string) {
@@ -113,11 +124,17 @@ function csv(s: string) {
 }
 
 export function writeDiscoveryReport(report: DiscoveryReport) {
-  return writeJson("luminahub-discovery-report.json", report);
+  writeJson("luminahub-discovery-report.json", report);
+  return writeJson("luminahub-discovery.json", report);
 }
 
 export function writeImportReport(report: ImportReport) {
   return writeJson("luminahub-import-report.json", report);
+}
+
+export function writeImageReport(report: ImageAuditReport) {
+  writeJson("luminahub-image-audit.json", report);
+  return writeJson("luminahub-image-report.json", report);
 }
 
 export function writeParsedProducts(products: SourceProduct[]) {

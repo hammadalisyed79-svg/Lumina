@@ -24,7 +24,7 @@ export async function listProductsForShop(opts: {
   query?: ShopQuery;
   page?: number;
 }) {
-  const where: Prisma.ProductWhereInput = { published: true };
+  const where: Prisma.ProductWhereInput = { published: true, archived: false };
   if (opts.type) where.type = opts.type;
   if (opts.query?.shape) where.shapeKey = opts.query.shape;
   if (opts.query?.mood) where.moodTags = { has: opts.query.mood };
@@ -113,8 +113,8 @@ export async function listProductsForShop(opts: {
 }
 
 export async function getProductBySlug(slug: string) {
-  return prisma.product.findUnique({
-    where: { slug },
+  return prisma.product.findFirst({
+    where: { slug, archived: false, published: true },
     include: {
       images: { orderBy: { sortOrder: "asc" } },
       variants: {

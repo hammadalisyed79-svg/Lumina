@@ -15,13 +15,14 @@
 import fs from "fs";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
-import { crawlCollectionProducts, discoverCollections } from "../src/lib/import/collection-parser";
+import { crawlAllProducts, crawlCollectionProducts, discoverCollections } from "../src/lib/import/collection-parser";
 import { downloadProductImages } from "../src/lib/import/image-downloader";
 import { importProductsToDatabase } from "../src/lib/import/db-importer";
 import {
   buildImageAudit,
   MIGRATION_DIR,
   writeDiscoveryReport,
+  writeImageReport,
   writeImportReport,
   writeParsedProducts,
   writeProductsCsv,
@@ -60,16 +61,29 @@ async function phaseDiscover(): Promise<DiscoveryReport> {
   }
 
   const uniqueHandles = [...handleToCollections.keys()].sort();
+
+  // Safety net: also crawl global /products.json so nothing is missed outside collections
+  console.log("Crawl all /products.json for completeness…");
+  const allProducts = await crawlAllProducts();
+  let addedFromProductsJson = 0;
+  for (const h of allProducts.productHandles) {
+    if (!handleToCollections.has(h)) {
+      handleToCollections.set(h, ["__uncategorized__"]);
+      addedFromProductsJson++;
+    }
+  }
+  const uniqueAfter = [...handleToCollections.keys()].sort();
+
   const report: DiscoveryReport = {
     crawledAt: new Date().toISOString(),
     sourceWebsite: BASE,
     collectionsDiscovered: collections.length,
-    collectionPagesCrawled: pages,
-    productLinksFound: links,
-    uniqueProducts: uniqueHandles.length,
-    duplicateUrlsRemoved: links - uniqueHandles.length,
+    collectionPagesCrawled: pages + allProducts.pagesCrawled,
+    productLinksFound: links + allProducts.productHandles.length,
+    uniqueProducts: uniqueAfter.length,
+    duplicateUrlsRemoved: links + allProducts.productHandles.length - uniqueAfter.length,
     collections,
-    uniqueHandles,
+    uniqueHandles: uniqueAfter,
   };
 
   // Persist membership map for parse phase
@@ -87,6 +101,8 @@ async function phaseDiscover(): Promise<DiscoveryReport> {
         links: report.productLinksFound,
         unique: report.uniqueProducts,
         dupesRemoved: report.duplicateUrlsRemoved,
+        addedFromProductsJson,
+        collectionOnlyUnique: uniqueHandles.length,
       },
       null,
       2
@@ -136,10 +152,7 @@ async function phaseImages(products: SourceProduct[]) {
   const result = await downloadProductImages(products, 4);
   writeParsedProducts(products);
   const audit = buildImageAudit(products);
-  fs.writeFileSync(
-    path.join(MIGRATION_DIR, "luminahub-image-audit.json"),
-    JSON.stringify(audit, null, 2)
-  );
+  writeImageReport(audit);
   console.log(JSON.stringify(result, null, 2));
   return { result, audit };
 }

@@ -243,6 +243,7 @@ model Product {
   basePrice       Decimal     @db.Decimal(10, 2)
   compareAtPrice  Decimal?    @db.Decimal(10, 2)
   published       Boolean     @default(true)
+  archived        Boolean     @default(false)
   featured        Boolean     @default(false)
   bestseller      Boolean     @default(false)
   handmade        Boolean     @default(true)
@@ -260,6 +261,8 @@ model Product {
   sourceOriginalDescription String? @db.Text
   sourceAvailability String?
   availabilityReviewed Boolean @default(false)
+  /// When true, re-import preserves title/description/SEO/published (admin-edited customer fields).
+  adminFieldsLocked Boolean @default(false)
   sourceImportedAt DateTime?
   migrationStatus String?
   createdAt       DateTime    @default(now())
@@ -281,6 +284,7 @@ model Product {
   inventoryItems  InventoryItem[]
 
   @@index([type, published])
+  @@index([archived])
   @@index([featured])
   @@index([bestseller])
   @@index([shapeKey])

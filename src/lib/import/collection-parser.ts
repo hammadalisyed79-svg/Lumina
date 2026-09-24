@@ -52,3 +52,29 @@ export async function crawlCollectionProducts(
 
   return { pagesCrawled, productHandles: handles, productUrls: urls };
 }
+
+/** Paginate the global products feed so products outside any collection are not missed. */
+export async function crawlAllProducts(): Promise<
+  Pick<SourceCollection, "pagesCrawled" | "productHandles" | "productUrls">
+> {
+  const handles: string[] = [];
+  const urls: string[] = [];
+  let pagesCrawled = 0;
+
+  for (let page = 1; page <= 100; page++) {
+    const url = `${BASE}/products.json?limit=50&page=${page}`;
+    const data = await fetchJson<CollectionProductsJson>(url);
+    pagesCrawled++;
+    const batch = data.products || [];
+    if (!batch.length) break;
+    for (const p of batch) {
+      handles.push(p.handle);
+      urls.push(`${BASE}/products/${p.handle}`);
+    }
+    console.log(`  [all-products] page ${page}: +${batch.length} (running ${handles.length})`);
+    if (batch.length < 50) break;
+    await sleep(250);
+  }
+
+  return { pagesCrawled, productHandles: handles, productUrls: urls };
+}

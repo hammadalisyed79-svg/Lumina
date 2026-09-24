@@ -6,6 +6,7 @@ import { writeAuditLog } from "@/lib/security/audit";
 
 const patchSchema = z.object({
   published: z.boolean().optional(),
+  archived: z.boolean().optional(),
   featured: z.boolean().optional(),
   bestseller: z.boolean().optional(),
   title: z.string().min(2).optional(),
@@ -14,11 +15,14 @@ const patchSchema = z.object({
   shortDesc: z.string().nullable().optional(),
   basePrice: z.number().positive().optional(),
   slug: z.string().min(2).optional(),
+  leadTimeDays: z.number().int().min(1).max(120).optional(),
   shopifyProductId: z.string().nullable().optional(),
   shopifyHandle: z.string().nullable().optional(),
   seoTitle: z.string().nullable().optional(),
   seoDesc: z.string().nullable().optional(),
   shapeKey: z.string().nullable().optional(),
+  adminFieldsLocked: z.boolean().optional(),
+  migrationStatus: z.string().nullable().optional(),
   images: z
     .array(
       z.object({
@@ -61,10 +65,24 @@ export async function PATCH(
 
   const { images, variants, ...productData } = parsed.data;
 
+  // Any customer-facing edit locks fields against future import overwrites
+  const lockOnEdit =
+    productData.title != null ||
+    productData.description != null ||
+    productData.shortDesc != null ||
+    productData.seoTitle != null ||
+    productData.seoDesc != null ||
+    productData.published != null;
+
   const product = await prisma.$transaction(async (tx) => {
     const updated = await tx.product.update({
       where: { id },
-      data: productData,
+      data: {
+        ...productData,
+        ...(lockOnEdit && productData.adminFieldsLocked !== false
+          ? { adminFieldsLocked: true }
+          : {}),
+      },
     });
 
     if (images) {

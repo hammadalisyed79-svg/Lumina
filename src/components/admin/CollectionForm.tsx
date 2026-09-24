@@ -28,6 +28,10 @@ export function CollectionCreateForm() {
     }
     e.currentTarget.reset();
     setError("");
+    if (data.id) {
+      router.push(`/admin/collections/${data.id}`);
+      return;
+    }
     router.refresh();
   }
 

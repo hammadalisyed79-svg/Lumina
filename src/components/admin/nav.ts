@@ -27,6 +27,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { href: "/admin/products", label: "Products", permission: "products.view" },
       { href: "/admin/collections", label: "Collections", permission: "collections.view" },
+      { href: "/admin/migration-review", label: "Migration review", permission: "products.view" },
       { href: "/admin/fabrics", label: "Fabrics", permission: "fabrics.view" },
       { href: "/admin/shapes", label: "Shapes", permission: "shapes.view" },
       { href: "/admin/sizes", label: "Sizes", permission: "sizes.view" },

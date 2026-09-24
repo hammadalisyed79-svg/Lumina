@@ -159,14 +159,23 @@ export async function importProductsToDatabase(
 
   // Prefetch existing products — key ONLY by exact handle fields (never collide via unrelated slug aliases)
   const existingProducts = await prisma.product.findMany({
-    select: { id: true, slug: true, sourceHandle: true, shopifyHandle: true },
+    select: {
+      id: true,
+      slug: true,
+      sourceHandle: true,
+      shopifyHandle: true,
+      adminFieldsLocked: true,
+      archived: true,
+    },
   });
   const byHandle = new Map<string, string>();
+  const lockedById = new Map<string, boolean>();
   for (const e of existingProducts) {
     // Prefer sourceHandle, then shopifyHandle, then slug — each key maps to its own product only when equal
     if (e.sourceHandle) byHandle.set(e.sourceHandle, e.id);
     if (e.shopifyHandle && e.shopifyHandle === e.slug) byHandle.set(e.shopifyHandle, e.id);
     byHandle.set(e.slug, e.id);
+    lockedById.set(e.id, Boolean(e.adminFieldsLocked));
   }
 
   const existingVariants = await prisma.productVariant.findMany({
@@ -237,18 +246,45 @@ export async function importProductsToDatabase(
       }
     }
     if (productId) {
-      await prisma.product.update({ where: { id: productId }, data });
+      const locked = lockedById.get(productId);
+      const updateData = locked
+        ? {
+            // Preserve admin-edited customer-facing fields; refresh source + pricing/media metadata
+            basePrice: data.basePrice,
+            compareAtPrice: data.compareAtPrice,
+            shapeKey: data.shapeKey,
+            moodTags: data.moodTags,
+            colourTags: data.colourTags,
+            patternTags: data.patternTags,
+            material: data.material,
+            shopifyProductId: data.shopifyProductId,
+            shopifyHandle: data.shopifyHandle,
+            sourceWebsite: data.sourceWebsite,
+            sourceUrl: data.sourceUrl,
+            sourceHandle: data.sourceHandle,
+            sourceTitle: data.sourceTitle,
+            sourceOriginalDescription: data.sourceOriginalDescription,
+            sourceAvailability: data.sourceAvailability,
+            sourceImportedAt: data.sourceImportedAt,
+            migrationStatus: data.migrationStatus,
+            leadTimeDays: data.leadTimeDays,
+          }
+        : data;
+      await prisma.product.update({ where: { id: productId }, data: updateData });
     } else {
       const created = await prisma.product.create({
-        data: { ...data, slug: p.sourceHandle },
+        data: { ...data, slug: p.sourceHandle, archived: false, adminFieldsLocked: false },
       });
       productId = created.id;
       byHandle.set(p.sourceHandle, productId);
+      lockedById.set(productId, false);
       existingProducts.push({
         id: productId,
         slug: p.sourceHandle,
         sourceHandle: p.sourceHandle,
         shopifyHandle: p.sourceHandle,
+        adminFieldsLocked: false,
+        archived: false,
       });
     }
     upsertedProducts++;
