@@ -317,7 +317,7 @@ a {
   }
 
   .studio-page-body {
-    padding-bottom: 6.5rem;
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
   }
 
   .studio-inline-nav {
@@ -482,25 +482,44 @@ a {
   outline-offset: 2px;
 }
 
+@media (max-width: 1023px) {
+  .studio-page-body {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom));
+  }
+}
+
 .studio-sticky {
   display: none;
 }
 
 @media (max-width: 1023px) {
-  .studio-sticky {
+  .studio-sticky.cfg-sticky-bar {
     position: fixed;
     inset-inline: 0;
     bottom: 0;
-    z-index: 44;
+    z-index: 40;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    padding: 0.7rem 1rem calc(0.7rem + env(safe-area-inset-bottom));
+    padding: 0.55rem 1rem calc(0.55rem + env(safe-area-inset-bottom));
     background: rgba(248, 246, 241, 0.97);
     border-top: 1px solid var(--line);
     backdrop-filter: blur(12px);
     box-shadow: 0 -8px 30px rgba(20, 17, 14, 0.08);
+    pointer-events: auto;
+  }
+
+  /* Keep sticky bar from covering option controls — options get extra bottom room */
+  .studio-options-col {
+    padding-bottom: 0.5rem;
+  }
+
+  .studio-options-col .studio-option,
+  .studio-options-col button.cfg-chip,
+  .studio-options-col .input {
+    position: relative;
+    z-index: 1;
   }
 }
 

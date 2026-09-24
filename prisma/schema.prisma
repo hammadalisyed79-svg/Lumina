@@ -353,6 +353,12 @@ model ProductRelation {
   @@id([fromId, toId])
 }
 
+enum FabricRepeatMode {
+  REPEAT
+  COVER
+  CONTAIN
+}
+
 model Fabric {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -364,6 +370,14 @@ model Fabric {
   pattern     String?
   imageUrl    String?
   swatchUrl   String?
+  /// Dedicated flat/close-up texture for the configurator renderer
+  textureImage    String?
+  patternScale    Float    @default(1)
+  patternOffsetX  Float    @default(0)
+  patternOffsetY  Float    @default(0)
+  patternRotation Float    @default(0)
+  repeatMode      FabricRepeatMode @default(REPEAT)
+  usableAsTexture Boolean  @default(false)
   priceMod    Decimal  @default(0) @db.Decimal(10, 2)
   stockQty    Int?
   active      Boolean  @default(true)
@@ -372,6 +386,7 @@ model Fabric {
   designs     SavedDesign[]
   products    ProductFabric[]
   inventoryItems InventoryItem[]
+  shapes      ShapeFabric[]
 }
 
 model Size {
@@ -383,6 +398,8 @@ model Size {
   heightCm    Decimal? @db.Decimal(6, 2)
   widthCm     Decimal? @db.Decimal(6, 2)
   depthCm     Decimal? @db.Decimal(6, 2)
+  topDiameterCm    Decimal? @db.Decimal(6, 2)
+  bottomDiameterCm Decimal? @db.Decimal(6, 2)
   displayUnit String   @default("cm")
   priceMod    Decimal  @default(0) @db.Decimal(10, 2)
   active      Boolean  @default(true)
@@ -391,6 +408,7 @@ model Size {
   variants    ProductVariant[]
   designs     SavedDesign[]
   products    ProductSize[]
+  shapes      ShapeSize[]
 
   @@index([shapeId])
 }
@@ -402,12 +420,17 @@ model Lining {
   colour    String?
   swatchUrl String?
   description String?
+  /// Exact hex used by the configurator interior renderer
+  rendererHex      String?
+  /// 0–1 reflective warmth hint for Light On preview
+  reflectivityHint Float?
   priceMod  Decimal @default(0) @db.Decimal(10, 2)
   active    Boolean @default(true)
   sortOrder Int     @default(0)
   variants  ProductVariant[]
   designs   SavedDesign[]
   products  ProductLining[]
+  shapes    ShapeLining[]
 }
 
 model Fitting {
@@ -417,12 +440,15 @@ model Fitting {
   description String?
   imageUrl    String?
   compatibility String?
+  /// Explicit use types: table | floor | ceiling. Empty = all uses.
+  useTypes    String[] @default([])
   priceMod    Decimal @default(0) @db.Decimal(10, 2)
   active      Boolean @default(true)
   sortOrder   Int     @default(0)
   variants    ProductVariant[]
   designs     SavedDesign[]
   products    ProductFitting[]
+  shapes      ShapeFitting[]
 }
 
 model Shape {
@@ -433,11 +459,66 @@ model Shape {
   imageUrl    String?
   basePrice   Decimal @db.Decimal(10, 2)
   priceMod    Decimal @default(0) @db.Decimal(10, 2)
+  /// Explicit use types: table | floor | ceiling. Empty = all uses.
+  useTypes    String[] @default([])
   active      Boolean @default(true)
   sortOrder   Int     @default(0)
   designs     SavedDesign[]
   sizes       Size[]
   products    ProductShape[]
+  shapeSizes    ShapeSize[]
+  shapeFabrics  ShapeFabric[]
+  shapeLinings  ShapeLining[]
+  shapeFittings ShapeFitting[]
+}
+
+/// Explicit Shape ↔ Size eligibility for the configurator
+model ShapeSize {
+  shapeId     String
+  sizeId      String
+  needsReview Boolean @default(false)
+  source      String?
+  shape       Shape   @relation(fields: [shapeId], references: [id], onDelete: Cascade)
+  size        Size    @relation(fields: [sizeId], references: [id], onDelete: Cascade)
+
+  @@id([shapeId, sizeId])
+  @@index([sizeId])
+}
+
+model ShapeFabric {
+  shapeId     String
+  fabricId    String
+  needsReview Boolean @default(false)
+  source      String?
+  shape       Shape   @relation(fields: [shapeId], references: [id], onDelete: Cascade)
+  fabric      Fabric  @relation(fields: [fabricId], references: [id], onDelete: Cascade)
+
+  @@id([shapeId, fabricId])
+  @@index([fabricId])
+}
+
+model ShapeLining {
+  shapeId     String
+  liningId    String
+  needsReview Boolean @default(false)
+  source      String?
+  shape       Shape   @relation(fields: [shapeId], references: [id], onDelete: Cascade)
+  lining      Lining  @relation(fields: [liningId], references: [id], onDelete: Cascade)
+
+  @@id([shapeId, liningId])
+  @@index([liningId])
+}
+
+model ShapeFitting {
+  shapeId     String
+  fittingId   String
+  needsReview Boolean @default(false)
+  source      String?
+  shape       Shape   @relation(fields: [shapeId], references: [id], onDelete: Cascade)
+  fitting     Fitting @relation(fields: [fittingId], references: [id], onDelete: Cascade)
+
+  @@id([shapeId, fittingId])
+  @@index([fittingId])
 }
 
 model ProductShape {

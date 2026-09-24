@@ -4,7 +4,11 @@ import { useId, useMemo } from "react";
 import { normalizeImageSrc } from "@/lib/image";
 import { liningSwatchHex } from "@/lib/studio/images";
 import { buildShadeBody, type ShadeDims } from "@/lib/configurator/geometry";
-import type { PreviewMode, RoomContext } from "@/lib/configurator/types";
+import type {
+  FabricRepeatMode,
+  PreviewMode,
+  RoomContext,
+} from "@/lib/configurator/types";
 
 type Props = {
   shapeKey: string;
@@ -12,8 +16,14 @@ type Props = {
   fabricUrl?: string | null;
   fabricName?: string | null;
   patternScale?: number;
+  patternOffsetX?: number;
+  patternOffsetY?: number;
+  patternRotation?: number;
+  repeatMode?: FabricRepeatMode;
   liningName?: string | null;
   liningColour?: string | null;
+  liningHex?: string | null;
+  reflectivityHint?: number | null;
   mode?: PreviewMode;
   room?: RoomContext;
   showDimensions?: boolean;
@@ -29,8 +39,14 @@ export function ShadeRenderer({
   fabricUrl,
   fabricName,
   patternScale = 1,
+  patternOffsetX = 0,
+  patternOffsetY = 0,
+  patternRotation = 0,
+  repeatMode = "REPEAT",
   liningName,
   liningColour,
+  liningHex: liningHexProp,
+  reflectivityHint,
   mode = "exterior",
   room = "studio",
   showDimensions = false,
@@ -41,11 +57,15 @@ export function ShadeRenderer({
     () => buildShadeBody(shapeKey, dims),
     [shapeKey, dims]
   );
-  const liningHex = liningSwatchHex(liningName, liningColour);
+  const liningHex =
+    liningHexProp || liningSwatchHex(liningName, liningColour);
   const fabricHref = fabricUrl ? normalizeImageSrc(fabricUrl) : null;
-  const scale = Math.max(0.55, Math.min(1.8, patternScale || 1));
-  const patW = 100 / scale;
-  const patH = 120 / scale;
+  const scale = Math.max(0.45, Math.min(2.2, patternScale || 1));
+  const patW = repeatMode === "COVER" ? 100 : 100 / scale;
+  const patH = repeatMode === "COVER" ? 120 : 120 / scale;
+  const ox = (patternOffsetX / 100) * patW;
+  const oy = (patternOffsetY / 100) * patH;
+  const reflect = Math.max(0, Math.min(1, reflectivityHint ?? 0.4));
 
   const lightOn = mode === "light";
   const showInterior = mode === "interior" || mode === "light";
@@ -57,6 +77,9 @@ export function ShadeRenderer({
         : room === "floor"
           ? ["#e8e0d4", "#d4cbb8", "#c4b8a4"]
           : ["#f0ebe3", "#e2d9cc", "#cfc4b4"];
+
+  const aspect =
+    repeatMode === "CONTAIN" ? "xMidYMid meet" : "xMidYMid slice";
 
   return (
     <div className={`shade-renderer ${className}`.trim()} data-mode={mode}>
@@ -76,7 +99,7 @@ export function ShadeRenderer({
             <stop
               offset="0%"
               stopColor="#ffffff"
-              stopOpacity={lightOn ? 0.35 : 0.75}
+              stopOpacity={lightOn ? 0.28 : 0.75}
             />
             <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
           </radialGradient>
@@ -86,7 +109,7 @@ export function ShadeRenderer({
               patternUnits="userSpaceOnUse"
               width={patW}
               height={patH}
-              patternTransform={`translate(${(100 - patW) / 2} ${(120 - patH) / 2})`}
+              patternTransform={`translate(${(100 - patW) / 2 + ox} ${(120 - patH) / 2 + oy}) rotate(${patternRotation} ${patW / 2} ${patH / 2})`}
             >
               <image
                 href={fabricHref}
@@ -94,21 +117,25 @@ export function ShadeRenderer({
                 y="0"
                 width={patW}
                 height={patH}
-                preserveAspectRatio="xMidYMid slice"
+                preserveAspectRatio={aspect}
               />
             </pattern>
           ) : null}
           <linearGradient id={`${uid}-cyl`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#1a1510" stopOpacity={lightOn ? 0.25 : 0.42} />
+            <stop offset="0%" stopColor="#1a1510" stopOpacity={lightOn ? 0.22 : 0.42} />
             <stop offset="18%" stopColor="#1a1510" stopOpacity="0.08" />
-            <stop offset="50%" stopColor="#ffffff" stopOpacity={lightOn ? 0.28 : 0.16} />
+            <stop
+              offset="50%"
+              stopColor="#ffffff"
+              stopOpacity={lightOn ? 0.22 + reflect * 0.18 : 0.16}
+            />
             <stop offset="82%" stopColor="#1a1510" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="#1a1510" stopOpacity={lightOn ? 0.25 : 0.42} />
+            <stop offset="100%" stopColor="#1a1510" stopOpacity={lightOn ? 0.22 : 0.42} />
           </linearGradient>
           <linearGradient id={`${uid}-fall`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#ffffff" stopOpacity="0.16" />
             <stop offset="50%" stopColor="#000000" stopOpacity="0" />
-            <stop offset="100%" stopColor="#000000" stopOpacity={lightOn ? 0.12 : 0.22} />
+            <stop offset="100%" stopColor="#000000" stopOpacity={lightOn ? 0.1 : 0.22} />
           </linearGradient>
           <radialGradient id={`${uid}-lining`} cx="50%" cy="50%" r="65%">
             <stop
@@ -119,8 +146,12 @@ export function ShadeRenderer({
             <stop offset="55%" stopColor={liningHex} stopOpacity="0.7" />
             <stop offset="100%" stopColor="#2a2018" stopOpacity="0.88" />
           </radialGradient>
-          <radialGradient id={`${uid}-glow`} cx="50%" cy="70%" r="55%">
-            <stop offset="0%" stopColor={liningHex} stopOpacity={lightOn ? 0.55 : 0} />
+          <radialGradient id={`${uid}-glow`} cx="50%" cy="68%" r={48 + reflect * 18}>
+            <stop
+              offset="0%"
+              stopColor={liningHex}
+              stopOpacity={lightOn ? 0.35 + reflect * 0.35 : 0}
+            />
             <stop offset="100%" stopColor={liningHex} stopOpacity="0" />
           </radialGradient>
           <linearGradient id={`${uid}-rim`} x1="0" y1="0" x2="1" y2="1">
@@ -195,7 +226,7 @@ export function ShadeRenderer({
               rx={body.innerRx * 0.9}
               ry={body.botRy * 3}
               fill={liningHex}
-              opacity={lightOn ? 0.35 : 0.2}
+              opacity={lightOn ? 0.25 + reflect * 0.25 : 0.2}
               style={{ mixBlendMode: "screen" }}
             />
           )}

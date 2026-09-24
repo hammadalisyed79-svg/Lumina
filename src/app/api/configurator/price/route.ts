@@ -3,9 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { toNumber } from "@/lib/pricing";
 import { calculateShadePrice } from "@/lib/configurator/pricing";
-import type { ConfigCatalog } from "@/lib/configurator/types";
-import { derivePatternScale, deriveUseTypes } from "@/lib/configurator/fabric-meta";
-import { catalogImageUrl } from "@/lib/studio/images";
+import type { ConfigCatalog, UseType } from "@/lib/configurator/types";
 
 const schema = z.object({
   shapeKey: z.string().nullable().optional(),
@@ -35,7 +33,7 @@ async function loadCatalog(): Promise<ConfigCatalog> {
       name: s.name,
       basePrice: toNumber(s.basePrice),
       priceMod: toNumber(s.priceMod),
-      imageUrl: catalogImageUrl(s.imageUrl),
+      useTypes: (s.useTypes || []) as UseType[],
     })),
     sizes: sizes.map((s) => ({
       id: s.id,
@@ -46,27 +44,38 @@ async function loadCatalog(): Promise<ConfigCatalog> {
       heightCm: s.heightCm ? toNumber(s.heightCm) : null,
       widthCm: s.widthCm ? toNumber(s.widthCm) : null,
       depthCm: s.depthCm ? toNumber(s.depthCm) : null,
+      topDiameterCm: s.topDiameterCm ? toNumber(s.topDiameterCm) : null,
+      bottomDiameterCm: s.bottomDiameterCm ? toNumber(s.bottomDiameterCm) : null,
       shapeKey: s.shape?.key ?? null,
+      eligibleShapeKeys: [],
     })),
     fabrics: fabrics.map((f) => ({
       id: f.id,
       slug: f.slug,
       name: f.name,
       priceMod: toNumber(f.priceMod),
-      patternScale: derivePatternScale(f.material, f.pattern, f.name),
+      patternScale: f.patternScale,
+      patternOffsetX: f.patternOffsetX,
+      patternOffsetY: f.patternOffsetY,
+      patternRotation: f.patternRotation,
+      repeatMode: f.repeatMode,
+      usableAsTexture: f.usableAsTexture,
+      eligibleShapeKeys: [],
     })),
     linings: linings.map((l) => ({
       id: l.id,
       slug: l.slug,
       name: l.name,
       priceMod: toNumber(l.priceMod),
+      eligibleShapeKeys: [],
     })),
     fittings: fittings.map((f) => ({
       id: f.id,
       slug: f.slug,
       name: f.name,
       priceMod: toNumber(f.priceMod),
-      useTypes: deriveUseTypes(f.slug, f.compatibility),
+      useTypes: (f.useTypes || []) as UseType[],
+      eligibleShapeKeys: [],
     })),
   };
 }

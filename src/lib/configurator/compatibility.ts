@@ -11,80 +11,39 @@ import type {
   UseType,
 } from "./types";
 
-/** Shapes suited to each use type (data-driven defaults; all shapes OK if empty). */
-const USE_SHAPE_KEYS: Record<UseType, string[] | null> = {
-  table: ["drum", "empire", "coolie", "oval", "square"],
-  floor: ["drum", "empire", "coolie", "oval", "rectangular", "square"],
-  ceiling: ["drum", "empire", "oval", "rectangular", "square", "tiered", "coolie"],
-};
-
-/** Fitting slug → preferred use types when Fitting.useTypes / compatibility empty. */
-const FITTING_USE_DEFAULTS: Record<string, UseType[]> = {
-  "candle-clip": ["table"],
-  spider: ["table", "floor", "ceiling"],
-  "e27-uno": ["ceiling"],
-  uno: ["ceiling"],
-};
-
-/** Explicit width/depth (no diameter) → rectangular silhouette. */
-function sizeLooksRectangular(s: SizeOpt): boolean {
-  if (s.widthCm != null && s.diameterCm == null) return true;
-  const hay = `${s.slug} ${s.name}`.toLowerCase();
-  if (/\b(rect|rectangular|square)\b/.test(hay) && s.diameterCm == null) return true;
-  return false;
-}
-
-function sizeLooksRound(s: SizeOpt): boolean {
-  return s.diameterCm != null;
-}
-
-/** Whether a size geometrically suits a shape key. */
-export function sizeCompatibleWithShape(size: SizeOpt, shapeKey: string | null): boolean {
+/** Explicit Shape → Size via eligibleShapeKeys (from ShapeSize). */
+export function sizeCompatibleWithShape(
+  size: SizeOpt,
+  shapeKey: string | null
+): boolean {
   if (!shapeKey) return true;
-  if (size.shapeKey && size.shapeKey !== shapeKey) return false;
-  // Unscoped sizes: heuristic by dimension kind
-  if (!size.shapeKey) {
-    const rectShapes = new Set(["rectangular", "square"]);
-    if (rectShapes.has(shapeKey)) {
-      // Prefer width-based; still allow diameter sizes as fallback pool
-      return true;
-    }
-    if (sizeLooksRectangular(size) && !sizeLooksRound(size)) {
-      // Width-only / rect-named sizes not for round silhouettes
-      return false;
-    }
+  if (size.eligibleShapeKeys?.length) {
+    return size.eligibleShapeKeys.includes(shapeKey);
   }
-  return true;
+  // No eligibility rows yet — deny rather than guess
+  return false;
 }
 
 export function parseFittingUseTypes(fitting: {
   slug: string;
-  compatibility?: string | null;
   useTypes?: UseType[];
 }): UseType[] {
-  if (fitting.useTypes && fitting.useTypes.length) return fitting.useTypes;
-  const hay = `${fitting.slug} ${fitting.compatibility || ""}`.toLowerCase();
-  const found: UseType[] = [];
-  if (/ceiling|pendant|uno|hanging/.test(hay)) found.push("ceiling");
-  if (/table|clip|candle|harp/.test(hay)) found.push("table");
-  if (/floor/.test(hay)) found.push("floor");
-  if (found.length) return [...new Set(found)];
-  return FITTING_USE_DEFAULTS[fitting.slug] || [];
+  return fitting.useTypes?.length ? fitting.useTypes : [];
 }
 
 export function getValidShapes(
   catalog: ConfigCatalog,
   useType: UseType | null
 ): OptionAvailability<ShapeOpt>[] {
-  const allowed = useType ? USE_SHAPE_KEYS[useType] : null;
   return catalog.shapes.map((option) => {
-    if (!allowed || allowed.includes(option.key)) {
+    const uses = option.useTypes || [];
+    if (!useType || !uses.length || uses.includes(useType)) {
       return { option, available: true };
     }
     return {
       option,
       available: false,
-      reason: `Less suited to ${useType} lamps — pick another shape or change use.`,
+      reason: `Not available for ${useType} — pick another shape or change use.`,
     };
   });
 }
@@ -100,38 +59,89 @@ export function getValidSizes(
       available: ok,
       reason: ok
         ? undefined
-        : `Not available for this ${shapeKey || "shape"} silhouette.`,
+        : shapeKey
+          ? `Not available for this ${shapeKey} silhouette.`
+          : "Choose a shape first.",
     };
   });
 }
 
 export function getValidFabrics(
-  catalog: ConfigCatalog
+  catalog: ConfigCatalog,
+  shapeKey: string | null
 ): OptionAvailability<FabricOpt>[] {
-  // No fabric↔shape restrictions in DB yet — all active fabrics available
-  return catalog.fabrics.map((option) => ({ option, available: true }));
+  return catalog.fabrics.map((option) => {
+    if (!shapeKey) return { option, available: true };
+    const keys = option.eligibleShapeKeys || [];
+    if (!keys.length) {
+      return {
+        option,
+        available: false,
+        reason: "Not linked to this shape in the catalogue.",
+      };
+    }
+    const ok = keys.includes(shapeKey);
+    return {
+      option,
+      available: ok,
+      reason: ok ? undefined : "Unavailable with this shape.",
+    };
+  });
 }
 
 export function getValidLinings(
-  catalog: ConfigCatalog
+  catalog: ConfigCatalog,
+  shapeKey: string | null
 ): OptionAvailability<LiningOpt>[] {
-  return catalog.linings.map((option) => ({ option, available: true }));
+  return catalog.linings.map((option) => {
+    if (!shapeKey) return { option, available: true };
+    const keys = option.eligibleShapeKeys || [];
+    if (!keys.length) {
+      return {
+        option,
+        available: false,
+        reason: "Not linked to this shape in the catalogue.",
+      };
+    }
+    const ok = keys.includes(shapeKey);
+    return {
+      option,
+      available: ok,
+      reason: ok ? undefined : "Unavailable with this shape.",
+    };
+  });
 }
 
 export function getValidFittings(
   catalog: ConfigCatalog,
-  useType: UseType | null
+  useType: UseType | null,
+  shapeKey: string | null
 ): OptionAvailability<FittingOpt>[] {
   return catalog.fittings.map((option) => {
-    const uses = parseFittingUseTypes(option);
-    if (!useType || uses.length === 0 || uses.includes(useType)) {
-      return { option, available: true };
+    const shapeKeys = option.eligibleShapeKeys || [];
+    if (shapeKey && shapeKeys.length && !shapeKeys.includes(shapeKey)) {
+      return {
+        option,
+        available: false,
+        reason: `Unavailable with this ${shapeKey} silhouette.`,
+      };
     }
-    return {
-      option,
-      available: false,
-      reason: `Unavailable for ${useType} — try another fitting.`,
-    };
+    if (shapeKey && !shapeKeys.length) {
+      return {
+        option,
+        available: false,
+        reason: "Not linked to this shape in the catalogue.",
+      };
+    }
+    const uses = parseFittingUseTypes(option);
+    if (useType && uses.length && !uses.includes(useType)) {
+      return {
+        option,
+        available: false,
+        reason: `Unavailable for ${useType} — try another fitting.`,
+      };
+    }
+    return { option, available: true };
   });
 }
 
@@ -155,7 +165,7 @@ export function invalidateAfterChange(
   if (changed === "useType" || changed === "shapeKey") {
     const sizes = getValidSizes(catalog, next.shapeKey);
     const sizeOk = sizes.find((s) => s.option.id === next.sizeId);
-    if (next.sizeId && sizeOk && !sizeOk.available) {
+    if (next.sizeId && (!sizeOk || !sizeOk.available)) {
       const shapeName =
         catalog.shapes.find((s) => s.key === next.shapeKey)?.name || "this shape";
       warnings.push(
@@ -167,11 +177,29 @@ export function invalidateAfterChange(
       }
     }
 
-    const fittings = getValidFittings(catalog, next.useType);
-    const fitOk = fittings.find((f) => f.option.id === next.fittingId);
-    if (next.fittingId && fitOk && !fitOk.available) {
+    const fabrics = getValidFabrics(catalog, next.shapeKey);
+    const fabOk = fabrics.find((f) => f.option.id === next.fabricId);
+    if (next.fabricId && (!fabOk || !fabOk.available)) {
       warnings.push(
-        "Your previous fitting is not available for this use. Please choose another fitting."
+        "Your previous fabric is not available for this shape. Please choose another fabric."
+      );
+      next.fabricId = null;
+    }
+
+    const linings = getValidLinings(catalog, next.shapeKey);
+    const linOk = linings.find((l) => l.option.id === next.liningId);
+    if (next.liningId && (!linOk || !linOk.available)) {
+      warnings.push(
+        "Your previous lining is not available for this shape. Please choose another lining."
+      );
+      next.liningId = null;
+    }
+
+    const fittings = getValidFittings(catalog, next.useType, next.shapeKey);
+    const fitOk = fittings.find((f) => f.option.id === next.fittingId);
+    if (next.fittingId && (!fitOk || !fitOk.available)) {
+      warnings.push(
+        "Your previous fitting is not available for this use or shape. Please choose another fitting."
       );
       next.fittingId = null;
     }
@@ -180,9 +208,8 @@ export function invalidateAfterChange(
     const shapeOk = shapes.find((s) => s.option.key === next.shapeKey);
     if (next.shapeKey && shapeOk && !shapeOk.available) {
       warnings.push(
-        "Your previous shape is less suited to this use. Please confirm or choose another shape."
+        "Your previous shape is not available for this use. Please confirm or choose another shape."
       );
-      // Do not clear automatically — available:false but still selected until user changes
     }
   }
 
@@ -206,11 +233,38 @@ export function validateConfiguration(
   if (size && !sizeCompatibleWithShape(size, selection.shapeKey)) {
     warnings.push("Selected size is not compatible with the current shape.");
   }
+  const fabric = catalog.fabrics.find((f) => f.id === selection.fabricId);
+  if (
+    fabric &&
+    selection.shapeKey &&
+    fabric.eligibleShapeKeys.length &&
+    !fabric.eligibleShapeKeys.includes(selection.shapeKey)
+  ) {
+    warnings.push("Selected fabric is not compatible with the current shape.");
+  }
+  const lining = catalog.linings.find((l) => l.id === selection.liningId);
+  if (
+    lining &&
+    selection.shapeKey &&
+    lining.eligibleShapeKeys.length &&
+    !lining.eligibleShapeKeys.includes(selection.shapeKey)
+  ) {
+    warnings.push("Selected lining is not compatible with the current shape.");
+  }
   const fitting = catalog.fittings.find((f) => f.id === selection.fittingId);
-  if (fitting && selection.useType) {
-    const uses = parseFittingUseTypes(fitting);
-    if (uses.length && !uses.includes(selection.useType)) {
-      warnings.push("Selected fitting is not compatible with the current use.");
+  if (fitting) {
+    if (
+      selection.shapeKey &&
+      fitting.eligibleShapeKeys.length &&
+      !fitting.eligibleShapeKeys.includes(selection.shapeKey)
+    ) {
+      warnings.push("Selected fitting is not compatible with the current shape.");
+    }
+    if (selection.useType) {
+      const uses = parseFittingUseTypes(fitting);
+      if (uses.length && !uses.includes(selection.useType)) {
+        warnings.push("Selected fitting is not compatible with the current use.");
+      }
     }
   }
 
@@ -257,5 +311,14 @@ export function recommendSizeRange(
     };
   }
   void baseHeightCm;
+  return null;
+}
+
+/** Texture URL for renderer — never lifestyle/product when unusable. */
+export function fabricTextureUrl(fabric: FabricOpt | null | undefined): string | null {
+  if (!fabric) return null;
+  if (fabric.usableAsTexture) {
+    return fabric.textureImage || fabric.swatchUrl || fabric.imageUrl || null;
+  }
   return null;
 }

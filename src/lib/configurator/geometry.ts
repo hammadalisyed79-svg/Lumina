@@ -108,9 +108,12 @@ export function buildShadeBody(shapeKey: string, dims: ShadeDims): ShadeBody {
   const heightLabelCm = heightCm;
 
   if (key === "empire" || key === "coolie") {
-    const taper = key === "coolie" ? 0.42 : 0.58;
-    const topRx = halfW * taper;
+    const bottomCm = dims.bottomDiameterCm ?? dims.diameterCm ?? widthCm;
+    const topCm =
+      dims.topDiameterCm ??
+      bottomCm * (key === "coolie" ? 0.42 : 0.58);
     const botRx = halfW;
+    const topRx = botRx * (topCm / Math.max(bottomCm, 1));
     const topRy = Math.max(2.2, topRx * 0.22);
     const botRy = Math.max(3.2, botRx * 0.2);
     return {
@@ -126,7 +129,7 @@ export function buildShadeBody(shapeKey: string, dims: ShadeDims): ShadeBody {
       innerRx: botRx * 0.82,
       innerRy: botRy * 0.75,
       cordTo,
-      widthLabelCm,
+      widthLabelCm: bottomCm,
       heightLabelCm,
     };
   }

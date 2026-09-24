@@ -1,4 +1,4 @@
-/** Shared types for Design Your Shade v2 configurator. */
+/** Shared types for Design Your Shade configurator. */
 
 export type UseType = "table" | "floor" | "ceiling";
 
@@ -40,6 +40,8 @@ export type ShapeOpt = {
   priceMod: number;
   imageUrl?: string | null;
   description?: string | null;
+  /** Empty = all use types */
+  useTypes: UseType[];
 };
 
 export type SizeOpt = {
@@ -51,8 +53,15 @@ export type SizeOpt = {
   heightCm: number | null;
   widthCm: number | null;
   depthCm: number | null;
+  topDiameterCm: number | null;
+  bottomDiameterCm: number | null;
+  /** Legacy single-shape link; eligibility uses ShapeSize */
   shapeKey: string | null;
+  /** Shape keys this size is explicitly eligible for */
+  eligibleShapeKeys: string[];
 };
+
+export type FabricRepeatMode = "REPEAT" | "COVER" | "CONTAIN";
 
 export type FabricOpt = {
   id: string;
@@ -61,12 +70,18 @@ export type FabricOpt = {
   priceMod: number;
   imageUrl?: string | null;
   swatchUrl?: string | null;
+  textureImage?: string | null;
   material?: string | null;
   colour?: string | null;
   pattern?: string | null;
   description?: string | null;
-  /** Relative pattern scale; 1 = default. */
   patternScale: number;
+  patternOffsetX: number;
+  patternOffsetY: number;
+  patternRotation: number;
+  repeatMode: FabricRepeatMode;
+  usableAsTexture: boolean;
+  eligibleShapeKeys: string[];
 };
 
 export type LiningOpt = {
@@ -77,6 +92,9 @@ export type LiningOpt = {
   colour?: string | null;
   swatchUrl?: string | null;
   description?: string | null;
+  rendererHex?: string | null;
+  reflectivityHint?: number | null;
+  eligibleShapeKeys: string[];
 };
 
 export type FittingOpt = {
@@ -87,8 +105,8 @@ export type FittingOpt = {
   description?: string | null;
   imageUrl?: string | null;
   compatibility?: string | null;
-  /** Parsed use types this fitting suits; empty = all. */
   useTypes: UseType[];
+  eligibleShapeKeys: string[];
 };
 
 export type ConfigSelection = {

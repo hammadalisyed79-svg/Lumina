@@ -20,7 +20,10 @@ import {
   type UseType,
 } from "@/lib/configurator/types";
 import {
+  fabricTextureUrl,
+  getValidFabrics,
   getValidFittings,
+  getValidLinings,
   getValidShapes,
   getValidSizes,
   invalidateAfterChange,
@@ -231,6 +234,15 @@ function DesignStudioInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Deep-link / saved design: scroll options column to the active step once ready
+  useEffect(() => {
+    if (!ready || !selection.step) return;
+    const t = window.setTimeout(() => {
+      sectionRefs.current[selection.step]?.scrollIntoView({ behavior: "auto", block: "start" });
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [ready, selection.step]);
+
   const shape = catalog?.shapes.find((s) => s.key === selection.shapeKey);
   const size = catalog?.sizes.find((s) => s.id === selection.sizeId);
   const fabric = catalog?.fabrics.find((f) => f.id === selection.fabricId);
@@ -253,10 +265,13 @@ function DesignStudioInner() {
       heightCm: size?.heightCm,
       widthCm: size?.widthCm,
       depthCm: size?.depthCm,
-      bottomDiameterCm: size?.diameterCm,
+      topDiameterCm: size?.topDiameterCm,
+      bottomDiameterCm: size?.bottomDiameterCm ?? size?.diameterCm,
     }),
     [size]
   );
+
+  const textureUrl = fabricTextureUrl(fabric);
 
   // Sync room context with use type when entering room mode
   useEffect(() => {
@@ -422,7 +437,7 @@ function DesignStudioInner() {
     if (!shape || !fabric || !size || !lining || !fitting || !price || !validation.valid) return;
     addConfigured({
       title: `Custom ${shape.name} · ${fabric.name}`,
-      imageUrl: fabric.imageUrl || fabric.swatchUrl || undefined,
+      imageUrl: textureUrl || fabric.swatchUrl || fabric.imageUrl || undefined,
       quantity: selection.quantity,
       config: {
         shapeKey: shape.key,
@@ -446,8 +461,15 @@ function DesignStudioInner() {
 
   const shapesAvail = catalog ? getValidShapes(catalog, selection.useType) : [];
   const sizesAvail = catalog ? getValidSizes(catalog, selection.shapeKey) : [];
-  const fittingsAvail = catalog ? getValidFittings(catalog, selection.useType) : [];
+  const fabricsAvail = catalog ? getValidFabrics(catalog, selection.shapeKey) : [];
+  const liningsAvail = catalog ? getValidLinings(catalog, selection.shapeKey) : [];
+  const fittingsAvail = catalog
+    ? getValidFittings(catalog, selection.useType, selection.shapeKey)
+    : [];
   const availableSizes = sizesAvail.filter((s) => s.available).map((s) => s.option);
+  const availableFabrics = fabricsAvail
+    .filter((f) => f.available)
+    .map((f) => f.option);
 
   const stepIndex = CONFIG_STEPS.findIndex((s) => s.id === selection.step);
   const progress = ((Math.max(0, stepIndex) + 1) / CONFIG_STEPS.length) * 100;
@@ -537,18 +559,28 @@ function DesignStudioInner() {
                   <ConfiguratorPreview
                     shapeKey={selection.shapeKey || "drum"}
                     dims={dims}
-                    fabricUrl={fabric?.imageUrl || fabric?.swatchUrl}
+                    fabricUrl={textureUrl}
                     fabricName={fabric?.name}
                     patternScale={fabric?.patternScale}
+                    patternOffsetX={fabric?.patternOffsetX}
+                    patternOffsetY={fabric?.patternOffsetY}
+                    patternRotation={fabric?.patternRotation}
+                    repeatMode={fabric?.repeatMode}
                     liningName={lining?.name}
                     liningColour={lining?.colour}
+                    liningHex={lining?.rendererHex}
+                    reflectivityHint={lining?.reflectivityHint}
                     mode={previewMode}
                     room={room}
                     showDimensions={showDims}
                     onModeChange={setPreviewMode}
                     onRoomChange={setRoom}
                     onShowDimensionsChange={setShowDims}
-                    onZoomFabric={() => setZoomFabric(true)}
+                    onZoomFabric={
+                      textureUrl || fabric?.swatchUrl
+                        ? () => setZoomFabric(true)
+                        : undefined
+                    }
                   />
                 </div>
                 <div className="mt-6 hidden lg:block">
@@ -705,7 +737,9 @@ function DesignStudioInner() {
                   id="cfg-fabric"
                 >
                   <FabricBrowser
-                    fabrics={catalog.fabrics}
+                    fabrics={
+                      selection.shapeKey ? availableFabrics : catalog.fabrics
+                    }
                     value={selection.fabricId}
                     onChange={(id) => {
                       updateSelection({ fabricId: id }, "fabricId");
@@ -714,6 +748,12 @@ function DesignStudioInner() {
                     }}
                     onViewFabric={setViewFabric}
                   />
+                  {selection.shapeKey && availableFabrics.length === 0 && (
+                    <p className="prose-muted text-sm mt-4" role="alert">
+                      No fabrics are linked to this shape yet. An admin can attach
+                      fabrics in the catalogue eligibility settings.
+                    </p>
+                  )}
                 </section>
 
                 {/* LINING */}
@@ -732,17 +772,20 @@ function DesignStudioInner() {
                     The interior of the shade updates in the preview.
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" role="radiogroup" aria-labelledby="cfg-lining-title">
-                    {catalog.linings.map((l) => {
+                    {liningsAvail.map(({ option: l, available, reason }) => {
                       const selected = selection.liningId === l.id;
-                      const hex = liningSwatchHex(l.name, l.colour);
+                      const hex = l.rendererHex || liningSwatchHex(l.name, l.colour);
                       return (
                         <button
                           key={l.id}
                           type="button"
                           role="radio"
                           aria-checked={selected}
-                          className={`studio-option ${selected ? "is-selected" : ""}`}
+                          disabled={!available}
+                          title={!available ? reason : undefined}
+                          className={`studio-option ${selected ? "is-selected" : ""} ${!available ? "is-disabled" : ""}`}
                           onClick={() => {
+                            if (!available) return;
                             updateSelection({ liningId: l.id }, "liningId");
                             trackConfigurator("lining_selected", { lining: l.slug });
                             setPreviewMode("interior");
@@ -760,6 +803,9 @@ function DesignStudioInner() {
                               +{formatMoney(l.priceMod)}
                             </span>
                           ) : null}
+                          {!available && (
+                            <span className="block text-[11px] text-muted mt-1">{reason}</span>
+                          )}
                         </button>
                       );
                     })}
@@ -964,19 +1010,27 @@ function DesignStudioInner() {
               </div>
             </div>
 
-            {/* Mobile sticky bar */}
-            <div className="studio-sticky">
-              <div>
-                <p className="text-[11px] tracking-[0.12em] uppercase text-muted">Your shade</p>
-                <p className="font-display text-xl leading-none">
+            {/* Mobile sticky bar — compact; does not cover option taps */}
+            <div className="studio-sticky cfg-sticky-bar" aria-label="Configuration status">
+              <div className="min-w-0">
+                <p className="text-[10px] tracking-[0.12em] uppercase text-muted truncate">
+                  {validation.valid
+                    ? [shape?.name, size?.name, fabric?.name].filter(Boolean).join(" · ")
+                    : nextHint(validation.missing) || "Configure your shade"}
+                </p>
+                <p className="font-display text-lg leading-none mt-0.5">
                   {price ? formatMoney(price.unitPrice) : "—"}
                 </p>
               </div>
               <button
                 type="button"
-                className="btn-primary text-sm"
-                disabled={!validation.valid}
-                onClick={() => (validation.valid ? addToBag() : goStep(validation.missing[0] as ConfigStepId || "use"))}
+                className="btn-primary text-sm shrink-0"
+                disabled={!validation.valid && !validation.missing.length}
+                onClick={() =>
+                  validation.valid
+                    ? addToBag()
+                    : goStep((validation.missing[0] as ConfigStepId) || "use")
+                }
               >
                 {validation.valid ? "Add to bag" : "Continue"}
               </button>
@@ -992,7 +1046,7 @@ function DesignStudioInner() {
           setZoomFabric(false);
         }}
         zoomOnShade={zoomFabric}
-        fabricUrl={fabric?.imageUrl || fabric?.swatchUrl}
+        fabricUrl={textureUrl || fabric?.swatchUrl}
       />
     </div>
   );

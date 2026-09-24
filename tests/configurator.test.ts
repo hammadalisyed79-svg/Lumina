@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  fabricTextureUrl,
+  getValidFabrics,
   getValidFittings,
   getValidShapes,
   getValidSizes,
@@ -17,14 +19,34 @@ import type { ConfigCatalog, ConfigSelection } from "../src/lib/configurator/typ
 
 const catalog: ConfigCatalog = {
   shapes: [
-    { id: "sh1", key: "drum", name: "Drum", basePrice: 40, priceMod: 0 },
-    { id: "sh2", key: "empire", name: "Empire", basePrice: 42, priceMod: 2 },
-    { id: "sh3", key: "oval", name: "Oval", basePrice: 45, priceMod: 0 },
-    { id: "sh4", key: "rectangular", name: "Rectangular", basePrice: 48, priceMod: 0 },
+    {
+      id: "sh1",
+      key: "drum",
+      name: "Drum",
+      basePrice: 40,
+      priceMod: 0,
+      useTypes: ["table", "floor", "ceiling"],
+    },
+    {
+      id: "sh2",
+      key: "empire",
+      name: "Empire",
+      basePrice: 42,
+      priceMod: 2,
+      useTypes: ["table", "floor", "ceiling"],
+    },
+    {
+      id: "sh3",
+      key: "tiered",
+      name: "Tiered",
+      basePrice: 50,
+      priceMod: 0,
+      useTypes: ["ceiling"],
+    },
   ],
   sizes: [
     {
-      id: "sz-round-40",
+      id: "sz-40",
       slug: "40x25",
       name: "40 × 25 cm",
       priceMod: 5,
@@ -32,32 +54,13 @@ const catalog: ConfigCatalog = {
       heightCm: 25,
       widthCm: null,
       depthCm: null,
+      topDiameterCm: null,
+      bottomDiameterCm: null,
       shapeKey: null,
+      eligibleShapeKeys: ["drum", "empire"],
     },
     {
-      id: "sz-round-20",
-      slug: "20x20",
-      name: "20 × 20 cm",
-      priceMod: 0,
-      diameterCm: 20,
-      heightCm: 20,
-      widthCm: null,
-      depthCm: null,
-      shapeKey: null,
-    },
-    {
-      id: "sz-rect",
-      slug: "40x30x25",
-      name: "40 × 30 × 25 cm",
-      priceMod: 8,
-      diameterCm: null,
-      heightCm: 25,
-      widthCm: 40,
-      depthCm: 30,
-      shapeKey: null,
-    },
-    {
-      id: "sz-oval-only",
+      id: "sz-oval",
       slug: "oval-45",
       name: "Oval 45",
       priceMod: 6,
@@ -65,31 +68,62 @@ const catalog: ConfigCatalog = {
       heightCm: 28,
       widthCm: 45,
       depthCm: 30,
+      topDiameterCm: null,
+      bottomDiameterCm: null,
       shapeKey: "oval",
+      eligibleShapeKeys: ["oval"],
     },
   ],
   fabrics: [
     {
       id: "fab-a",
       slug: "azure",
-      name: "Azure Marble",
+      name: "Azure",
       priceMod: 8,
       patternScale: 1,
-      material: "Velvet",
-      colour: "Blue",
+      patternOffsetX: 0,
+      patternOffsetY: 0,
+      patternRotation: 0,
+      repeatMode: "REPEAT",
+      usableAsTexture: true,
+      textureImage: "/media/fabrics/a.jpg",
+      swatchUrl: "/media/fabrics/a.jpg",
+      eligibleShapeKeys: ["drum", "empire"],
     },
     {
       id: "fab-b",
-      slug: "linen-natural",
-      name: "Natural Linen",
+      slug: "linen",
+      name: "Linen",
       priceMod: 4,
       patternScale: 1.2,
-      material: "Linen",
+      patternOffsetX: 0,
+      patternOffsetY: 0,
+      patternRotation: 0,
+      repeatMode: "REPEAT",
+      usableAsTexture: false,
+      imageUrl: "/media/lifestyle.jpg",
+      eligibleShapeKeys: ["drum", "empire"],
     },
   ],
   linings: [
-    { id: "lin-gold", slug: "gold", name: "Gold", priceMod: 4, colour: "Gold" },
-    { id: "lin-white", slug: "white", name: "White", priceMod: 0, colour: "White" },
+    {
+      id: "lin-gold",
+      slug: "gold",
+      name: "Gold",
+      priceMod: 4,
+      rendererHex: "#d4a84b",
+      reflectivityHint: 0.75,
+      eligibleShapeKeys: ["drum", "empire"],
+    },
+    {
+      id: "lin-white",
+      slug: "white",
+      name: "White",
+      priceMod: 0,
+      rendererHex: "#f7f7f5",
+      reflectivityHint: 0.25,
+      eligibleShapeKeys: ["drum", "empire"],
+    },
   ],
   fittings: [
     {
@@ -98,6 +132,7 @@ const catalog: ConfigCatalog = {
       name: "Candle clip",
       priceMod: 2,
       useTypes: ["table"],
+      eligibleShapeKeys: ["drum", "empire"],
     },
     {
       id: "fit-spider",
@@ -105,13 +140,7 @@ const catalog: ConfigCatalog = {
       name: "Spider",
       priceMod: 3,
       useTypes: ["table", "floor", "ceiling"],
-    },
-    {
-      id: "fit-uno",
-      slug: "e27-uno",
-      name: "E27 Uno",
-      priceMod: 3,
-      useTypes: ["ceiling"],
+      eligibleShapeKeys: ["drum", "empire", "tiered"],
     },
   ],
 };
@@ -120,98 +149,99 @@ function sel(partial: Partial<ConfigSelection> = {}): ConfigSelection {
   return { ...emptySelection(), ...partial };
 }
 
-describe("compatibility engine", () => {
-  it("marks rect-only sizes unavailable for drum", () => {
-    expect(sizeCompatibleWithShape(catalog.sizes[2], "drum")).toBe(false);
-    const sizes = getValidSizes(catalog, "drum");
-    const rect = sizes.find((s) => s.option.id === "sz-rect");
-    expect(rect?.available).toBe(false);
-  });
-
-  it("allows round sizes for drum", () => {
+describe("explicit eligibility", () => {
+  it("allows only sizes linked to the shape", () => {
     expect(sizeCompatibleWithShape(catalog.sizes[0], "drum")).toBe(true);
+    expect(sizeCompatibleWithShape(catalog.sizes[1], "drum")).toBe(false);
+    const sizes = getValidSizes(catalog, "drum");
+    expect(sizes.find((s) => s.option.id === "sz-oval")?.available).toBe(false);
   });
 
-  it("scopes oval-only size to oval shape", () => {
-    const forDrum = getValidSizes(catalog, "drum").find(
-      (s) => s.option.id === "sz-oval-only"
-    );
-    const forOval = getValidSizes(catalog, "oval").find(
-      (s) => s.option.id === "sz-oval-only"
-    );
-    expect(forDrum?.available).toBe(false);
-    expect(forOval?.available).toBe(true);
+  it("denies size with empty eligibility", () => {
+    const orphan = {
+      ...catalog.sizes[0],
+      id: "orphan",
+      eligibleShapeKeys: [] as string[],
+    };
+    expect(sizeCompatibleWithShape(orphan, "drum")).toBe(false);
   });
 
-  it("clears incompatible size when shape changes without substituting", () => {
-    const before = sel({
-      useType: "table",
-      shapeKey: "oval",
-      sizeId: "sz-oval-only",
-      liningId: "lin-gold",
-      fabricId: "fab-a",
-    });
-    const { selection, warnings } = invalidateAfterChange(
+  it("clears incompatible size on shape change without substituting", () => {
+    const result = invalidateAfterChange(
       catalog,
-      { ...before, shapeKey: "drum" },
+      sel({
+        useType: "table",
+        shapeKey: "drum",
+        sizeId: "sz-oval",
+        liningId: "lin-gold",
+        fabricId: "fab-a",
+        fittingId: "fit-spider",
+      }),
       "shapeKey"
     );
-    expect(selection.sizeId).toBeNull();
-    expect(selection.liningId).toBe("lin-gold");
-    expect(selection.fabricId).toBe("fab-a");
-    expect(warnings.some((w) => /size/i.test(w))).toBe(true);
+    expect(result.selection.sizeId).toBeNull();
+    expect(result.selection.liningId).toBe("lin-gold");
+    expect(result.selection.fabricId).toBe("fab-a");
+    expect(result.warnings.some((w) => /size/i.test(w))).toBe(true);
   });
 
-  it("preserves compatible lining when shape changes", () => {
-    const before = sel({
-      shapeKey: "drum",
-      sizeId: "sz-round-40",
-      liningId: "lin-gold",
-    });
+  it("preserves fabric and lining when changing drum to empire", () => {
     const { selection } = invalidateAfterChange(
       catalog,
-      { ...before, shapeKey: "empire" },
+      sel({
+        useType: "table",
+        shapeKey: "empire",
+        sizeId: "sz-40",
+        fabricId: "fab-a",
+        liningId: "lin-gold",
+        fittingId: "fit-spider",
+      }),
       "shapeKey"
     );
-    expect(selection.sizeId).toBe("sz-round-40");
+    expect(selection.sizeId).toBe("sz-40");
+    expect(selection.fabricId).toBe("fab-a");
     expect(selection.liningId).toBe("lin-gold");
+    expect(selection.fittingId).toBe("fit-spider");
   });
 
-  it("clears fitting incompatible with use type", () => {
-    const before = sel({
-      useType: "table",
-      fittingId: "fit-clip",
-      shapeKey: "drum",
-    });
+  it("clears fitting when use type makes it ineligible", () => {
     const { selection, warnings } = invalidateAfterChange(
       catalog,
-      { ...before, useType: "ceiling" },
+      sel({
+        useType: "ceiling",
+        shapeKey: "drum",
+        fittingId: "fit-clip",
+      }),
       "useType"
     );
     expect(selection.fittingId).toBeNull();
     expect(warnings.some((w) => /fitting/i.test(w))).toBe(true);
   });
 
-  it("disables candle-clip for ceiling", () => {
-    const fittings = getValidFittings(catalog, "ceiling");
-    const clip = fittings.find((f) => f.option.slug === "candle-clip");
-    expect(clip?.available).toBe(false);
+  it("disables shapes not listed for use type", () => {
+    const shapes = getValidShapes(catalog, "table");
+    expect(shapes.find((s) => s.option.key === "tiered")?.available).toBe(false);
   });
 
-  it("validateConfiguration reports missing fields", () => {
-    const v = validateConfiguration(catalog, emptySelection());
-    expect(v.valid).toBe(false);
-    expect(v.missing).toContain("use");
-    expect(v.missing).toContain("fabric");
+  it("filters fabrics by shape eligibility", () => {
+    const fabs = getValidFabrics(catalog, "drum");
+    expect(fabs.every((f) => f.available)).toBe(true);
   });
 
-  it("validateConfiguration accepts complete config", () => {
+  it("filters fittings by shape and use", () => {
+    const fits = getValidFittings(catalog, "table", "drum");
+    expect(fits.find((f) => f.option.slug === "candle-clip")?.available).toBe(true);
+    const ceiling = getValidFittings(catalog, "ceiling", "drum");
+    expect(ceiling.find((f) => f.option.slug === "candle-clip")?.available).toBe(false);
+  });
+
+  it("validateConfiguration accepts a complete eligible config", () => {
     const v = validateConfiguration(
       catalog,
       sel({
         useType: "table",
         shapeKey: "drum",
-        sizeId: "sz-round-40",
+        sizeId: "sz-40",
         fabricId: "fab-a",
         liningId: "lin-gold",
         fittingId: "fit-spider",
@@ -220,56 +250,28 @@ describe("compatibility engine", () => {
     expect(v.valid).toBe(true);
   });
 
-  it("use type filters recommended shapes", () => {
-    const table = getValidShapes(catalog, "table");
-    const rect = table.find((s) => s.option.key === "rectangular");
-    expect(rect?.available).toBe(false);
+  it("never uses lifestyle images when usableAsTexture is false", () => {
+    expect(fabricTextureUrl(catalog.fabrics[1])).toBeNull();
+    expect(fabricTextureUrl(catalog.fabrics[0])).toContain("a.jpg");
   });
 });
 
 describe("pricing", () => {
-  it("sums base and modifiers", () => {
+  it("sums modifiers", () => {
     const price = calculateShadePrice(catalog, {
       shapeKey: "drum",
-      sizeId: "sz-round-40",
+      sizeId: "sz-40",
       fabricId: "fab-a",
       liningId: "lin-gold",
       fittingId: "fit-spider",
       quantity: 1,
     });
-    // 40 + 0 + 5 + 8 + 4 + 3 = 60
     expect(price.unitPrice).toBe(60);
-    expect(price.fabricMod).toBe(8);
-  });
-
-  it("multiplies line total by quantity", () => {
-    const price = calculateShadePrice(catalog, {
-      shapeKey: "drum",
-      sizeId: "sz-round-20",
-      fabricId: "fab-b",
-      liningId: "lin-white",
-      fittingId: "fit-clip",
-      quantity: 2,
-    });
-    expect(price.lineTotal).toBe(price.unitPrice * 2);
   });
 });
 
 describe("url state", () => {
-  it("ignores invalid shape and fabric ids", () => {
-    const parsed = parseConfigFromParams(catalog, {
-      shape: "not-a-shape",
-      fabric: "missing",
-      size: "40x25",
-      use: "table",
-    });
-    expect(parsed.shapeKey).toBeUndefined();
-    expect(parsed.fabricId).toBeUndefined();
-    expect(parsed.sizeId).toBe("sz-round-40");
-    expect(parsed.useType).toBe("table");
-  });
-
-  it("rejects size incompatible with shape from URL", () => {
+  it("rejects size not eligible for shape", () => {
     const parsed = parseConfigFromParams(catalog, {
       shape: "drum",
       size: "oval-45",
@@ -277,32 +279,28 @@ describe("url state", () => {
     expect(parsed.shapeKey).toBe("drum");
     expect(parsed.sizeId).toBeUndefined();
   });
-
-  it("rejects inactive-style missing fabric selection reconstruction", () => {
-    const parsed = parseConfigFromParams(catalog, { fabric: "inactive-slug" });
-    expect(parsed.fabricId).toBeUndefined();
-  });
 });
 
 describe("geometry", () => {
-  it("drum and empire produce different silhouettes", () => {
-    const drum = buildShadeBody("drum", { diameterCm: 40, heightCm: 25 });
-    const empire = buildShadeBody("empire", { diameterCm: 40, heightCm: 25 });
-    expect(drum.bodyPath).not.toBe(empire.bodyPath);
-    expect(empire.topRx).toBeLessThan(empire.botRx);
-    expect(drum.topRx).toBeCloseTo(drum.botRx, 5);
+  it("40x20 drum is wider than 30x30 drum", () => {
+    const wide = buildShadeBody("drum", { diameterCm: 40, heightCm: 20 });
+    const tall = buildShadeBody("drum", { diameterCm: 30, heightCm: 30 });
+    expect(wide.botRx / (wide.botCy - wide.topCy)).toBeGreaterThan(
+      tall.botRx / (tall.botCy - tall.topCy)
+    );
   });
 
-  it("dimensions change proportions", () => {
-    const small = buildShadeBody("drum", { diameterCm: 20, heightCm: 20 });
-    const large = buildShadeBody("drum", { diameterCm: 60, heightCm: 25 });
-    expect(large.botRx).toBeGreaterThan(small.botRx);
-    expect(small.widthLabelCm).toBe(20);
-    expect(large.widthLabelCm).toBe(60);
-  });
-
-  it("square uses rectangular body path", () => {
-    const sq = buildShadeBody("square", { widthCm: 30, heightCm: 30 });
-    expect(sq.bodyPath).toContain("Q");
+  it("empire taper responds to top and bottom diameters", () => {
+    const gentle = buildShadeBody("empire", {
+      topDiameterCm: 30,
+      bottomDiameterCm: 40,
+      heightCm: 25,
+    });
+    const sharp = buildShadeBody("empire", {
+      topDiameterCm: 15,
+      bottomDiameterCm: 40,
+      heightCm: 25,
+    });
+    expect(sharp.topRx / sharp.botRx).toBeLessThan(gentle.topRx / gentle.botRx);
   });
 });

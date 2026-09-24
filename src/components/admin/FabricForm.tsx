@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { fdChecked, fdNum, fdNumOrNull, fdStr } from "@/components/admin/form-helpers";
+import { FabricTexturePreview } from "@/components/admin/FabricTexturePreview";
 
 export type FabricRow = {
   id: string;
@@ -16,6 +17,13 @@ export type FabricRow = {
   pattern: string | null;
   imageUrl: string | null;
   swatchUrl: string | null;
+  textureImage: string | null;
+  patternScale: number;
+  patternOffsetX: number;
+  patternOffsetY: number;
+  patternRotation: number;
+  repeatMode: "REPEAT" | "COVER" | "CONTAIN";
+  usableAsTexture: boolean;
   priceMod: string;
   stockQty: number | null;
   active: boolean;
@@ -33,6 +41,16 @@ function fabricPayload(fd: FormData) {
     pattern: fdStr(fd, "pattern") || null,
     imageUrl: fdStr(fd, "imageUrl") || null,
     swatchUrl: fdStr(fd, "swatchUrl") || null,
+    textureImage: fdStr(fd, "textureImage") || null,
+    patternScale: fdNum(fd, "patternScale") || 1,
+    patternOffsetX: fdNum(fd, "patternOffsetX"),
+    patternOffsetY: fdNum(fd, "patternOffsetY"),
+    patternRotation: fdNum(fd, "patternRotation"),
+    repeatMode: (fdStr(fd, "repeatMode") || "REPEAT") as
+      | "REPEAT"
+      | "COVER"
+      | "CONTAIN",
+    usableAsTexture: fdChecked(fd, "usableAsTexture"),
     priceMod: fdNum(fd, "priceMod"),
     stockQty: fdNumOrNull(fd, "stockQty"),
     active: fdChecked(fd, "active"),
@@ -223,6 +241,31 @@ function FabricFields({ fabric }: { fabric?: FabricRow }) {
         <span className="admin-label">Swatch URL</span>
         <input name="swatchUrl" defaultValue={fabric?.swatchUrl ?? ""} className="admin-input" />
       </label>
+      {fabric ? (
+        <FabricTexturePreview
+          initial={{
+            textureImage: fabric.textureImage || fabric.swatchUrl || "",
+            patternScale: fabric.patternScale,
+            patternOffsetX: fabric.patternOffsetX,
+            patternOffsetY: fabric.patternOffsetY,
+            patternRotation: fabric.patternRotation,
+            repeatMode: fabric.repeatMode,
+            usableAsTexture: fabric.usableAsTexture,
+            name: fabric.name,
+          }}
+        />
+      ) : (
+        <>
+          <label className="sm:col-span-2">
+            <span className="admin-label">Texture image URL</span>
+            <input name="textureImage" className="admin-input" />
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="usableAsTexture" />
+            Usable as shade texture
+          </label>
+        </>
+      )}
       <label className="sm:col-span-2">
         <span className="admin-label">Description</span>
         <textarea

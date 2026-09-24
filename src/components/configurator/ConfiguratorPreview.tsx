@@ -3,7 +3,11 @@
 import { memo } from "react";
 import { ShadeRenderer } from "@/components/configurator/ShadeRenderer";
 import type { ShadeDims } from "@/lib/configurator/geometry";
-import type { PreviewMode, RoomContext } from "@/lib/configurator/types";
+import type {
+  FabricRepeatMode,
+  PreviewMode,
+  RoomContext,
+} from "@/lib/configurator/types";
 
 type Props = {
   shapeKey: string;
@@ -11,8 +15,14 @@ type Props = {
   fabricUrl?: string | null;
   fabricName?: string | null;
   patternScale?: number;
+  patternOffsetX?: number;
+  patternOffsetY?: number;
+  patternRotation?: number;
+  repeatMode?: FabricRepeatMode;
   liningName?: string | null;
   liningColour?: string | null;
+  liningHex?: string | null;
+  reflectivityHint?: number | null;
   mode: PreviewMode;
   room: RoomContext;
   showDimensions: boolean;
@@ -43,8 +53,14 @@ function ConfiguratorPreviewInner({
   fabricUrl,
   fabricName,
   patternScale,
+  patternOffsetX,
+  patternOffsetY,
+  patternRotation,
+  repeatMode,
   liningName,
   liningColour,
+  liningHex,
+  reflectivityHint,
   mode,
   room,
   showDimensions,
@@ -66,8 +82,14 @@ function ConfiguratorPreviewInner({
           fabricUrl={fabricUrl}
           fabricName={fabricName}
           patternScale={patternScale}
+          patternOffsetX={patternOffsetX}
+          patternOffsetY={patternOffsetY}
+          patternRotation={patternRotation}
+          repeatMode={repeatMode}
           liningName={liningName}
           liningColour={liningColour}
+          liningHex={liningHex}
+          reflectivityHint={reflectivityHint}
           mode={effectiveMode}
           room={effectiveRoom}
           showDimensions={showDimensions}

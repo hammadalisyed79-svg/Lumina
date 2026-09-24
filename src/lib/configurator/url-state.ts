@@ -45,17 +45,24 @@ export function parseConfigFromParams(
     out.shapeKey = shape;
   }
 
-  const fabric = get("fabric");
-  if (fabric) {
-    const f = catalog.fabrics.find((x) => x.slug === fabric || x.id === fabric);
-    if (f) out.fabricId = f.id;
-  }
-
   const size = get("size");
   if (size) {
     const s = catalog.sizes.find((x) => x.slug === size || x.id === size);
     if (s && sizeCompatibleWithShape(s, out.shapeKey ?? null)) {
       out.sizeId = s.id;
+    }
+  }
+
+  const fabric = get("fabric");
+  if (fabric) {
+    const f = catalog.fabrics.find((x) => x.slug === fabric || x.id === fabric);
+    if (
+      f &&
+      (!out.shapeKey ||
+        !f.eligibleShapeKeys.length ||
+        f.eligibleShapeKeys.includes(out.shapeKey))
+    ) {
+      out.fabricId = f.id;
     }
   }
 

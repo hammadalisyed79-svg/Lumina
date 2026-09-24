@@ -1,14 +1,28 @@
 import { prisma } from "@/lib/db";
 import { formatMoney } from "@/lib/utils";
 import { ShapeCreateForm, ShapeEditForm, type ShapeRow } from "@/components/admin/ShapeForm";
+import { ShapeEligibilityEditor } from "@/components/admin/ShapeEligibilityEditor";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminShapesPage() {
-  const rows = await prisma.shape.findMany({
-    orderBy: { sortOrder: "asc" },
-    take: 200,
-  });
+  const [rows, sizes, fabrics, linings, fittings, shapeSizes, shapeFabrics, shapeLinings, shapeFittings] =
+    await Promise.all([
+      prisma.shape.findMany({ orderBy: { sortOrder: "asc" }, take: 200 }),
+      prisma.size.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
+      prisma.fabric.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
+      prisma.lining.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
+      prisma.fitting.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
+      prisma.shapeSize.findMany(),
+      prisma.shapeFabric.findMany(),
+      prisma.shapeLining.findMany(),
+      prisma.shapeFitting.findMany(),
+    ]);
+
+  const sizeOpts = sizes.map((s) => ({ id: s.id, label: s.name }));
+  const fabricOpts = fabrics.map((f) => ({ id: f.id, label: f.name }));
+  const liningOpts = linings.map((l) => ({ id: l.id, label: l.name }));
+  const fittingOpts = fittings.map((f) => ({ id: f.id, label: f.name }));
 
   const shapes: ShapeRow[] = rows.map((s) => ({
     id: s.id,
@@ -27,7 +41,7 @@ export default async function AdminShapesPage() {
       <div>
         <h1 className="admin-h1">Shapes</h1>
         <p className="text-sm text-[color:var(--admin-muted)] mt-1">
-          Silhouettes for the design studio and product shape keys.
+          Silhouettes for the design studio — manage size/fabric/lining/fitting eligibility per shape.
         </p>
       </div>
       <ShapeCreateForm />
@@ -54,6 +68,28 @@ export default async function AdminShapesPage() {
                       {shape.description}
                     </div>
                   )}
+                  <div className="mt-2">
+                    <ShapeEligibilityEditor
+                      shapeId={shape.id}
+                      shapeName={shape.name}
+                      sizes={sizeOpts}
+                      fabrics={fabricOpts}
+                      linings={liningOpts}
+                      fittings={fittingOpts}
+                      selectedSizeIds={shapeSizes
+                        .filter((r) => r.shapeId === shape.id)
+                        .map((r) => r.sizeId)}
+                      selectedFabricIds={shapeFabrics
+                        .filter((r) => r.shapeId === shape.id)
+                        .map((r) => r.fabricId)}
+                      selectedLiningIds={shapeLinings
+                        .filter((r) => r.shapeId === shape.id)
+                        .map((r) => r.liningId)}
+                      selectedFittingIds={shapeFittings
+                        .filter((r) => r.shapeId === shape.id)
+                        .map((r) => r.fittingId)}
+                    />
+                  </div>
                 </td>
                 <td>{shape.key}</td>
                 <td>{formatMoney(shape.basePrice)}</td>

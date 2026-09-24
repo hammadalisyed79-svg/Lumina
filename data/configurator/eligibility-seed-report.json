@@ -1,0 +1,483 @@
+{
+  "generatedAt": "2026-09-24T08:03:26.870Z",
+  "counts": {
+    "shapes": 7,
+    "sizes": 6,
+    "fabrics": 8,
+    "linings": 14,
+    "fittings": 3,
+    "relationships": 67,
+    "needsReview": 45
+  },
+  "relationships": [
+    {
+      "relationship": "Shape.useTypes:oval",
+      "source": "seed_shape_defaults",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "table,floor,ceiling"
+    },
+    {
+      "relationship": "Shape.useTypes:rectangular",
+      "source": "seed_shape_defaults",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "floor,ceiling"
+    },
+    {
+      "relationship": "Shape.useTypes:empire",
+      "source": "seed_shape_defaults",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "table,floor,ceiling"
+    },
+    {
+      "relationship": "Shape.useTypes:square",
+      "source": "seed_shape_defaults",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "table,floor,ceiling"
+    },
+    {
+      "relationship": "Shape.useTypes:coolie",
+      "source": "seed_shape_defaults",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "table,floor"
+    },
+    {
+      "relationship": "Shape.useTypes:tiered",
+      "source": "seed_shape_defaults",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "ceiling"
+    },
+    {
+      "relationship": "Shape.useTypes:drum",
+      "source": "seed_shape_defaults",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "table,floor,ceiling"
+    },
+    {
+      "relationship": "Fitting.useTypes:candle-clip",
+      "source": "seed_fitting_slug",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "table"
+    },
+    {
+      "relationship": "Fitting.useTypes:spider",
+      "source": "seed_fitting_slug",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "table,floor,ceiling"
+    },
+    {
+      "relationship": "Fitting.useTypes:e27-uno",
+      "source": "seed_fitting_slug",
+      "confidence": "medium",
+      "needsReview": true,
+      "detail": "ceiling"
+    },
+    {
+      "relationship": "ShapeSize:oval:20cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "20 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:rectangular:20cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "20 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:empire:20cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "20 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:square:20cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "20 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:coolie:20cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "20 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:tiered:20cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "20 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:drum:20cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "20 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:oval:30cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "30 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:rectangular:30cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "30 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:empire:30cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "30 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:square:30cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "30 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:coolie:30cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "30 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:tiered:30cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "30 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:drum:30cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "30 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:oval:45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:rectangular:45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:empire:45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:square:45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:coolie:45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:tiered:45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:drum:45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:oval:40cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "40 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:rectangular:40cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "40 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:empire:40cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "40 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:square:40cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "40 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:coolie:40cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "40 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:tiered:40cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "40 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:drum:40cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "40 cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:oval:45cm-x-45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45cm x 45cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:rectangular:45cm-x-45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45cm x 45cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:square:45cm-x-45cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "45cm x 45cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:oval:60cm-x-60cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "60cm x 60cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:rectangular:60cm-x-60cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "60cm x 60cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeSize:square:60cm-x-60cm",
+      "source": "seed_dim_heuristic",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "60cm x 60cm — NEEDS_REVIEW (was unscoped)"
+    },
+    {
+      "relationship": "ShapeFabric:all×all",
+      "source": "seed_open_catalogue",
+      "confidence": "low",
+      "needsReview": true,
+      "detail": "7 shapes × 8 fabrics — restrict in admin if needed"
+    },
+    {
+      "relationship": "ShapeLining:all×all",
+      "source": "seed_open_lining",
+      "confidence": "medium",
+      "needsReview": false,
+      "detail": "Linings generally available across silhouettes"
+    },
+    {
+      "relationship": "ShapeFitting:oval:candle-clip",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[table]"
+    },
+    {
+      "relationship": "ShapeFitting:oval:spider",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[table,floor,ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:oval:e27-uno",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:rectangular:candle-clip",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "skipped — no use-type overlap"
+    },
+    {
+      "relationship": "ShapeFitting:rectangular:spider",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[floor,ceiling] ∩ fitting[table,floor,ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:rectangular:e27-uno",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[floor,ceiling] ∩ fitting[ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:empire:candle-clip",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[table]"
+    },
+    {
+      "relationship": "ShapeFitting:empire:spider",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[table,floor,ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:empire:e27-uno",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:square:candle-clip",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[table]"
+    },
+    {
+      "relationship": "ShapeFitting:square:spider",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[table,floor,ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:square:e27-uno",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:coolie:candle-clip",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor] ∩ fitting[table]"
+    },
+    {
+      "relationship": "ShapeFitting:coolie:spider",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor] ∩ fitting[table,floor,ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:coolie:e27-uno",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "skipped — no use-type overlap"
+    },
+    {
+      "relationship": "ShapeFitting:tiered:candle-clip",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "skipped — no use-type overlap"
+    },
+    {
+      "relationship": "ShapeFitting:tiered:spider",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[ceiling] ∩ fitting[table,floor,ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:tiered:e27-uno",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[ceiling] ∩ fitting[ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:drum:candle-clip",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[table]"
+    },
+    {
+      "relationship": "ShapeFitting:drum:spider",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[table,floor,ceiling]"
+    },
+    {
+      "relationship": "ShapeFitting:drum:e27-uno",
+      "source": "seed_use_intersect",
+      "confidence": "high",
+      "needsReview": false,
+      "detail": "shape[table,floor,ceiling] ∩ fitting[ceiling]"
+    }
+  ]
+}
