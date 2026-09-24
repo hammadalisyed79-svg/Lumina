@@ -74,10 +74,11 @@ export function StudioLivePreview({
     [candidates, shapeImage]
   );
 
-  /** Shape step: catalog silhouette photo. Later: match photo OR SVG composite. */
-  const showPhotoOnly = step === 0 || Boolean(catalogMatch);
+  /** Shape step: catalog photo. Fabric step: cloth only. Later: match or SVG composite. */
+  const showFabricOnly = step === 1 && Boolean(fabricHref);
+  const showPhotoOnly = !showFabricOnly && (step === 0 || Boolean(catalogMatch));
   const photoSrc = step === 0 ? shapeRef : catalogMatch;
-  const showComposite = !showPhotoOnly && Boolean(fabricHref);
+  const showComposite = !showFabricOnly && !showPhotoOnly && Boolean(fabricHref);
 
   return (
     <div className="relative aspect-[4/5] overflow-hidden studio-preview-frame">
@@ -85,6 +86,20 @@ export function StudioLivePreview({
         <div className="absolute inset-0 animate-pulse bg-stone" />
       ) : (
         <>
+          {showFabricOnly ? (
+            <div className="studio-preview-photo studio-preview-fabric-only">
+              <MediaImage
+                key={fabricHref!}
+                src={fabricHref!}
+                alt={fabric?.name || "Selected fabric"}
+                fill
+                className="object-cover object-center"
+                sizes="(max-width:1024px) 100vw, 50vw"
+                priority
+              />
+            </div>
+          ) : null}
+
           {showPhotoOnly && photoSrc ? (
             <div className="studio-preview-photo">
               <MediaImage
@@ -96,7 +111,7 @@ export function StudioLivePreview({
                 sizes="(max-width:1024px) 100vw, 50vw"
                 priority
               />
-              {step > 0 && (
+              {step > 1 && (
                 <div
                   className="studio-preview-lining-wash"
                   style={{
@@ -164,7 +179,6 @@ export function StudioLivePreview({
                     </filter>
                   </defs>
 
-                  {/* Soft hanging cord */}
                   <line
                     x1="50"
                     y1="0"
@@ -192,7 +206,7 @@ export function StudioLivePreview({
             </div>
           ) : null}
 
-          {!showPhotoOnly && !showComposite && shapeRef ? (
+          {!showFabricOnly && !showPhotoOnly && !showComposite && shapeRef ? (
             <div className="studio-preview-photo">
               <MediaImage
                 key={shapeRef}
@@ -211,24 +225,44 @@ export function StudioLivePreview({
       )}
 
       <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 bg-gradient-to-t from-[rgba(20,17,14,0.82)] via-[rgba(20,17,14,0.38)] to-transparent text-white z-[2]">
-        <p className="eyebrow text-champagne mb-2">Live preview</p>
-        <p className="font-display text-2xl md:text-3xl tracking-tight">
-          {shapeName || "Shade"}
+        <p className="eyebrow text-champagne mb-2">
+          {showFabricOnly ? "Selected fabric" : "Live preview"}
         </p>
-        <p className="text-sm text-white/80 mt-1">{fabric?.name}</p>
-        {sizeName && (
-          <p className="text-xs text-white/65 mt-1">
-            {sizeName}
-            {diameterCm != null ? ` · Ø ${diameterCm} cm` : ""}
-            {liningName ? ` · ${liningName}` : ""}
-          </p>
-        )}
-        {showFitting && fittingName && (
-          <p className="text-xs text-white/55 mt-0.5">{fittingName}</p>
+        {showFabricOnly ? (
+          <>
+            <p className="font-display text-2xl md:text-3xl tracking-tight">
+              {fabric?.name || "Fabric"}
+            </p>
+            {(fabric?.material || fabric?.colour) && (
+              <p className="text-sm text-white/80 mt-1">
+                {[fabric?.material, fabric?.colour].filter(Boolean).join(" · ")}
+              </p>
+            )}
+            <p className="text-xs text-white/55 mt-1">
+              For {shapeName || "your shade"}
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="font-display text-2xl md:text-3xl tracking-tight">
+              {shapeName || "Shade"}
+            </p>
+            <p className="text-sm text-white/80 mt-1">{fabric?.name}</p>
+            {sizeName && (
+              <p className="text-xs text-white/65 mt-1">
+                {sizeName}
+                {diameterCm != null ? ` · Ø ${diameterCm} cm` : ""}
+                {liningName ? ` · ${liningName}` : ""}
+              </p>
+            )}
+            {showFitting && fittingName && (
+              <p className="text-xs text-white/55 mt-0.5">{fittingName}</p>
+            )}
+          </>
         )}
         <div className="mt-3 flex items-center gap-3">
           <p className="text-lg tracking-wide">{formatMoney(unitPrice)}</p>
-          {liningName && step > 0 && (
+          {liningName && step > 1 && (
             <span
               className="studio-preview-lining-chip"
               style={{ background: liningHex }}
