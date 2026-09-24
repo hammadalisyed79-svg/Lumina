@@ -211,6 +211,7 @@ a {
   text-align: left;
   border: 1px solid var(--line);
   padding: 1rem;
+  min-height: 3.25rem;
   background: rgba(248, 246, 241, 0.45);
   transition: border-color 0.3s var(--ease-out), background 0.3s var(--ease-out),
     box-shadow 0.3s var(--ease-out);
@@ -224,6 +225,113 @@ a {
   border-color: var(--ink);
   background: var(--ivory);
   box-shadow: var(--shadow-soft);
+}
+
+.studio-layout {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .studio-layout {
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .studio-preview-col {
+    position: sticky;
+    top: 7rem;
+  }
+
+  .studio-options-col {
+    order: 2;
+  }
+
+  .studio-preview-col {
+    order: 1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .studio-options-col {
+    order: 1;
+  }
+
+  .studio-preview-col {
+    order: 2;
+  }
+
+  .studio-page-body {
+    padding-bottom: 6.5rem;
+  }
+
+  .studio-inline-nav {
+    display: none;
+  }
+}
+
+.studio-step-chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.15rem;
+  scrollbar-width: none;
+}
+
+.studio-step-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.studio-step-chip {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid transparent;
+  background: transparent;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.studio-step-chip.is-done {
+  background: var(--stone);
+  color: var(--ink);
+}
+
+.studio-step-chip.is-active {
+  background: var(--ink);
+  color: var(--ivory);
+}
+
+.studio-step-chip:focus-visible {
+  outline: 2px solid var(--bronze);
+  outline-offset: 2px;
+}
+
+.studio-sticky {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .studio-sticky {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 44;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem calc(0.7rem + env(safe-area-inset-bottom));
+    background: rgba(248, 246, 241, 0.97);
+    border-top: 1px solid var(--line);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 -8px 30px rgba(20, 17, 14, 0.08);
+  }
 }
 
 .qty-control {

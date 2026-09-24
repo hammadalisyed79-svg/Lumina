@@ -5,7 +5,11 @@ import { toNumber } from "@/lib/pricing";
 export async function GET() {
   const [fabrics, sizes, linings, fittings, shapes] = await Promise.all([
     prisma.fabric.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
-    prisma.size.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
+    prisma.size.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+      include: { shape: { select: { key: true } } },
+    }),
     prisma.lining.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
     prisma.fitting.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
     prisma.shape.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
@@ -31,12 +35,16 @@ export async function GET() {
       priceMod: toNumber(s.priceMod),
       diameterCm: s.diameterCm ? toNumber(s.diameterCm) : null,
       heightCm: s.heightCm ? toNumber(s.heightCm) : null,
+      shapeKey: s.shape?.key ?? null,
     })),
     linings: linings.map((l) => ({
       id: l.id,
       slug: l.slug,
       name: l.name,
       priceMod: toNumber(l.priceMod),
+      colour: l.colour,
+      swatchUrl: l.swatchUrl,
+      description: l.description,
     })),
     fittings: fittings.map((f) => ({
       id: f.id,
@@ -44,6 +52,8 @@ export async function GET() {
       name: f.name,
       priceMod: toNumber(f.priceMod),
       description: f.description,
+      imageUrl: f.imageUrl,
+      compatibility: f.compatibility,
     })),
     shapes: shapes.map((s) => ({
       key: s.key,

@@ -12,20 +12,21 @@ export function AddSavedDesignButton({
   imageUrl?: string | null;
   config: ShadeConfig;
 }) {
-  const { addConfigured } = useCart();
+  const { addConfigured, setDrawerOpen } = useCart();
 
   return (
     <button
       type="button"
       className="btn-primary text-sm"
-      onClick={() =>
+      onClick={() => {
         addConfigured({
           title,
           imageUrl: imageUrl || undefined,
           quantity: 1,
           config,
-        })
-      }
+        });
+        setDrawerOpen(true);
+      }}
     >
       Add to bag
     </button>

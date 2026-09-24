@@ -13,6 +13,7 @@ const schema = z.object({
   fittingSlug: z.string(),
   unitPrice: z.number(),
   guestKey: z.string().optional(),
+  previewUrl: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -48,6 +49,7 @@ export async function POST(req: Request) {
       liningId: lining.id,
       fittingId: fitting.id,
       unitPrice: parsed.data.unitPrice,
+      previewUrl: parsed.data.previewUrl || undefined,
       configJson: {
         shapeKey: shape.key,
         shapeName: shape.name,
@@ -64,5 +66,9 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json({ id: design.id, guestKey });
+  return NextResponse.json({
+    id: design.id,
+    guestKey,
+    signedIn: Boolean(session?.user?.id),
+  });
 }

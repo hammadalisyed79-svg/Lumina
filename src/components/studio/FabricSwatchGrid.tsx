@@ -65,7 +65,16 @@ export function FabricSwatchGrid({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="prose-muted text-sm">No fabrics in this family — try All.</p>
+        <div className="surface-panel p-6 text-sm">
+          <p className="prose-muted mb-3">No fabrics in this family.</p>
+          <button
+            type="button"
+            className="btn-quiet text-sm"
+            onClick={() => onFilterChange("all")}
+          >
+            Show all fabrics
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {filtered.map((f) => {

@@ -53,7 +53,8 @@ export default async function SavedDesignsPage() {
               d.lining?.name,
               d.fitting?.name,
             ].filter(Boolean);
-            const imageUrl = d.fabric?.imageUrl || d.fabric?.swatchUrl || d.shape?.imageUrl;
+            const imageUrl =
+              d.previewUrl || d.fabric?.imageUrl || d.fabric?.swatchUrl || d.shape?.imageUrl;
             const studioHref = buildStudioSharePath({
               shapeKey: d.shape?.key,
               fabricSlug: d.fabric?.slug,
