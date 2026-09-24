@@ -10,6 +10,8 @@ export type ShadeConfig = {
   fittingSlug: string;
   fittingName: string;
   unitPrice: number;
+  useType?: string | null;
+  personalisation?: string;
 };
 
 export type CartLine = {

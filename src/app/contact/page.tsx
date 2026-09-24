@@ -1,12 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { SITE } from "@/lib/site";
 import { COPY } from "@/lib/copy";
 
-export default function ContactPage() {
+const STUDIO_BRIEF = "luminahub_studio_enquiry_brief";
+
+function ContactForm() {
+  const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [brief, setBrief] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("from") !== "studio") return;
+    try {
+      const raw = sessionStorage.getItem(STUDIO_BRIEF);
+      if (raw) {
+        setBrief(raw);
+        sessionStorage.removeItem(STUDIO_BRIEF);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [searchParams]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,8 +42,45 @@ export default function ContactPage() {
     }
     setMessage("Message sent — we’ll reply soon.");
     e.currentTarget.reset();
+    setBrief("");
   }
 
+  return (
+    <form onSubmit={onSubmit} className="surface-panel p-6 md:p-8 space-y-4 h-fit">
+      {brief && (
+        <p className="text-xs text-muted border border-line p-3 bg-paper">
+          Your current shade configuration has been included in the message below.
+        </p>
+      )}
+      <label className="block">
+        <span className="label">Name</span>
+        <input name="name" required className="input" />
+      </label>
+      <label className="block">
+        <span className="label">Email</span>
+        <input name="email" type="email" required className="input" />
+      </label>
+      <label className="block">
+        <span className="label">Message</span>
+        <textarea
+          name="message"
+          required
+          rows={6}
+          className="input"
+          defaultValue={brief || undefined}
+          key={brief ? "with-brief" : "empty"}
+        />
+      </label>
+      {error && <p className="text-sm text-red-700">{error}</p>}
+      {message && <p className="text-sm text-muted">{message}</p>}
+      <button type="submit" className="btn-primary w-full sm:w-auto">
+        Send message
+      </button>
+    </form>
+  );
+}
+
+export default function ContactPage() {
   return (
     <div className="container-site section-pad">
       <div className="grid md:grid-cols-2 gap-12 md:gap-16 max-w-5xl">
@@ -64,25 +119,9 @@ export default function ContactPage() {
             </li>
           </ul>
         </div>
-        <form onSubmit={onSubmit} className="surface-panel p-6 md:p-8 space-y-4 h-fit">
-          <label className="block">
-            <span className="label">Name</span>
-            <input name="name" required className="input" />
-          </label>
-          <label className="block">
-            <span className="label">Email</span>
-            <input name="email" type="email" required className="input" />
-          </label>
-          <label className="block">
-            <span className="label">Message</span>
-            <textarea name="message" required rows={6} className="input" />
-          </label>
-          {error && <p className="text-sm text-red-700">{error}</p>}
-          {message && <p className="text-sm text-muted">{message}</p>}
-          <button type="submit" className="btn-primary w-full sm:w-auto">
-            Send message
-          </button>
-        </form>
+        <Suspense fallback={<div className="surface-panel p-6 md:p-8 h-64 cfg-skel" />}>
+          <ContactForm />
+        </Suspense>
       </div>
     </div>
   );

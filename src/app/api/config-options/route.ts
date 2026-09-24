@@ -2,9 +2,10 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { toNumber } from "@/lib/pricing";
 import { catalogImageUrl } from "@/lib/studio/images";
+import { derivePatternScale, deriveUseTypes } from "@/lib/configurator/fabric-meta";
 
 export async function GET() {
-  const [fabrics, sizes, linings, fittings, shapes, catalog] = await Promise.all([
+  const [fabrics, sizes, linings, fittings, shapes] = await Promise.all([
     prisma.fabric.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
     prisma.size.findMany({
       where: { active: true },
@@ -14,69 +15,24 @@ export async function GET() {
     prisma.lining.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
     prisma.fitting.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
     prisma.shape.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
-    prisma.product.findMany({
-      where: {
-        published: true,
-        type: "LAMPSHADE",
-        shapeKey: { not: null },
-      },
-      select: {
-        shapeKey: true,
-        title: true,
-        colourTags: true,
-        patternTags: true,
-        material: true,
-        images: {
-          orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
-          take: 1,
-          select: { url: true },
-        },
-      },
-      take: 240,
-    }),
   ]);
-
-  const previewCatalog: Record<
-    string,
-    Array<{
-      imageUrl: string;
-      title: string;
-      colourTags: string[];
-      patternTags: string[];
-      material: string | null;
-    }>
-  > = {};
-
-  for (const p of catalog) {
-    const key = p.shapeKey;
-    if (!key) continue;
-    const imageUrl = catalogImageUrl(p.images[0]?.url);
-    if (!imageUrl) continue;
-    if (!previewCatalog[key]) previewCatalog[key] = [];
-    if (previewCatalog[key].length >= 24) continue;
-    previewCatalog[key].push({
-      imageUrl,
-      title: p.title,
-      colourTags: p.colourTags,
-      patternTags: p.patternTags,
-      material: p.material,
-    });
-  }
 
   return NextResponse.json({
     fabrics: fabrics.map((f) => {
       const photo = catalogImageUrl(f.imageUrl, f.swatchUrl);
+      const swatch = catalogImageUrl(f.swatchUrl, f.imageUrl);
       return {
         id: f.id,
         slug: f.slug,
         name: f.name,
         priceMod: toNumber(f.priceMod),
         imageUrl: photo,
-        swatchUrl: photo,
+        swatchUrl: swatch || photo,
         material: f.material,
         colour: f.colour,
         pattern: f.pattern,
         description: f.description,
+        patternScale: derivePatternScale(f.material, f.pattern, f.name),
       };
     }),
     sizes: sizes.map((s) => ({
@@ -86,6 +42,8 @@ export async function GET() {
       priceMod: toNumber(s.priceMod),
       diameterCm: s.diameterCm ? toNumber(s.diameterCm) : null,
       heightCm: s.heightCm ? toNumber(s.heightCm) : null,
+      widthCm: s.widthCm ? toNumber(s.widthCm) : null,
+      depthCm: s.depthCm ? toNumber(s.depthCm) : null,
       shapeKey: s.shape?.key ?? null,
     })),
     linings: linings.map((l) => ({
@@ -105,14 +63,16 @@ export async function GET() {
       description: f.description,
       imageUrl: catalogImageUrl(f.imageUrl),
       compatibility: f.compatibility,
+      useTypes: deriveUseTypes(f.slug, f.compatibility),
     })),
     shapes: shapes.map((s) => ({
+      id: s.id,
       key: s.key,
       name: s.name,
       basePrice: toNumber(s.basePrice),
+      priceMod: toNumber(s.priceMod),
       imageUrl: catalogImageUrl(s.imageUrl),
       description: s.description,
     })),
-    previewCatalog,
   });
 }

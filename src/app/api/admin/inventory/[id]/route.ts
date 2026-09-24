@@ -40,7 +40,10 @@ export async function PATCH(
   }
 
   const delta = newAvailable - existing.available;
-  const { adjustBy: _a, available: _b, reason, note, ...rest } = parsed.data;
+  const rest = { ...parsed.data };
+  delete rest.adjustBy;
+  delete rest.available;
+  const { reason, note } = parsed.data;
 
   const item = await prisma.$transaction(async (tx) => {
     const updated = await tx.inventoryItem.update({

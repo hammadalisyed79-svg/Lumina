@@ -272,7 +272,7 @@ export const COPY = {
   designPage: {
     eyebrow: "Configure",
     title: "Design your shade",
-    body: "Start with silhouette, then fabric, size, lining and fitting. Preview as you go, add to bag when ready, or save the design to revisit later.",
+    body: "Choose use, silhouette, size, fabric, lining and fitting. The live preview updates with every selection — save, share, or add to bag when ready.",
   },
 
   shopIntros: {
