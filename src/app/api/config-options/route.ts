@@ -4,7 +4,7 @@ import { toNumber } from "@/lib/pricing";
 import { catalogImageUrl } from "@/lib/studio/images";
 
 export async function GET() {
-  const [fabrics, sizes, linings, fittings, shapes] = await Promise.all([
+  const [fabrics, sizes, linings, fittings, shapes, catalog] = await Promise.all([
     prisma.fabric.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
     prisma.size.findMany({
       where: { active: true },
@@ -14,7 +14,54 @@ export async function GET() {
     prisma.lining.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
     prisma.fitting.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
     prisma.shape.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
+    prisma.product.findMany({
+      where: {
+        published: true,
+        type: "LAMPSHADE",
+        shapeKey: { not: null },
+      },
+      select: {
+        shapeKey: true,
+        title: true,
+        colourTags: true,
+        patternTags: true,
+        material: true,
+        images: {
+          orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
+          take: 1,
+          select: { url: true },
+        },
+      },
+      take: 240,
+    }),
   ]);
+
+  const previewCatalog: Record<
+    string,
+    Array<{
+      imageUrl: string;
+      title: string;
+      colourTags: string[];
+      patternTags: string[];
+      material: string | null;
+    }>
+  > = {};
+
+  for (const p of catalog) {
+    const key = p.shapeKey;
+    if (!key) continue;
+    const imageUrl = catalogImageUrl(p.images[0]?.url);
+    if (!imageUrl) continue;
+    if (!previewCatalog[key]) previewCatalog[key] = [];
+    if (previewCatalog[key].length >= 24) continue;
+    previewCatalog[key].push({
+      imageUrl,
+      title: p.title,
+      colourTags: p.colourTags,
+      patternTags: p.patternTags,
+      material: p.material,
+    });
+  }
 
   return NextResponse.json({
     fabrics: fabrics.map((f) => {
@@ -66,5 +113,6 @@ export async function GET() {
       imageUrl: catalogImageUrl(s.imageUrl),
       description: s.description,
     })),
+    previewCatalog,
   });
 }

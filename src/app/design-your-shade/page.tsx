@@ -15,11 +15,16 @@ import {
   type FabricOpt,
 } from "@/components/studio/FabricSwatchGrid";
 import { StudioFittingHint, StudioSizeHint } from "@/components/studio/StudioHints";
+import { StudioLivePreview } from "@/components/studio/StudioLivePreview";
 import {
   buildStudioSharePath,
   type FabricFamily,
 } from "@/lib/studio/fabric-family";
 import { catalogImageUrl, liningSwatchHex } from "@/lib/studio/images";
+import {
+  pickPreviewImage,
+  type PreviewCandidate,
+} from "@/lib/studio/preview";
 
 type Opt = {
   id: string;
@@ -44,7 +49,6 @@ type Shape = {
 };
 
 const STEPS = ["Shape", "Fabric", "Size", "Lining", "Fitting", "Review"] as const;
-const FALLBACK_PREVIEW = "/media/homepage/hero-lifestyle.png";
 const GUEST_KEY = "luminahub_studio_guest";
 
 function guestKey(): string {
@@ -88,6 +92,9 @@ function DesignStudioInner() {
   const [sizes, setSizes] = useState<Opt[]>([]);
   const [linings, setLinings] = useState<Opt[]>([]);
   const [fittings, setFittings] = useState<Opt[]>([]);
+  const [previewCatalog, setPreviewCatalog] = useState<
+    Record<string, PreviewCandidate[]>
+  >({});
   const [shapeKey, setShapeKey] = useState("drum");
   const [fabricId, setFabricId] = useState("");
   const [sizeId, setSizeId] = useState("");
@@ -121,6 +128,7 @@ function DesignStudioInner() {
         setSizes(nextSizes);
         setLinings(nextLinings);
         setFittings(nextFittings);
+        setPreviewCatalog(d.previewCatalog || {});
 
         const qShape = searchParams.get("shape");
         const qFabric = searchParams.get("fabric");
@@ -197,42 +205,17 @@ function DesignStudioInner() {
     });
   }, [shape, fabric, size, lining, fitting]);
 
-  const previewSrc = useMemo(() => {
-    if (step === 0) {
-      return (
-        catalogImageUrl(shape?.imageUrl, fabric?.imageUrl, fabric?.swatchUrl) ||
-        FALLBACK_PREVIEW
-      );
-    }
-    if (step === 3) {
-      return (
-        catalogImageUrl(
-          lining?.swatchUrl,
-          fabric?.imageUrl,
-          fabric?.swatchUrl,
-          shape?.imageUrl
-        ) || FALLBACK_PREVIEW
-      );
-    }
-    if (step === 4) {
-      return (
-        catalogImageUrl(
-          fitting?.imageUrl,
-          fabric?.imageUrl,
-          fabric?.swatchUrl,
-          shape?.imageUrl
-        ) || FALLBACK_PREVIEW
-      );
-    }
-    return (
-      catalogImageUrl(
-        fabric?.imageUrl,
-        fabric?.swatchUrl,
-        shape?.imageUrl,
-        shapes.find((s) => catalogImageUrl(s.imageUrl))?.imageUrl
-      ) || FALLBACK_PREVIEW
-    );
-  }, [step, shape, fabric, lining, fitting, shapes]);
+  const shapeCandidates = previewCatalog[shapeKey] || [];
+
+  const previewUrl = useMemo(
+    () =>
+      pickPreviewImage(shapeCandidates, fabric || null, [
+        catalogImageUrl(shape?.imageUrl),
+        catalogImageUrl(fabric?.imageUrl, fabric?.swatchUrl),
+        "/media/homepage/hero-lifestyle.png",
+      ]) || "/media/homepage/hero-lifestyle.png",
+    [shapeCandidates, fabric, shape]
+  );
 
   const syncUrl = useCallback(
     (nextStep = step) => {
@@ -294,7 +277,7 @@ function DesignStudioInner() {
           liningSlug: lining.slug,
           fittingSlug: fitting.slug,
           unitPrice,
-          previewUrl: previewSrc,
+          previewUrl,
           guestKey: session?.user ? undefined : guestKey() || undefined,
         }),
       });
@@ -344,7 +327,7 @@ function DesignStudioInner() {
     if (!shape || !fabric || !size || !lining || !fitting) return;
     addConfigured({
       title: `Custom ${shape.name} · ${fabric.name}`,
-      imageUrl: previewSrc,
+      imageUrl: previewUrl,
       quantity: 1,
       config: {
         shapeKey: shape.key,
@@ -371,27 +354,6 @@ function DesignStudioInner() {
       (step === 3 && liningId) ||
       (step === 4 && fittingId) ||
       step === 5
-  );
-
-  const previewMeta = (
-    <>
-      <p className="eyebrow text-champagne mb-2">Live preview</p>
-      <p className="font-display text-3xl md:text-4xl tracking-tight">
-        {shape?.name || "Shade"}
-      </p>
-      <p className="text-sm text-white/80 mt-1">{fabric?.name}</p>
-      {size && (
-        <p className="text-xs text-white/65 mt-1">
-          {size.name}
-          {size.diameterCm != null ? ` · Ø ${size.diameterCm} cm` : ""}
-          {lining ? ` · ${lining.name}` : ""}
-        </p>
-      )}
-      {fitting && step >= 4 && (
-        <p className="text-xs text-white/55 mt-0.5">{fitting.name}</p>
-      )}
-      <p className="mt-3 text-lg tracking-wide">{formatMoney(unitPrice)}</p>
-    </>
   );
 
   return (
@@ -458,23 +420,22 @@ function DesignStudioInner() {
 
             <div className="studio-layout">
               <div className="studio-preview-col">
-                <div className="relative aspect-[4/5] overflow-hidden bg-stone group studio-preview-frame">
-                  {!ready ? (
-                    <div className="absolute inset-0 animate-pulse bg-stone" />
-                  ) : (
-                    <MediaImage
-                      src={previewSrc}
-                      alt="Shade preview"
-                      fill
-                      className="object-cover object-center img-zoom"
-                      sizes="(max-width:1024px) 100vw, 50vw"
-                      priority
-                    />
-                  )}
-                  <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 bg-gradient-to-t from-[rgba(20,17,14,0.78)] via-[rgba(20,17,14,0.35)] to-transparent text-white">
-                    {previewMeta}
-                  </div>
-                </div>
+                <StudioLivePreview
+                  ready={ready}
+                  shapeKey={shapeKey}
+                  shapeName={shape?.name}
+                  shapeImage={catalogImageUrl(shape?.imageUrl)}
+                  fabric={fabric || null}
+                  sizeName={size?.name}
+                  diameterCm={size?.diameterCm}
+                  liningName={lining?.name}
+                  liningColour={lining?.colour}
+                  fittingName={fitting?.name}
+                  showFitting={step >= 4}
+                  unitPrice={unitPrice}
+                  candidates={shapeCandidates}
+                  step={step}
+                />
               </div>
 
               <div className="studio-options-col">
