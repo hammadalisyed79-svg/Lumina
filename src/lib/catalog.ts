@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/db";
 import { ProductType, Prisma } from "@prisma/client";
 import { toNumber } from "@/lib/pricing";
-import { isWebImageUrl } from "@/lib/utils";
+import {
+  pickCardHoverImageUrl,
+  pickPrimaryImageUrl,
+} from "@/lib/product-images";
 
 export type ShopQuery = {
   shape?: string;
@@ -79,28 +82,33 @@ export async function listProductsForShop(opts: {
     }),
   ]);
 
+  const mapped = await Promise.all(
+    products.map(async (p) => {
+      const imageUrl = pickPrimaryImageUrl(p.images);
+      if (!imageUrl) return null;
+      // Fabrics: hover only when a plan/flat metreage shot exists (no wrinkle→wrinkle).
+      // Other types: prefer plan when present, else legacy second-image hover.
+      const hoverImageUrl = await pickCardHoverImageUrl(p.images, {
+        strictPlan: p.type === "FABRIC",
+        primaryUrl: imageUrl,
+      });
+      return {
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        subtitle: p.subtitle,
+        basePrice: toNumber(p.basePrice),
+        imageUrl,
+        hoverImageUrl,
+      };
+    })
+  );
+
   return {
     total,
     page,
     pageSize: PAGE_SIZE,
-    products: products
-      .map((p) => {
-        const imageUrl =
-          p.images.find((i) => isWebImageUrl(i.url))?.url || null;
-        if (!imageUrl) return null;
-        return {
-          id: p.id,
-          slug: p.slug,
-          title: p.title,
-          subtitle: p.subtitle,
-          basePrice: toNumber(p.basePrice),
-          imageUrl,
-          hoverImageUrl: p.images.find(
-            (img, idx) => idx > 0 && isWebImageUrl(img.url)
-          )?.url,
-        };
-      })
-      .filter(Boolean) as {
+    products: mapped.filter(Boolean) as {
       id: string;
       slug: string;
       title: string;
