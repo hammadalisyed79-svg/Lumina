@@ -79,12 +79,17 @@ async function shapeImageMap(keys: string[]) {
   return map;
 }
 
-async function moodImage(slug: string, fallback: string, avoid: Set<string>) {
+async function moodImage(
+  slug: string,
+  fallbacks: string[],
+  avoid: Set<string>
+) {
   const col = await prisma.collection.findUnique({
     where: { slug },
     include: {
       products: {
-        take: 12,
+        take: 24,
+        orderBy: { sortOrder: "asc" },
         include: {
           product: {
             include: { images: { orderBy: { sortOrder: "asc" }, take: 4 } },
@@ -93,18 +98,33 @@ async function moodImage(slug: string, fallback: string, avoid: Set<string>) {
       },
     },
   });
+
   for (const row of col?.products || []) {
-    const url = firstWebImage(row.product.images);
+    for (const img of row.product.images) {
+      const url = firstWebImage([img]);
+      if (url && !avoid.has(url)) {
+        avoid.add(url);
+        return url;
+      }
+    }
+  }
+
+  for (const url of fallbacks) {
     if (url && !avoid.has(url)) {
       avoid.add(url);
       return url;
     }
   }
+
   for (const row of col?.products || []) {
     const url = firstWebImage(row.product.images);
-    if (url) return url;
+    if (url) {
+      avoid.add(url);
+      return url;
+    }
   }
-  return fallback;
+
+  return fallbacks[0] || "/media/homepage/hero-lifestyle.png";
 }
 
 export default async function HomePage() {
@@ -171,11 +191,26 @@ export default async function HomePage() {
   const tradeImage = lifestyleUrls[2] || designImage;
 
   const usedMoodImages = new Set<string>();
+  const moodFallbacks = [
+    ...lifestyleUrls,
+    shapeImages.drum,
+    shapeImages.empire,
+    shapeImages.coolie,
+    designImage,
+    craftImage,
+    tradeImage,
+  ].filter(Boolean) as string[];
+
   const moodCards = [];
-  for (const m of moodMeta) {
+  // Stable display order for the three featured mood tiles
+  const moodOrder = ["botanical", "linen-calm", "bestsellers"];
+  const moodBySlug = new Map(moodMeta.map((m) => [m.slug, m]));
+  for (const slug of moodOrder) {
+    const m = moodBySlug.get(slug);
+    if (!m) continue;
     moodCards.push({
       ...m,
-      imageUrl: await moodImage(m.slug, designImage, usedMoodImages),
+      imageUrl: await moodImage(slug, moodFallbacks, usedMoodImages),
     });
   }
 
