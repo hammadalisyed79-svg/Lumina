@@ -39,14 +39,12 @@ export function SpecSummary({
   ];
 
   return (
-    <aside className="cfg-summary surface-panel p-5 md:p-6" aria-live="polite">
-      <p className="eyebrow mb-2">Your shade</p>
-      <ul className="space-y-2.5 text-sm">
+    <aside className="cfg-summary" aria-live="polite">
+      <p className="eyebrow">Your shade</p>
+      <ul className="cfg-summary-list">
         {rows.map((r) => (
-          <li key={r.label} className="flex justify-between gap-4 border-b border-line/60 pb-2">
-            <span className="text-muted tracking-[0.06em] uppercase text-[11px]">
-              {r.label}
-            </span>
+          <li key={r.label}>
+            <span className="cfg-sum-label">{r.label}</span>
             <span className="text-right font-medium">
               {r.value || <span className="text-muted font-normal">—</span>}
             </span>
@@ -55,17 +53,13 @@ export function SpecSummary({
       </ul>
 
       {selection.personalisation && (
-        <p className="mt-3 text-sm prose-muted">
-          Note: {selection.personalisation}
-        </p>
+        <p className="mt-3 text-sm prose-muted">Note: {selection.personalisation}</p>
       )}
 
-      <div className="mt-5">
+      <div className="mt-1">
         {price && shape ? (
           <>
-            <p className="font-display text-3xl tracking-tight">
-              {formatMoney(price.unitPrice)}
-            </p>
+            <p className="cfg-summary-price">{formatMoney(price.unitPrice)}</p>
             {price.quantity > 1 && (
               <p className="text-xs text-muted mt-1">
                 × {price.quantity} = {formatMoney(price.lineTotal)}
@@ -91,12 +85,12 @@ export function SpecSummary({
             )}
           </>
         ) : (
-          <p className="text-sm prose-muted">Price appears as you configure.</p>
+          <p className="text-sm prose-muted mt-3">Price appears as you configure.</p>
         )}
       </div>
 
       {nextHint && (
-        <p className="mt-4 text-sm text-bronze border-t border-line pt-4">{nextHint}</p>
+        <p className="mt-4 text-sm text-bronze border-t border-line pt-3">{nextHint}</p>
       )}
     </aside>
   );

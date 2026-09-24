@@ -42,6 +42,9 @@ import { FabricBrowser } from "@/components/configurator/FabricBrowser";
 import { SpecSummary } from "@/components/configurator/SpecSummary";
 import { SizeAssist } from "@/components/configurator/SizeAssist";
 import { FabricLightbox } from "@/components/configurator/FabricLightbox";
+import { ShapeSilhouette } from "@/components/configurator/ShapeSilhouette";
+import { FittingGlyph } from "@/components/configurator/FittingGlyph";
+import { sizeMeasurement } from "@/lib/configurator/size-label";
 
 const GUEST_KEY = "luminahub_studio_guest";
 const LOCAL_SAVE = "luminahub_studio_draft_v2";
@@ -75,21 +78,17 @@ function nextHint(missing: string[]): string | null {
 
 function SkeletonFallback() {
   return (
-    <div className="bg-paper studio-page">
-      <div className="border-b border-line bg-ivory/70">
-        <div className="container-site py-10 md:py-14 max-w-3xl">
-          <div className="cfg-skel h-3 w-24 mb-4" />
-          <div className="cfg-skel h-10 w-72 mb-3" />
-          <div className="cfg-skel h-4 w-full max-w-md" />
-        </div>
-      </div>
-      <div className="container-site py-10 md:py-14">
+    <div className="bg-paper studio-page cfg-page">
+      <div className="container-site py-8 md:py-12 studio-page-body">
         <div className="studio-layout">
           <div className="studio-preview-col">
             <div className="cfg-skel aspect-[5/6] w-full" />
           </div>
           <div className="studio-options-col space-y-4">
-            <div className="cfg-skel h-8 w-48" />
+            <div className="cfg-skel h-3 w-32 mb-2" />
+            <div className="cfg-skel h-9 w-64 mb-3" />
+            <div className="cfg-skel h-4 w-full max-w-sm mb-6" />
+            <div className="cfg-skel h-8 w-full mb-4" />
             <div className="grid grid-cols-2 gap-3">
               <div className="cfg-skel h-24" />
               <div className="cfg-skel h-24" />
@@ -523,7 +522,6 @@ function DesignStudioInner() {
     .map((f) => f.option);
 
   const stepIndex = CONFIG_STEPS.findIndex((s) => s.id === selection.step);
-  const progress = ((Math.max(0, stepIndex) + 1) / CONFIG_STEPS.length) * 100;
 
   const loginHref = `/account/login?callbackUrl=${encodeURIComponent(
     savedId
@@ -537,19 +535,7 @@ function DesignStudioInner() {
 
   return (
     <div className="bg-paper studio-page cfg-page">
-      <div className="border-b border-line bg-ivory/70">
-        <div className="container-site py-10 md:py-14 max-w-3xl">
-          <p className="eyebrow mb-3">{COPY.designPage.eyebrow}</p>
-          <h1 className="section-title mb-3">{COPY.designPage.title}</h1>
-          <div className="lux-rule" />
-          <p className="prose-muted">
-            Configure use, silhouette, size, fabric, lining and fitting. The live preview
-            updates with every choice.
-          </p>
-        </div>
-      </div>
-
-      <div className="container-site py-8 md:py-12 studio-page-body">
+      <div className="container-site py-6 md:py-10 studio-page-body">
         {loadError || !catalog ? (
           <div className="surface-panel p-8 max-w-lg mx-auto text-center space-y-4">
             <p className="eyebrow">Studio</p>
@@ -563,37 +549,6 @@ function DesignStudioInner() {
           </div>
         ) : (
           <>
-            <nav className="mb-6 md:mb-8" aria-label="Configurator progress">
-              <div className="flex items-center justify-between gap-4 mb-3">
-                <p className="text-xs tracking-[0.16em] uppercase text-muted">
-                  Step {stepIndex + 1} of {CONFIG_STEPS.length}
-                </p>
-              </div>
-              <div className="h-px bg-line overflow-hidden mb-4">
-                <div
-                  className="h-full bg-bronze transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <div className="studio-step-chips">
-                {CONFIG_STEPS.map((s, i) => {
-                  const done = i < stepIndex;
-                  const active = s.id === selection.step;
-                  return (
-                    <button
-                      key={s.id}
-                      type="button"
-                      className={`studio-step-chip ${done ? "is-done" : ""} ${active ? "is-active" : ""}`}
-                      onClick={() => goStep(s.id)}
-                      aria-current={active ? "step" : undefined}
-                    >
-                      {i + 1} {s.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </nav>
-
             {warnings.map((w) => (
               <div
                 key={w}
@@ -646,7 +601,35 @@ function DesignStudioInner() {
                 </div>
               </div>
 
-              <div className="studio-options-col space-y-14 md:space-y-16">
+              <div className="studio-options-col space-y-12 md:space-y-14">
+                <header className="cfg-panel-intro">
+                  <p className="eyebrow">{COPY.designPage.eyebrow}</p>
+                  <h1>{COPY.designPage.title}</h1>
+                  <p>{COPY.designPage.body}</p>
+                </header>
+
+                <nav aria-label="Configurator progress">
+                  <div className="studio-step-chips">
+                    {CONFIG_STEPS.map((s, i) => {
+                      const done = i < stepIndex;
+                      const active = s.id === selection.step;
+                      const num = String(i + 1).padStart(2, "0");
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          className={`studio-step-chip ${done ? "is-done" : ""} ${active ? "is-active" : ""}`}
+                          onClick={() => goStep(s.id)}
+                          aria-current={active ? "step" : undefined}
+                        >
+                          <span className="cfg-step-num">{num}</span>
+                          {s.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </nav>
+
                 {/* USE */}
                 <section
                   ref={(el) => {
@@ -655,11 +638,11 @@ function DesignStudioInner() {
                   id="cfg-use"
                   aria-labelledby="cfg-use-title"
                 >
-                  <h2 id="cfg-use-title" className="font-display text-3xl md:text-4xl tracking-tight mb-2">
+                  <h2 id="cfg-use-title" className="cfg-section-title">
                     Where will your shade be used?
                   </h2>
-                  <div className="lux-rule" />
-                  <div className="grid gap-3 mt-6" role="radiogroup" aria-labelledby="cfg-use-title">
+                  <div className="cfg-section-rule" />
+                  <div className="cfg-use-grid" role="radiogroup" aria-labelledby="cfg-use-title">
                     {USE_TYPES.map((u) => {
                       const selected = selection.useType === u.id;
                       return (
@@ -668,15 +651,15 @@ function DesignStudioInner() {
                           type="button"
                           role="radio"
                           aria-checked={selected}
-                          className={`studio-option ${selected ? "is-selected" : ""}`}
+                          className={`studio-option cfg-use-tile ${selected ? "is-selected" : ""}`}
                           onClick={() => {
                             updateSelection({ useType: u.id }, "useType");
                             trackConfigurator("use_selected", { useType: u.id });
                             afterSelect("use", "shape");
                           }}
                         >
-                          <span className="font-medium block">{u.label}</span>
-                          <span className="text-sm text-muted">{u.hint}</span>
+                          <span className="cfg-use-label">{u.label}</span>
+                          <span className="cfg-use-hint">{u.hint}</span>
                         </button>
                       );
                     })}
@@ -691,11 +674,15 @@ function DesignStudioInner() {
                   id="cfg-shape"
                   aria-labelledby="cfg-shape-title"
                 >
-                  <h2 id="cfg-shape-title" className="font-display text-3xl md:text-4xl tracking-tight mb-2">
+                  <h2 id="cfg-shape-title" className="cfg-section-title">
                     Choose shape
                   </h2>
-                  <div className="lux-rule" />
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6" role="radiogroup" aria-labelledby="cfg-shape-title">
+                  <div className="cfg-section-rule" />
+                  <div
+                    className="cfg-shape-grid"
+                    role="radiogroup"
+                    aria-labelledby="cfg-shape-title"
+                  >
                     {shapesAvail.map(({ option, available, reason }) => {
                       const selected = selection.shapeKey === option.key;
                       return (
@@ -707,7 +694,7 @@ function DesignStudioInner() {
                           aria-disabled={!available}
                           disabled={!available}
                           title={!available ? reason : undefined}
-                          className={`studio-option ${selected ? "is-selected" : ""} ${!available ? "is-disabled" : ""}`}
+                          className={`studio-option cfg-shape-tile ${selected ? "is-selected" : ""} ${!available ? "is-disabled" : ""}`}
                           onClick={() => {
                             if (!available) return;
                             updateSelection({ shapeKey: option.key }, "shapeKey");
@@ -715,9 +702,10 @@ function DesignStudioInner() {
                             afterSelect("shape", "size");
                           }}
                         >
-                          <span className="font-medium">{option.name}</span>
+                          <ShapeSilhouette shapeKey={option.key} />
+                          <span className="cfg-shape-name">{option.name}</span>
                           {!available && (
-                            <span className="block text-[11px] text-muted mt-1">{reason}</span>
+                            <span className="block text-[11px] text-muted">{reason}</span>
                           )}
                         </button>
                       );
@@ -733,18 +721,22 @@ function DesignStudioInner() {
                   id="cfg-size"
                   aria-labelledby="cfg-size-title"
                 >
-                  <h2 id="cfg-size-title" className="font-display text-3xl md:text-4xl tracking-tight mb-2">
+                  <h2 id="cfg-size-title" className="cfg-section-title">
                     Choose size
                   </h2>
-                  <div className="lux-rule" />
+                  <div className="cfg-section-rule" />
                   {!selection.shapeKey ? (
-                    <p className="prose-muted text-sm mt-4">Choose a shape first.</p>
+                    <p className="prose-muted text-sm mt-2">Choose a shape first.</p>
                   ) : availableSizes.length === 0 ? (
-                    <p className="prose-muted text-sm mt-4" role="alert">
+                    <p className="prose-muted text-sm mt-2" role="alert">
                       No compatible sizes for this shape. Please choose another silhouette.
                     </p>
                   ) : (
-                    <div className="grid grid-cols-2 gap-3 mt-6" role="radiogroup" aria-labelledby="cfg-size-title">
+                    <div
+                      className="cfg-size-grid"
+                      role="radiogroup"
+                      aria-labelledby="cfg-size-title"
+                    >
                       {sizesAvail.map(({ option, available, reason }) => {
                         const selected = selection.sizeId === option.id;
                         return (
@@ -755,7 +747,7 @@ function DesignStudioInner() {
                             aria-checked={selected}
                             disabled={!available}
                             title={!available ? reason : undefined}
-                            className={`studio-option ${selected ? "is-selected" : ""} ${!available ? "is-disabled" : ""}`}
+                            className={`studio-option cfg-size-tile ${selected ? "is-selected" : ""} ${!available ? "is-disabled" : ""}`}
                             onClick={() => {
                               if (!available) return;
                               updateSelection({ sizeId: option.id }, "sizeId");
@@ -763,7 +755,8 @@ function DesignStudioInner() {
                               afterSelect("size", "fabric");
                             }}
                           >
-                            <span className="font-medium">{option.name}</span>
+                            <span className="cfg-size-measure">{sizeMeasurement(option)}</span>
+                            <span className="cfg-size-name">{option.name}</span>
                             {option.priceMod ? (
                               <span className="block text-xs text-muted mt-1">
                                 +{formatMoney(option.priceMod)}
@@ -815,14 +808,18 @@ function DesignStudioInner() {
                   id="cfg-lining"
                   aria-labelledby="cfg-lining-title"
                 >
-                  <h2 id="cfg-lining-title" className="font-display text-3xl md:text-4xl tracking-tight mb-2">
+                  <h2 id="cfg-lining-title" className="cfg-section-title">
                     Choose lining
                   </h2>
-                  <div className="lux-rule" />
+                  <div className="cfg-section-rule" />
                   <p className="prose-muted text-sm mb-5">
                     The interior of the shade updates in the preview.
                   </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3" role="radiogroup" aria-labelledby="cfg-lining-title">
+                  <div
+                    className="cfg-lining-grid"
+                    role="radiogroup"
+                    aria-labelledby="cfg-lining-title"
+                  >
                     {liningsAvail.map(({ option: l, available, reason }) => {
                       const selected = selection.liningId === l.id;
                       const hex = l.rendererHex || liningSwatchHex(l.name, l.colour);
@@ -834,7 +831,7 @@ function DesignStudioInner() {
                           aria-checked={selected}
                           disabled={!available}
                           title={!available ? reason : undefined}
-                          className={`studio-option ${selected ? "is-selected" : ""} ${!available ? "is-disabled" : ""}`}
+                          className={`studio-option cfg-lining-tile ${selected ? "is-selected" : ""} ${!available ? "is-disabled" : ""}`}
                           onClick={() => {
                             if (!available) return;
                             updateSelection({ liningId: l.id }, "liningId");
@@ -844,18 +841,16 @@ function DesignStudioInner() {
                           }}
                         >
                           <span
-                            className="inline-block w-5 h-5 rounded-full border border-line mr-2 align-middle"
+                            className="cfg-lining-swatch"
                             style={{ background: hex }}
                             aria-hidden
                           />
-                          <span className="font-medium">{l.name}</span>
+                          <span className="cfg-lining-name">{l.name}</span>
                           {l.priceMod ? (
-                            <span className="block text-xs text-muted mt-1">
-                              +{formatMoney(l.priceMod)}
-                            </span>
+                            <span className="text-xs text-muted">+{formatMoney(l.priceMod)}</span>
                           ) : null}
                           {!available && (
-                            <span className="block text-[11px] text-muted mt-1">{reason}</span>
+                            <span className="text-[11px] text-muted">{reason}</span>
                           )}
                         </button>
                       );
@@ -871,17 +866,21 @@ function DesignStudioInner() {
                   id="cfg-fitting"
                   aria-labelledby="cfg-fitting-title"
                 >
-                  <h2 id="cfg-fitting-title" className="font-display text-3xl md:text-4xl tracking-tight mb-2">
+                  <h2 id="cfg-fitting-title" className="cfg-section-title">
                     Choose fitting
                   </h2>
-                  <div className="lux-rule" />
+                  <div className="cfg-section-rule" />
                   {selection.useType && (
                     <p className="prose-muted text-sm mb-5">
                       Recommended for{" "}
                       {USE_TYPES.find((u) => u.id === selection.useType)?.label.toLowerCase()}.
                     </p>
                   )}
-                  <div className="grid gap-3" role="radiogroup" aria-labelledby="cfg-fitting-title">
+                  <div
+                    className="cfg-fitting-grid"
+                    role="radiogroup"
+                    aria-labelledby="cfg-fitting-title"
+                  >
                     {fittingsAvail.map(({ option, available, reason }) => {
                       const selected = selection.fittingId === option.id;
                       return (
@@ -892,7 +891,7 @@ function DesignStudioInner() {
                           aria-checked={selected}
                           disabled={!available}
                           title={!available ? reason : undefined}
-                          className={`studio-option ${selected ? "is-selected" : ""} ${!available ? "is-disabled" : ""}`}
+                          className={`studio-option cfg-fitting-tile ${selected ? "is-selected" : ""} ${!available ? "is-disabled" : ""}`}
                           onClick={() => {
                             if (!available) return;
                             updateSelection({ fittingId: option.id }, "fittingId");
@@ -900,13 +899,16 @@ function DesignStudioInner() {
                             afterSelect("fitting", "review");
                           }}
                         >
-                          <span className="font-medium">{option.name}</span>
-                          {option.description && (
-                            <span className="block text-sm text-muted mt-1">{option.description}</span>
-                          )}
-                          {!available && (
-                            <span className="block text-[11px] text-muted mt-1">{reason}</span>
-                          )}
+                          <FittingGlyph name={option.name} slug={option.slug} />
+                          <span>
+                            <span className="cfg-fitting-name">{option.name}</span>
+                            {option.description && (
+                              <span className="cfg-fitting-desc">{option.description}</span>
+                            )}
+                            {!available && (
+                              <span className="block text-[11px] text-muted mt-1">{reason}</span>
+                            )}
+                          </span>
                         </button>
                       );
                     })}
@@ -922,49 +924,53 @@ function DesignStudioInner() {
                   aria-labelledby="cfg-review-title"
                   className="pb-8"
                 >
-                  <h2 id="cfg-review-title" className="font-display text-3xl md:text-4xl tracking-tight mb-2">
+                  <h2 id="cfg-review-title" className="cfg-section-title">
                     Review your shade
                   </h2>
-                  <div className="lux-rule" />
+                  <div className="cfg-section-rule" />
 
                   {!validation.valid ? (
-                    <p className="prose-muted mt-4">{nextHint(validation.missing)}</p>
+                    <p className="prose-muted mt-2">{nextHint(validation.missing)}</p>
                   ) : (
-                    <div className="mt-6 space-y-6">
-                      <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-                        <div>
-                          <dt className="text-muted text-[11px] uppercase tracking-[0.1em]">Use</dt>
-                          <dd>{USE_TYPES.find((u) => u.id === selection.useType)?.label}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted text-[11px] uppercase tracking-[0.1em]">Shape</dt>
-                          <dd>{shape?.name}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted text-[11px] uppercase tracking-[0.1em]">Size</dt>
-                          <dd>{size?.name}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted text-[11px] uppercase tracking-[0.1em]">Fabric</dt>
-                          <dd>{fabric?.name}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted text-[11px] uppercase tracking-[0.1em]">Lining</dt>
-                          <dd>{lining?.name}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted text-[11px] uppercase tracking-[0.1em]">Fitting</dt>
-                          <dd>{fitting?.name}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted text-[11px] uppercase tracking-[0.1em]">Lead time</dt>
-                          <dd>Handmade to order — typically 2–3 weeks</dd>
-                        </div>
-                        <div>
-                          <dt className="text-muted text-[11px] uppercase tracking-[0.1em]">Price</dt>
-                          <dd className="font-display text-2xl">{price ? formatMoney(price.unitPrice) : "—"}</dd>
-                        </div>
-                      </dl>
+                    <div className="mt-4 space-y-6">
+                      <div className="cfg-review-card">
+                        <dl>
+                          <div>
+                            <dt>Use</dt>
+                            <dd>{USE_TYPES.find((u) => u.id === selection.useType)?.label}</dd>
+                          </div>
+                          <div>
+                            <dt>Shape</dt>
+                            <dd>{shape?.name}</dd>
+                          </div>
+                          <div>
+                            <dt>Size</dt>
+                            <dd>{size?.name}</dd>
+                          </div>
+                          <div>
+                            <dt>Fabric</dt>
+                            <dd>{fabric?.name}</dd>
+                          </div>
+                          <div>
+                            <dt>Lining</dt>
+                            <dd>{lining?.name}</dd>
+                          </div>
+                          <div>
+                            <dt>Fitting</dt>
+                            <dd>{fitting?.name}</dd>
+                          </div>
+                          <div>
+                            <dt>Lead time</dt>
+                            <dd>Handmade to order — typically 2–3 weeks</dd>
+                          </div>
+                          <div>
+                            <dt>Price</dt>
+                            <dd className="font-display text-2xl">
+                              {price ? formatMoney(price.unitPrice) : "—"}
+                            </dd>
+                          </div>
+                        </dl>
+                      </div>
 
                       <label className="block max-w-md">
                         <span className="label">Personalisation (optional)</span>
@@ -996,7 +1002,7 @@ function DesignStudioInner() {
                         />
                       </label>
 
-                      <div className="flex flex-wrap gap-3">
+                      <div className="cfg-review-actions">
                         <button
                           type="button"
                           className="btn-primary"

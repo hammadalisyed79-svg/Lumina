@@ -100,7 +100,7 @@ function ConfiguratorPreviewInner({
       {!compact && (
         <div className="cfg-preview-controls mt-4 space-y-3">
           <div
-            className="flex flex-wrap gap-1.5"
+            className="cfg-segment"
             role="radiogroup"
             aria-label="Preview mode"
           >
@@ -110,7 +110,7 @@ function ConfiguratorPreviewInner({
                 type="button"
                 role="radio"
                 aria-checked={mode === m.id}
-                className={`cfg-chip ${mode === m.id ? "is-active" : ""}`}
+                className={`cfg-segment__btn ${mode === m.id ? "is-active" : ""}`}
                 onClick={() => onModeChange(m.id)}
               >
                 {m.label}
@@ -120,7 +120,7 @@ function ConfiguratorPreviewInner({
 
           {mode === "room" && (
             <div
-              className="flex flex-wrap gap-1.5"
+              className="cfg-segment"
               role="radiogroup"
               aria-label="Room context"
             >
@@ -130,7 +130,7 @@ function ConfiguratorPreviewInner({
                   type="button"
                   role="radio"
                   aria-checked={room === r.id}
-                  className={`cfg-chip ${room === r.id ? "is-active" : ""}`}
+                  className={`cfg-segment__btn ${room === r.id ? "is-active" : ""}`}
                   onClick={() => onRoomChange(r.id)}
                 >
                   {r.label}

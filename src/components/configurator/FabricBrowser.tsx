@@ -45,15 +45,13 @@ function FabricBrowserInner({ fabrics, value, onChange, onViewFabric }: Props) {
 
   return (
     <div>
-      <h2 className="font-display text-3xl md:text-4xl tracking-tight mb-2">
-        Choose fabric
-      </h2>
-      <div className="lux-rule" />
+      <h2 className="cfg-section-title">Choose fabric</h2>
+      <div className="cfg-section-rule" />
       <p className="prose-muted text-sm mb-5 max-w-md">
         Search or filter the catalogue. Selecting a fabric updates the shade instantly.
       </p>
 
-      <label className="block mb-4">
+      <label className="block mb-3">
         <span className="sr-only">Search fabrics</span>
         <input
           type="search"
@@ -65,7 +63,7 @@ function FabricBrowserInner({ fabrics, value, onChange, onViewFabric }: Props) {
         />
       </label>
 
-      <div className="flex flex-wrap gap-1.5 mb-6" role="group" aria-label="Fabric filters">
+      <div className="flex flex-wrap gap-1.5 mb-5" role="group" aria-label="Fabric filters">
         {availableFilters.map((f) => (
           <button
             key={f.id}
@@ -101,7 +99,7 @@ function FabricBrowserInner({ fabrics, value, onChange, onViewFabric }: Props) {
                     selected ? "is-selected" : ""
                   }`}
                 >
-                  <div className="relative aspect-square bg-stone">
+                  <div className="relative aspect-[5/6] bg-stone">
                     {img ? (
                       <MediaImage
                         src={img}
@@ -118,21 +116,19 @@ function FabricBrowserInner({ fabrics, value, onChange, onViewFabric }: Props) {
                     )}
                   </div>
                   <div className="p-2.5">
-                    <p className="text-sm leading-snug">{f.name}</p>
+                    <p className="text-sm leading-snug font-medium">{f.name}</p>
                     <p className="text-[11px] text-muted mt-0.5">
                       {[f.material, f.priceMod ? `+${formatMoney(f.priceMod)}` : null]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
-                    {selected && (
-                      <span className="sr-only">Selected</span>
-                    )}
+                    {selected && <span className="sr-only">Selected</span>}
                   </div>
                 </button>
                 {onViewFabric && (
                   <button
                     type="button"
-                    className="absolute top-2 right-2 z-10 bg-ivory/90 px-2 py-1 text-[10px] tracking-[0.1em] uppercase border border-line"
+                    className="absolute top-2 right-2 z-10 bg-ivory/95 px-2 py-1 text-[10px] tracking-[0.1em] uppercase border border-line"
                     onClick={(e) => {
                       e.stopPropagation();
                       onViewFabric(f);
