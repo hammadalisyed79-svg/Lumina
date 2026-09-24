@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const [fabric, lining] = await Promise.all([
+    const [fabric, lining, shapeRow] = await Promise.all([
       prisma.fabric.findFirst({
         where: { OR: [{ slug: fabricSlug }, { id: fabricSlug }], active: true },
       }),
@@ -31,6 +31,10 @@ export async function GET(req: NextRequest) {
             },
           })
         : Promise.resolve(null),
+      prisma.shape.findFirst({
+        where: { key: shape, active: true },
+        select: { name: true, key: true },
+      }),
     ]);
 
     if (!fabric) {
@@ -43,8 +47,10 @@ export async function GET(req: NextRequest) {
     }
 
     const png = await composeStudioPreview({
-      shapeKey: shape,
+      shapeKey: shapeRow?.key || shape,
+      shapeName: shapeRow?.name ? `${shapeRow.name} lampshade` : undefined,
       fabricUrl,
+      fabricName: fabric.name,
       liningName: lining?.name,
       liningColour: lining?.colour,
       diameterCm: Number.isFinite(diameter as number) ? diameter : null,
@@ -54,7 +60,7 @@ export async function GET(req: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
+        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
       },
     });
   } catch (err) {

@@ -82,6 +82,11 @@ export function StudioLivePreview({
   const showFabricOnly = step === 1 && Boolean(fabricSrc);
   const showShapeOnly = step === 0;
   const showComposed = step >= 2 && Boolean(composedSrc);
+  const shadeTitle = shapeName
+    ? /lampshade|pendant/i.test(shapeName)
+      ? shapeName
+      : `${shapeName} lampshade`
+    : "Lampshade";
 
   const previewSrc = showFabricOnly
     ? fabricSrc
@@ -99,7 +104,7 @@ export function StudioLivePreview({
         <div className="absolute inset-0 animate-pulse bg-stone" />
       ) : (
         <div
-          className={`studio-preview-photo ${showFabricOnly ? "studio-preview-fabric-only" : ""}`}
+          className={`studio-preview-photo ${showFabricOnly ? "studio-preview-fabric-only" : ""} ${showComposed ? "studio-preview-composed" : ""}`}
         >
           <MediaImage
             key={previewSrc}
@@ -107,10 +112,14 @@ export function StudioLivePreview({
             alt={
               showFabricOnly
                 ? fabric?.name || "Selected fabric"
-                : `${shapeName || "Shade"} in ${fabric?.name || "fabric"}`
+                : `${shadeTitle} in ${fabric?.name || "fabric"}`
             }
             fill
-            className="object-cover object-center"
+            className={
+              showComposed
+                ? "object-contain object-center"
+                : "object-cover object-center"
+            }
             sizes="(max-width:1024px) 100vw, 50vw"
             priority
             unoptimized={unoptimized}
@@ -120,7 +129,11 @@ export function StudioLivePreview({
 
       <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 bg-gradient-to-t from-[rgba(20,17,14,0.82)] via-[rgba(20,17,14,0.38)] to-transparent text-white z-[2]">
         <p className="eyebrow text-champagne mb-2">
-          {showFabricOnly ? "Selected fabric" : "Live preview"}
+          {showFabricOnly
+            ? "Selected fabric"
+            : showComposed
+              ? "Your lampshade"
+              : "Live preview"}
         </p>
         {showFabricOnly ? (
           <>
@@ -132,14 +145,12 @@ export function StudioLivePreview({
                 {[fabric?.material, fabric?.colour].filter(Boolean).join(" · ")}
               </p>
             )}
-            <p className="text-xs text-white/55 mt-1">
-              For {shapeName || "your shade"}
-            </p>
+            <p className="text-xs text-white/55 mt-1">For {shadeTitle}</p>
           </>
         ) : (
           <>
             <p className="font-display text-2xl md:text-3xl tracking-tight">
-              {shapeName || "Shade"}
+              {shadeTitle}
             </p>
             <p className="text-sm text-white/80 mt-1">{fabric?.name}</p>
             {sizeName && (

@@ -178,5 +178,6 @@ export function studioPreviewApiPath(params: {
   if (params.diameter != null && Number.isFinite(params.diameter)) {
     q.set("diameter", String(params.diameter));
   }
+  q.set("v", "3");
   return `/api/studio-preview?${q.toString()}`;
 }
