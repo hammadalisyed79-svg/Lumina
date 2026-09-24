@@ -259,7 +259,9 @@ export const COPY = {
 
   paymentNotice: {
     cancelled: "Checkout was cancelled. No payment was taken — your bag is unchanged.",
-    failed: "Payment was not completed. Your bag is unchanged; you can try again when ready.",
+    cancelledRestored:
+      "Checkout was cancelled. No payment was taken — your bag has been restored so you can try again.",
+    failed: "Payment was not completed. Your bag was restored; you can try again when ready.",
   },
 
   paymentFailed: {
@@ -270,7 +272,7 @@ export const COPY = {
 
   paymentCancelled: {
     title: "Checkout cancelled",
-    body: "No payment was taken. Your bag is unchanged — you can resume whenever you like.",
+    body: "No payment was taken. Your bag has been restored — resume checkout whenever you like.",
     cta: "Back to checkout",
   },
 };

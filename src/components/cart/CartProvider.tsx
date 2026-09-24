@@ -14,6 +14,10 @@ import {
   type CartLine,
   type ShadeConfig,
 } from "@/lib/cart/types";
+import {
+  CART_CHECKOUT_SNAPSHOT_KEY,
+  sameConfigured,
+} from "@/lib/cart/display";
 import { roundMoney } from "@/lib/pricing";
 import { trackAddToCart } from "@/lib/analytics";
 
@@ -33,6 +37,8 @@ type CartContextValue = {
   updateQty: (id: string, quantity: number) => void;
   remove: (id: string) => void;
   clear: () => void;
+  snapshotForCheckout: () => void;
+  restoreCheckoutSnapshot: () => boolean;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -99,18 +105,40 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addConfigured: CartContextValue["addConfigured"] = useCallback((input) => {
     const qty = input.quantity ?? 1;
-    setItems((prev) => [
-      ...prev,
-      {
-        id: uid(),
-        kind: "configured",
-        title: input.title,
-        imageUrl: input.imageUrl,
-        quantity: qty,
-        unitPrice: input.config.unitPrice,
-        config: input.config,
-      },
-    ]);
+    setItems((prev) => {
+      const existing = prev.find(
+        (p) =>
+          p.kind === "configured" &&
+          p.config &&
+          sameConfigured(p.config, input.config),
+      );
+      if (existing) {
+        return prev.map((p) =>
+          p.id === existing.id
+            ? {
+                ...p,
+                quantity: p.quantity + qty,
+                unitPrice: input.config.unitPrice,
+                imageUrl: input.imageUrl || p.imageUrl,
+                title: input.title,
+                config: input.config,
+              }
+            : p,
+        );
+      }
+      return [
+        ...prev,
+        {
+          id: uid(),
+          kind: "configured",
+          title: input.title,
+          imageUrl: input.imageUrl,
+          quantity: qty,
+          unitPrice: input.config.unitPrice,
+          config: input.config,
+        },
+      ];
+    });
     trackAddToCart({
       item_name: input.title,
       price: input.config.unitPrice,
@@ -133,6 +161,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback(() => setItems([]), []);
 
+  const snapshotForCheckout = useCallback(() => {
+    try {
+      sessionStorage.setItem(CART_CHECKOUT_SNAPSHOT_KEY, JSON.stringify(items));
+    } catch {
+      /* ignore */
+    }
+  }, [items]);
+
+  const restoreCheckoutSnapshot = useCallback(() => {
+    try {
+      const raw = sessionStorage.getItem(CART_CHECKOUT_SNAPSHOT_KEY);
+      if (!raw) return false;
+      const snap = JSON.parse(raw) as CartLine[];
+      sessionStorage.removeItem(CART_CHECKOUT_SNAPSHOT_KEY);
+      if (!Array.isArray(snap) || !snap.length) return false;
+      setItems(snap);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const value = useMemo<CartContextValue>(() => {
     const subtotal = roundMoney(
       items.reduce((s, i) => s + i.unitPrice * i.quantity, 0),
@@ -149,8 +199,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       updateQty,
       remove,
       clear,
+      snapshotForCheckout,
+      restoreCheckoutSnapshot,
     };
-  }, [items, drawerOpen, addProduct, addConfigured, updateQty, remove, clear]);
+  }, [
+    items,
+    drawerOpen,
+    addProduct,
+    addConfigured,
+    updateQty,
+    remove,
+    clear,
+    snapshotForCheckout,
+    restoreCheckoutSnapshot,
+  ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

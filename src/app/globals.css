@@ -450,6 +450,42 @@ a {
   line-height: 1.5;
 }
 
+.checkout-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+.checkout-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.checkout-step.is-done {
+  color: var(--ink);
+}
+
+.checkout-step.is-active {
+  color: var(--bronze);
+}
+
+.checkout-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 1px solid currentColor;
+  font-size: 0.65rem;
+  letter-spacing: 0;
+}
+
 .notice-panel.is-error {
   border-color: #e8c4c0;
   background: #fdf6f5;
