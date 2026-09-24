@@ -9,12 +9,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useSession } from "next-auth/react";
 import { WISHLIST_STORAGE_KEY } from "@/lib/cart/types";
 
 type WishlistContextValue = {
   ids: string[];
   has: (productId: string) => boolean;
   toggle: (productId: string) => void;
+  replaceIds: (serverIds: string[]) => void;
   mergeServer: (serverIds: string[]) => void;
   clear: () => void;
 };
@@ -22,6 +24,7 @@ type WishlistContextValue = {
 const WishlistContext = createContext<WishlistContextValue | null>(null);
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
+  const { status } = useSession();
   const [ids, setIds] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -42,23 +45,44 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   const has = useCallback((productId: string) => ids.includes(productId), [ids]);
 
-  const toggle = useCallback((productId: string) => {
-    setIds((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId],
-    );
+  const replaceIds = useCallback((serverIds: string[]) => {
+    setIds(Array.from(new Set(serverIds)));
   }, []);
 
   const mergeServer = useCallback((serverIds: string[]) => {
     setIds((prev) => Array.from(new Set([...prev, ...serverIds])));
   }, []);
 
+  const toggle = useCallback(
+    (productId: string) => {
+      setIds((prev) => {
+        const next = prev.includes(productId)
+          ? prev.filter((id) => id !== productId)
+          : [...prev, productId];
+        return next;
+      });
+
+      if (status === "authenticated") {
+        fetch("/api/wishlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId, action: "toggle" }),
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (Array.isArray(data.ids)) replaceIds(data.ids);
+          })
+          .catch(() => undefined);
+      }
+    },
+    [status, replaceIds]
+  );
+
   const clear = useCallback(() => setIds([]), []);
 
   const value = useMemo(
-    () => ({ ids, has, toggle, mergeServer, clear }),
-    [ids, has, toggle, mergeServer, clear],
+    () => ({ ids, has, toggle, replaceIds, mergeServer, clear }),
+    [ids, has, toggle, replaceIds, mergeServer, clear]
   );
 
   return (

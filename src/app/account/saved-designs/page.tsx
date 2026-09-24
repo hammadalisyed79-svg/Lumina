@@ -5,7 +5,7 @@ import { MediaImage } from "@/components/media/MediaImage";
 import { formatMoney } from "@/lib/utils";
 import { toNumber } from "@/lib/pricing";
 import { EmptyState } from "@/components/commerce/EmptyState";
-import { AddSavedDesignButton } from "@/components/studio/AddSavedDesignButton";
+import { SavedDesignActions } from "@/components/studio/SavedDesignActions";
 import { buildStudioSharePath } from "@/lib/studio/fabric-family";
 import type { ShadeConfig } from "@/lib/cart/types";
 
@@ -31,7 +31,7 @@ export default async function SavedDesignsPage() {
         <h1 className="section-title mb-3">Saved designs</h1>
         <div className="lux-rule" />
         <p className="prose-muted max-w-md">
-          Reopen a configuration in the atelier, or add it straight to your bag.
+          Reopen a configuration in the atelier, share it, or add it straight to your bag.
         </p>
       </header>
 
@@ -87,6 +87,8 @@ export default async function SavedDesignsPage() {
                 }
               : null;
 
+            const displayName = d.name || "Custom shade";
+
             return (
               <li key={d.id} className="surface-panel p-4 md:p-5">
                 <div className="flex gap-4">
@@ -102,30 +104,21 @@ export default async function SavedDesignsPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium text-lg">{d.name || "Custom shade"}</p>
-                        <p className="text-sm text-muted mt-1 leading-relaxed">{parts.join(" · ")}</p>
-                        <p className="mt-2 font-medium">{formatMoney(toNumber(d.unitPrice))}</p>
-                        <p className="text-xs text-muted mt-2">
-                          Saved {d.createdAt.toLocaleDateString("en-GB")}
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {config && (
-                          <AddSavedDesignButton
-                            title={d.name || `Custom ${d.shape?.name} · ${d.fabric?.name}`}
-                            imageUrl={imageUrl}
-                            config={config}
-                          />
-                        )}
-                        <Link href={studioHref} className="btn-secondary text-sm">
-                          Open studio
-                        </Link>
-                        <Link href="/bespoke" className="btn-quiet text-sm">
-                          Enquire
-                        </Link>
-                      </div>
+                    <p className="font-medium text-lg">{displayName}</p>
+                    <p className="text-sm text-muted mt-1 leading-relaxed">{parts.join(" · ")}</p>
+                    <p className="mt-2 font-medium">{formatMoney(toNumber(d.unitPrice))}</p>
+                    <p className="text-xs text-muted mt-2">
+                      Saved {d.createdAt.toLocaleDateString("en-GB")}
+                    </p>
+                    <div className="mt-4">
+                      <SavedDesignActions
+                        id={d.id}
+                        name={displayName}
+                        title={d.name || `Custom ${d.shape?.name} · ${d.fabric?.name}`}
+                        imageUrl={imageUrl}
+                        config={config}
+                        studioHref={studioHref}
+                      />
                     </div>
                   </div>
                 </div>

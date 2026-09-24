@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 const schema = z.object({
-  productIds: z.array(z.string()).max(100),
+  productIds: z.array(z.string()).max(100).default([]),
 });
 
 export async function POST(req: Request) {

@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { Heart, Search, ShoppingBag, User } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useCart } from "@/components/cart/CartProvider";
 import { useWishlist } from "@/components/wishlist/WishlistProvider";
 
 export function HeaderActions() {
   const { count, setDrawerOpen } = useCart();
   const { ids } = useWishlist();
+  const { status } = useSession();
+  const wishlistHref = status === "authenticated" ? "/account/wishlist" : "/wishlist";
 
   return (
     <div className="flex items-center gap-0.5 sm:gap-2 md:gap-3 text-ink shrink-0">
@@ -27,7 +30,7 @@ export function HeaderActions() {
         <User size={20} strokeWidth={1.75} />
       </Link>
       <Link
-        href="/wishlist"
+        href={wishlistHref}
         aria-label="Wishlist"
         className="relative flex h-10 w-10 items-center justify-center hover:text-bronze"
       >

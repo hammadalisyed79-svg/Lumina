@@ -16,22 +16,43 @@ export default async function AccountIndexPage() {
   if (!session?.user) redirect("/account/login");
 
   const email = session.user.email || "";
-  const tradeApp = await prisma.tradeApplication.findFirst({
-    where: {
-      OR: [
-        ...(session.user.id ? [{ userId: session.user.id }] : []),
-        ...(email ? [{ email: { equals: email, mode: "insensitive" as const } }] : []),
-      ],
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const emailLower = email.toLowerCase();
+
+  const [tradeApp, orderCount, wishlist, designCount] = await Promise.all([
+    prisma.tradeApplication.findFirst({
+      where: {
+        OR: [
+          ...(session.user.id ? [{ userId: session.user.id }] : []),
+          ...(email ? [{ email: { equals: email, mode: "insensitive" as const } }] : []),
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.order.count({
+      where: {
+        OR: [
+          { userId: session.user.id },
+          ...(emailLower
+            ? [{ email: { equals: emailLower, mode: "insensitive" as const } }]
+            : []),
+        ],
+      },
+    }),
+    prisma.wishlist.findUnique({
+      where: { userId: session.user.id },
+      include: { _count: { select: { items: true } } },
+    }),
+    prisma.savedDesign.count({ where: { userId: session.user.id } }),
+  ]);
+
+  const wishlistCount = wishlist?._count.items ?? 0;
 
   const links = [
-    { href: "/account/orders", label: "Orders" },
-    { href: "/account/addresses", label: "Addresses" },
-    { href: "/account/wishlist", label: "Wishlist" },
-    { href: "/account/saved-designs", label: "Saved designs" },
-    { href: "/account/profile", label: "Profile" },
+    { href: "/account/orders", label: "Orders", meta: `${orderCount}` },
+    { href: "/account/addresses", label: "Addresses", meta: null as string | null },
+    { href: "/account/wishlist", label: "Wishlist", meta: `${wishlistCount}` },
+    { href: "/account/saved-designs", label: "Saved designs", meta: `${designCount}` },
+    { href: "/account/profile", label: "Profile", meta: null },
   ];
 
   return (
@@ -85,11 +106,16 @@ export default async function AccountIndexPage() {
           <li key={l.href}>
             <Link
               href={l.href}
-              className="block surface-panel p-5 transition-colors hover:border-bronze group"
+              className="flex items-center justify-between gap-4 surface-panel p-5 transition-colors hover:border-bronze group"
             >
               <span className="font-display text-lg group-hover:text-bronze transition-colors">
                 {l.label}
               </span>
+              {l.meta != null && (
+                <span className="text-xs tracking-[0.12em] uppercase text-muted tabular-nums">
+                  {l.meta}
+                </span>
+              )}
             </Link>
           </li>
         ))}

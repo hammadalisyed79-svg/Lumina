@@ -6,29 +6,15 @@ import { formatMoney } from "@/lib/utils";
 import { toNumber } from "@/lib/pricing";
 import { CommerceTrust } from "@/components/commerce/CommerceTrust";
 import { OrderTrackingPanel } from "@/components/commerce/OrderTrackingPanel";
+import {
+  formatOrderConfig,
+  formatOrderStatus,
+  formatPaymentStatus,
+} from "@/lib/orders/customer";
 
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ orderNumber: string }> };
-
-function formatConfig(configJson: unknown): string | null {
-  if (!configJson || typeof configJson !== "object") return null;
-  const c = configJson as Record<string, unknown>;
-  const parts = [
-    c.shapeName || c.shapeKey,
-    c.fabricName || c.fabricSlug,
-    c.sizeName || c.sizeSlug,
-    c.liningName || c.liningSlug,
-    c.fittingName || c.fittingSlug,
-  ]
-    .filter((x) => typeof x === "string" && x)
-    .map(String);
-  return parts.length ? parts.join(" · ") : null;
-}
-
-function friendly(status: string) {
-  return status.toLowerCase().replace(/_/g, " ");
-}
 
 export default async function AccountOrderDetailPage({ params }: Props) {
   const session = await requireUser();
@@ -67,9 +53,9 @@ export default async function AccountOrderDetailPage({ params }: Props) {
             year: "numeric",
           })}
           {" · "}
-          Payment {friendly(order.paymentStatus)}
+          {formatPaymentStatus(order.paymentStatus)}
           {" · "}
-          {friendly(order.status)}
+          {formatOrderStatus(order.status)}
         </p>
       </header>
 
@@ -86,7 +72,7 @@ export default async function AccountOrderDetailPage({ params }: Props) {
         <p className="eyebrow mb-4">Items</p>
         <ul className="space-y-5">
           {order.items.map((item) => {
-            const config = formatConfig(item.configJson);
+            const config = formatOrderConfig(item.configJson);
             return (
               <li key={item.id} className="border-b border-line last:border-0 pb-5 last:pb-0">
                 <div className="flex justify-between gap-4">

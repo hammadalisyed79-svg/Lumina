@@ -2,8 +2,9 @@ import { requireUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { WishlistMerge } from "@/components/wishlist/WishlistMerge";
-import { ProductCard } from "@/components/shop/ProductCard";
+import { AccountWishlistGrid } from "@/components/wishlist/AccountWishlistGrid";
 import { toNumber } from "@/lib/pricing";
+import { isWebImageUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,9 @@ export default async function AccountWishlistPage() {
     where: { userId: session.user.id },
     include: {
       items: {
-        include: { product: { include: { images: { orderBy: { sortOrder: "asc" }, take: 2 } } } },
+        include: {
+          product: { include: { images: { orderBy: { sortOrder: "asc" }, take: 2 } } },
+        },
       },
     },
   });
@@ -22,33 +25,44 @@ export default async function AccountWishlistPage() {
       data: { userId: session.user.id },
       include: {
         items: {
-          include: { product: { include: { images: { orderBy: { sortOrder: "asc" }, take: 2 } } } },
+          include: {
+            product: { include: { images: { orderBy: { sortOrder: "asc" }, take: 2 } } },
+          },
         },
       },
     });
   }
 
-  const products = wishlist.items.map((i) => ({
-    id: i.product.id,
-    slug: i.product.slug,
-    title: i.product.title,
-    subtitle: i.product.subtitle,
-    basePrice: toNumber(i.product.basePrice),
-    imageUrl: i.product.images[0]?.url || "/demo-assets/products/placeholder.svg",
-    hoverImageUrl: i.product.images[1]?.url,
-  }));
+  const products = wishlist.items.map((i) => {
+    const imgs = i.product.images.filter((img) => isWebImageUrl(img.url));
+    return {
+      id: i.product.id,
+      slug: i.product.slug,
+      title: i.product.title,
+      subtitle: i.product.subtitle,
+      basePrice: toNumber(i.product.basePrice),
+      imageUrl: imgs[0]?.url || "/demo-assets/products/placeholder.svg",
+      hoverImageUrl: imgs[1]?.url,
+    };
+  });
 
   return (
-    <div className="container-site py-12">
+    <div className="container-site section-pad">
       <WishlistMerge />
-      <Link href="/account" className="text-sm text-[color:var(--muted)]">← Account</Link>
-      <h1 className="font-display text-4xl mt-4 mb-8">Wishlist</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        {products.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
-      </div>
-      {products.length === 0 && <p className="prose-muted">No saved pieces yet.</p>}
+      <nav className="page-crumb">
+        <Link href="/account">Account</Link>
+        <span className="mx-2 text-line">/</span>
+        <span className="text-ink">Wishlist</span>
+      </nav>
+      <header className="mb-10 max-w-2xl">
+        <p className="eyebrow mb-3">Saved</p>
+        <h1 className="section-title mb-3">Wishlist</h1>
+        <div className="lux-rule" />
+        <p className="prose-muted">
+          Pieces you have hearted — synced to this account. Remove with the heart on any card.
+        </p>
+      </header>
+      <AccountWishlistGrid products={products} />
     </div>
   );
 }

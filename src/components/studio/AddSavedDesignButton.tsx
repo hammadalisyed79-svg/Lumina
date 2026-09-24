@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import type { ShadeConfig } from "@/lib/cart/types";
 
@@ -13,6 +14,7 @@ export function AddSavedDesignButton({
   config: ShadeConfig;
 }) {
   const { addConfigured, setDrawerOpen } = useCart();
+  const [added, setAdded] = useState(false);
 
   return (
     <button
@@ -26,9 +28,11 @@ export function AddSavedDesignButton({
           config,
         });
         setDrawerOpen(true);
+        setAdded(true);
+        setTimeout(() => setAdded(false), 2000);
       }}
     >
-      Add to bag
+      {added ? "In bag" : "Add to bag"}
     </button>
   );
 }

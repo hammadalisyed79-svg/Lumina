@@ -1,13 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { useWishlist } from "@/components/wishlist/WishlistProvider";
 
+/** Sync local wishlist with the signed-in account (push local, then adopt server list). */
 export function WishlistMerge() {
-  const { ids, mergeServer, clear } = useWishlist();
+  const { status } = useSession();
+  const { ids, replaceIds } = useWishlist();
+  const ran = useRef(false);
 
   useEffect(() => {
-    if (ids.length === 0) return;
+    if (status !== "authenticated" || ran.current) return;
+    ran.current = true;
+
     fetch("/api/wishlist/merge", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -15,13 +21,12 @@ export function WishlistMerge() {
     })
       .then((r) => r.json())
       .then((data) => {
-        if (data.ids) {
-          mergeServer(data.ids);
-          // Keep local in sync with server after merge
-        }
+        if (Array.isArray(data.ids)) replaceIds(data.ids);
       })
       .catch(() => undefined);
-  }, [ids, mergeServer, clear]);
+    // Intentionally once after auth + local hydrate
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   return null;
 }

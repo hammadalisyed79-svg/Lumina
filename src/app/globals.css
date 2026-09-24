@@ -486,6 +486,33 @@ a {
   letter-spacing: 0;
 }
 
+.order-status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.order-status-chip.is-ok {
+  border-color: var(--bronze);
+  color: var(--bronze);
+}
+
+.order-status-chip.is-warn {
+  border-color: var(--champagne);
+  color: var(--ink);
+}
+
+.order-status-chip.is-bad {
+  border-color: var(--line);
+  color: var(--muted);
+  opacity: 0.85;
+}
+
 .notice-panel.is-error {
   border-color: #e8c4c0;
   background: #fdf6f5;
