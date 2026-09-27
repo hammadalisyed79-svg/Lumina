@@ -186,13 +186,29 @@ export async function flattenIllumination(
 }
 
 /**
- * Penalise scissors / props / tools in fabric photos.
- * Detect elongated low-sat chrome blobs (blade-like), not fabric print colour.
+ * Prefer original catalogue photography over soft derived plan crops.
+ * Early gallery frames (01-) are usually the clearest fabric shot;
+ * later lifestyle frames often include scissors/props.
+ */
+function galleryOrderBonus(url: string, img: CardImage): number {
+  if (url.includes("/media/plan/")) return 55;
+  const file = (url.split("/").pop() || "").toLowerCase();
+  if (/^01[-_]/.test(file)) return -22;
+  if (img.isPrimary) return -14;
+  if (/^02[-_]/.test(file)) return 10;
+  if (/^03[-_]/.test(file)) return 12;
+  if (/^0[4-9][-_]/.test(file)) return 6;
+  return Math.min(24, (img.sortOrder ?? 20) * 0.45);
+}
+
+/**
+ * Mild lifestyle-prop hint only. Print sheen false-positives are common,
+ * so texture picking primarily uses gallery order + clarity.
  */
 export async function propPenalty(buf: Buffer): Promise<number> {
   const sharp = (await import("sharp")).default;
   const { data, info } = await sharp(buf)
-    .resize(128, 128, { fit: "fill" })
+    .resize(96, 96, { fit: "fill" })
     .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -200,8 +216,8 @@ export async function propPenalty(buf: Buffer): Promise<number> {
   const h = info.height;
   const ch = info.channels;
   const N = w * h;
-  const mask = new Uint8Array(N);
-
+  let metal = 0;
+  let bronze = 0;
   for (let i = 0; i < N; i++) {
     const p = i * ch;
     const r = data[p];
@@ -211,98 +227,24 @@ export async function propPenalty(buf: Buffer): Promise<number> {
     const min = Math.min(r, g, b);
     const sat = max === 0 ? 0 : (max - min) / max;
     const val = max / 255;
-    const greyish =
-      Math.abs(r - g) < 22 && Math.abs(g - b) < 22 && Math.abs(r - b) < 22;
-    // Steel/chrome blade — not cream print lines (those are warmer / less grey-balanced)
-    mask[i] = sat < 0.12 && val > 0.58 && greyish ? 1 : 0;
-  }
-
-  const seen = new Uint8Array(N);
-  let penalty = 0;
-  let elongated = 0;
-  let chromePixels = 0;
-
-  for (let i = 0; i < N; i++) {
-    if (!mask[i] || seen[i]) continue;
-    const stack = [i];
-    seen[i] = 1;
-    let count = 0;
-    let minX = w;
-    let maxX = 0;
-    let minY = h;
-    let maxY = 0;
-    while (stack.length) {
-      const cur = stack.pop()!;
-      count++;
-      chromePixels++;
-      const x = cur % w;
-      const y = (cur / w) | 0;
-      if (x < minX) minX = x;
-      if (x > maxX) maxX = x;
-      if (y < minY) minY = y;
-      if (y > maxY) maxY = y;
-      for (const [dx, dy] of [
-        [1, 0],
-        [-1, 0],
-        [0, 1],
-        [0, -1],
-      ] as const) {
-        const nx = x + dx;
-        const ny = y + dy;
-        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
-        const ni = ny * w + nx;
-        if (!mask[ni] || seen[ni]) continue;
-        seen[ni] = 1;
-        stack.push(ni);
-      }
-    }
-    if (count < 18) continue;
-    const bw = maxX - minX + 1;
-    const bh = maxY - minY + 1;
-    const aspect = Math.max(bw, bh) / Math.max(1, Math.min(bw, bh));
-    const fill = count / (bw * bh);
-    if (aspect >= 2.4 && fill > 0.12 && count >= 28) {
-      elongated++;
-      penalty += 180 + Math.min(120, Math.floor(aspect * 20));
+    const nearGrey =
+      Math.abs(r - g) < 28 && Math.abs(g - b) < 28 && Math.abs(r - b) < 28;
+    if (sat < 0.15 && val > 0.62 && nearGrey) metal++;
+    if (
+      sat > 0.15 &&
+      sat < 0.5 &&
+      val > 0.45 &&
+      r > 130 &&
+      r >= g + 10 &&
+      r >= b + 18
+    ) {
+      bronze++;
     }
   }
-
-  if (elongated >= 1 && chromePixels / N > 0.008) penalty += 120;
-  if (elongated >= 2) penalty += 100;
-
-  if (elongated >= 1) {
-    let darkNear = 0;
-    for (let y = 1; y < h - 1; y++) {
-      for (let x = 1; x < w - 1; x++) {
-        const i = y * w + x;
-        if (!mask[i]) continue;
-        for (const [dx, dy] of [
-          [2, 0],
-          [-2, 0],
-          [0, 2],
-          [0, -2],
-          [3, 3],
-          [-3, -3],
-        ] as const) {
-          const nx = x + dx;
-          const ny = y + dy;
-          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
-          const p = (ny * w + nx) * ch;
-          const r = data[p];
-          const g = data[p + 1];
-          const b = data[p + 2];
-          const max = Math.max(r, g, b);
-          const min = Math.min(r, g, b);
-          const sat = max === 0 ? 0 : (max - min) / max;
-          const val = max / 255;
-          if (sat < 0.25 && val < 0.2 && val > 0.03) darkNear++;
-        }
-      }
-    }
-    if (darkNear > 40) penalty += 100;
-  }
-
-  return penalty;
+  const ratio = (metal + bronze) / N;
+  if (ratio > 0.12) return 80;
+  if (ratio > 0.07) return 35;
+  return 0;
 }
 
 /** True when the frame is unsafe to wrap as a shade texture (tools/props visible). */
@@ -318,6 +260,31 @@ export async function hasUnsafeProps(url: string): Promise<boolean> {
   }
 }
 
+/**
+ * Clarity bonus for ranking: prefer large original product photos over tiny soft crops.
+ * Lower rank is better (same scale as foldScore).
+ */
+async function clarityRankBonus(url: string): Promise<number> {
+  const abs = localPublicPath(url);
+  if (!abs) return 12;
+  try {
+    const sharp = (await import("sharp")).default;
+    const meta = await sharp(abs).metadata();
+    const px = (meta.width || 0) * (meta.height || 0);
+    if (url.includes("/media/plan/")) return 40; // soft derived crops always last
+    if (px >= 900_000) return -18;
+    if (px >= 450_000) return -10;
+    if (px >= 250_000) return -4;
+    if (px < 120_000) return 22;
+    return 0;
+  } catch {
+    return 8;
+  }
+}
+
+/**
+ * High-res prop-free crop from a real photo — no illumination flatten (keeps print sharp).
+ */
 export async function derivePlanCropBuffer(
   absPath: string
 ): Promise<{ buffer: Buffer; foldScore: number } | null> {
@@ -326,12 +293,12 @@ export async function derivePlanCropBuffer(
     const meta = await sharp(absPath).metadata();
     const W = meta.width || 800;
     const H = meta.height || 800;
-    const cropSize = Math.floor(Math.min(W, H) * 0.42);
+    // Large crop of the real photo — keep pattern readable on the shade
+    const cropSize = Math.floor(Math.min(W, H) * 0.62);
 
     type Cand = { score: number; buf: Buffer };
     const cands: Cand[] = [];
-    // Bias toward edges/corners — center swirls are common in fabric lifestyle shots
-    const positions = [0.02, 0.08, 0.18, 0.32, 0.48, 0.58];
+    const positions = [0.02, 0.08, 0.16, 0.28, 0.38];
 
     for (const fy of positions) {
       for (const fx of positions) {
@@ -339,7 +306,9 @@ export async function derivePlanCropBuffer(
         const top = Math.max(0, Math.min(H - cropSize, Math.floor(H * fy)));
         const cropBuf = await sharp(absPath)
           .extract({ left, top, width: cropSize, height: cropSize })
-          .jpeg()
+          .resize(1600, 1600, { fit: "cover" })
+          .sharpen({ sigma: 0.6 })
+          .jpeg({ quality: 92, mozjpeg: true })
           .toBuffer();
         const stats = await analyzeBuffer(cropBuf);
         const prop = await propPenalty(cropBuf);
@@ -351,9 +320,8 @@ export async function derivePlanCropBuffer(
     const best = cands[0];
     if (!best) return null;
 
-    const flat = await flattenIllumination(best.buf, 960);
-    const after = await analyzeBuffer(flat);
-    return { buffer: flat, foldScore: after.foldScore };
+    const after = await analyzeBuffer(best.buf);
+    return { buffer: best.buf, foldScore: after.foldScore };
   } catch {
     return null;
   }
@@ -398,8 +366,11 @@ export async function pickBestPlanSource(
     const stats = await analyzeLocalFabricImage(img.url);
     const tagged = textSuggestsPlan(img) === true;
     const fold = stats?.foldScore ?? 80;
-    // Prefer low fold + low props; heavily demote scissors/tools
-    const rank = fold + propScore * 0.85 + (tagged ? -8 : 0);
+    const clarity = await clarityRankBonus(img.url);
+    const orderBonus = galleryOrderBonus(img.url, img);
+    // Prefer clear real product photos (01 / primary). Soft plan last.
+    const rank =
+      fold * 0.3 + propScore * 0.4 + clarity + orderBonus + (tagged ? -6 : 0);
     scored.push({ url: img.url, stats, tagged, propScore, rank });
   }
 
@@ -445,12 +416,26 @@ export async function resolveFabricPlanTexture(opts: {
 
   const stats = best.stats;
   const propsUnsafe = best.propScore >= 100;
-  const galleryCount = images.filter((i) => !i.url.includes("/media/plan/")).length;
-  // Multi-image fabric packs often pair a flat swatch with scissors/props in-frame.
-  // Never wrap the full lifestyle flat — always derive a clean corner crop.
-  const mustDerive =
-    propsUnsafe ||
-    (opts.writeDerived && galleryCount >= 2 && !best.url.includes("/media/plan/"));
+  // Prefer real catalogue photos. Only crop when the chosen frame is a later
+  // lifestyle shot (02/03…) that still ranks best — rare with galleryOrderBonus.
+  const file = (best.url.split("/").pop() || "").toLowerCase();
+  const lateLifestyle = /^0[2-9][-_]/.test(file) && propsUnsafe;
+  const mustDerive = lateLifestyle;
+
+  // Prefer original product photography whenever it is prop-safe.
+  if (!mustDerive && !best.url.includes("/media/plan/")) {
+    return {
+      url: best.url,
+      source:
+        stats && looksPlanFold(stats)
+          ? best.tagged || (stats.foldScore ?? 99) < 30
+            ? "gallery_plan"
+            : "already_plan"
+          : "gallery_plan",
+      foldScore: stats?.foldScore ?? 0,
+      fromUrl: best.url,
+    };
+  }
 
   if (!mustDerive && stats && looksPlanFold(stats)) {
     return {
@@ -479,16 +464,15 @@ export async function resolveFabricPlanTexture(opts: {
     if (propsUnsafe) {
       for (const img of images) {
         if (img.url === best.url) continue;
+        if (img.url.includes("/media/plan/")) continue;
         if (!(await hasUnsafeProps(img.url))) {
           const s = await analyzeLocalFabricImage(img.url);
-          if (s && looksPlanFold(s)) {
-            return {
-              url: img.url,
-              source: "gallery_plan",
-              foldScore: s.foldScore,
-              fromUrl: img.url,
-            };
-          }
+          return {
+            url: img.url,
+            source: "gallery_plan",
+            foldScore: s?.foldScore ?? 999,
+            fromUrl: img.url,
+          };
         }
       }
     }
@@ -501,7 +485,6 @@ export async function resolveFabricPlanTexture(opts: {
   }
 
   // Prefer deriving from a prop-free wrinkled frame when scissors fill the flat shot.
-  // For multi-image flats, still derive from the flat frame but corner-crop away from centre props.
   let deriveFrom = best.url;
   if (propsUnsafe) {
     for (const img of images) {
@@ -512,12 +495,22 @@ export async function resolveFabricPlanTexture(opts: {
         break;
       }
     }
-  } else if (mustDerive && stats && looksPlanFold(stats)) {
-    deriveFrom = best.url;
   }
 
   const abs = localPublicPath(deriveFrom);
   if (!abs) {
+    // Fall back to any prop-free gallery original rather than a soft plan crop
+    for (const img of images) {
+      if (img.url.includes("/media/plan/")) continue;
+      if (!(await hasUnsafeProps(img.url))) {
+        return {
+          url: img.url,
+          source: "gallery_plan",
+          foldScore: stats?.foldScore ?? 999,
+          fromUrl: img.url,
+        };
+      }
+    }
     return {
       url: best.url,
       source: "already_plan",
@@ -529,10 +522,10 @@ export async function resolveFabricPlanTexture(opts: {
   const derived = await derivePlanCropBuffer(abs);
   if (!derived) {
     return {
-      url: best.url,
-      source: "already_plan",
+      url: deriveFrom,
+      source: "gallery_plan",
       foldScore: stats?.foldScore ?? 999,
-      fromUrl: best.url,
+      fromUrl: deriveFrom,
     };
   }
 
@@ -541,13 +534,13 @@ export async function resolveFabricPlanTexture(opts: {
   const hash = createHash("sha1")
     .update(opts.slug)
     .update(deriveFrom)
-    .update("no-props-v2")
+    .update("real-crop-v3")
     .digest("hex")
     .slice(0, 8);
   const fileName = `${opts.slug.slice(0, 48)}-${hash}.jpg`;
   const outAbs = path.join(outDir, fileName);
   const sharp = (await import("sharp")).default;
-  await sharp(derived.buffer).toFile(outAbs);
+  await sharp(derived.buffer).jpeg({ quality: 92, mozjpeg: true }).toFile(outAbs);
   const url = `/media/plan/${fileName}`;
 
   return {

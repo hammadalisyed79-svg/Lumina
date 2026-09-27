@@ -54,14 +54,17 @@ async function main() {
   let derivedCrop = 0;
 
   for (const fabric of fabrics) {
+    // Strict match only — avoid assigning unrelated product photos to demo fabrics
     const product =
       productsByTitle.get(fabric.name.toLowerCase()) ||
       productsBySlug.get(fabric.slug) ||
+      fabricProducts.find((p) => slugify(p.title) === fabric.slug) ||
       fabricProducts.find(
         (p) =>
-          slugify(p.title) === fabric.slug ||
-          p.slug.includes(fabric.slug.slice(0, 40)) ||
-          fabric.slug.includes(slugify(p.title).slice(0, 40))
+          fabric.slug.length >= 24 &&
+          (p.slug === fabric.slug ||
+            slugify(p.title).startsWith(fabric.slug.slice(0, 36)) ||
+            fabric.slug.startsWith(slugify(p.title).slice(0, 36)))
       );
 
     const images: CardImage[] = (product?.images || []).map((img) => ({
@@ -72,10 +75,35 @@ async function main() {
     }));
 
     // Prefer existing dedicated plan files if already written — do not regress to scissors flats
+    // Skip soft /media/plan crops when --force (refresh to real product photography)
     const existingPlan =
       fabric.textureImage?.includes("/media/plan/") ? fabric.textureImage : null;
+    const existingProduct =
+      fabric.textureImage?.includes("/media/products/") ? fabric.textureImage : null;
 
-    if (existingPlan && !process.argv.includes("--force")) {
+    if (
+      existingProduct &&
+      !process.argv.includes("--force") &&
+      existsSync(join(process.cwd(), "public", existingProduct.replace(/^\//, "")))
+    ) {
+      console.log(`${"keep_real".padEnd(14)} ${fabric.slug.slice(0, 52)} → ${existingProduct}`);
+      alreadyPlan++;
+      rows.push({
+        slug: fabric.slug,
+        name: fabric.name,
+        source: "already_plan",
+        textureImage: existingProduct,
+        foldScore: 0,
+        fromUrl: existingProduct,
+      });
+      continue;
+    }
+
+    if (
+      existingPlan &&
+      !process.argv.includes("--force") &&
+      !process.argv.includes("--prefer-real")
+    ) {
       const abs = join(process.cwd(), "public", existingPlan.replace(/^\//, ""));
       if (existsSync(abs)) {
         console.log(`${"keep_plan".padEnd(14)} ${fabric.slug.slice(0, 52)} → ${existingPlan}`);
@@ -92,15 +120,15 @@ async function main() {
       }
     }
 
+    if (!images.length) {
+      console.log(`${"skip_nogallery".padEnd(14)} ${fabric.slug.slice(0, 52)}`);
+      continue;
+    }
+
     const resolved = await resolveFabricPlanTexture({
       slug: fabric.slug,
       images,
-      fallbackUrls: [
-        existingPlan,
-        // Do NOT feed prior scissors lifestyle textureImage back into candidates
-        fabric.swatchUrl?.includes("/media/plan/") ? fabric.swatchUrl : null,
-        fabric.imageUrl,
-      ],
+      fallbackUrls: [],
       writeDerived: true,
     });
 

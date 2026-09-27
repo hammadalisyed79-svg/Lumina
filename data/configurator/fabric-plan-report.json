@@ -1,73 +1,17 @@
 {
-  "generatedAt": "2026-09-27T05:59:12.933Z",
+  "generatedAt": "2026-09-27T07:10:37.301Z",
   "total": 35,
-  "alreadyPlan": 27,
-  "galleryPlan": 3,
-  "derivedCrop": 5,
+  "alreadyPlan": 4,
+  "galleryPlan": 31,
+  "derivedCrop": 0,
   "fabrics": [
-    {
-      "slug": "luxury-teal-gold-pattern-plant-leaves-in-teal-blue-and-gold-",
-      "name": "Luxury Teal Gold Pattern Plant Leaves In Teal Blue And Gold Pattern",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-teal-gold-pattern-plant-leaves-in-teal-bl-ec1764e3.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-teal-gold-pattern-plant-leaves-in-teal-bl-ec1764e3.jpg"
-    },
     {
       "slug": "teal-gold-wave-effect-print-velvet",
       "name": "Teal Gold Wave Effect Print Velvet",
-      "source": "already_plan",
-      "textureImage": "/media/plan/teal-gold-wave-effect-print-velvet-cd13f476.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/teal-gold-wave-effect-print-velvet-cd13f476.jpg"
-    },
-    {
-      "slug": "luxury-green-and-golden-yellow-marble-effect-velvet",
-      "name": "Luxury Green And Golden Yellow Marble Effect Velvet",
-      "source": "derived_crop",
-      "textureImage": "/media/plan/luxury-green-and-golden-yellow-marble-effect-vel-8fe85539.jpg",
-      "foldScore": 120.72510187596446,
-      "fromUrl": "/media/products/print-by-order-luxury-green-and-golden-yellow-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/02-83692855067002.jpg"
-    },
-    {
-      "slug": "luxury-metal-oxidation-rusting-art-print-velvet",
-      "name": "Luxury Metal Oxidation Rusting Art Print Velvet",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-metal-oxidation-rusting-art-print-velvet-b47d1440.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-metal-oxidation-rusting-art-print-velvet-b47d1440.jpg"
-    },
-    {
-      "slug": "luxury-resin-wooden-marble-wave-turquoise-blue-velvet-per-me",
-      "name": "Luxury Resin Wooden Marble Wave Turquoise Blue Velvet Per Metre",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-resin-wooden-marble-wave-turquoise-blue-v-eabfe9f5.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-resin-wooden-marble-wave-turquoise-blue-v-eabfe9f5.jpg"
-    },
-    {
-      "slug": "velvet-jade-green-petrol-art-floral-leaf-plant-print-velvet",
-      "name": "Velvet Jade Green Petrol Art Floral Leaf Plant Print Velvet",
-      "source": "already_plan",
-      "textureImage": "/media/plan/velvet-jade-green-petrol-art-floral-leaf-plant-p-d4bb53bc.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/velvet-jade-green-petrol-art-floral-leaf-plant-p-d4bb53bc.jpg"
-    },
-    {
-      "slug": "luxury-digy-peacock-pattern-plant-leaves-in-teal-blue-and-go",
-      "name": "Luxury Digy Peacock Pattern Plant Leaves In Teal Blue And Gold Pattern",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-digy-peacock-pattern-plant-leaves-in-teal-4a54c16d.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-digy-peacock-pattern-plant-leaves-in-teal-4a54c16d.jpg"
-    },
-    {
-      "slug": "ivory-linen",
-      "name": "Ivory Linen",
-      "source": "already_plan",
-      "textureImage": "/media/plan/ivory-linen-deebe594.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/ivory-linen-deebe594.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-green-yellow-teal-blue-water-colour-abstract-effect-velvet-fabric-140cm-wide-sold-by-meter-copy/01-83692978274682.jpg",
+      "foldScore": 64.14718710816958,
+      "fromUrl": "/media/products/print-by-order-luxury-green-yellow-teal-blue-water-colour-abstract-effect-velvet-fabric-140cm-wide-sold-by-meter-copy/01-83692978274682.jpg"
     },
     {
       "slug": "gold-jade-abstract-velvet-print-teal-antique-water-art",
@@ -78,139 +22,179 @@
       "fromUrl": "/media/products/gold-jade-abstract-velvet-fabric-print-teal-antique-water-art/01-83716420305274.jpg"
     },
     {
-      "slug": "luxury-abstract-paint-dry-peeling-art-velvet",
-      "name": "Luxury Abstract Paint Dry Peeling Art Velvet",
-      "source": "derived_crop",
-      "textureImage": "/media/plan/luxury-abstract-paint-dry-peeling-art-velvet-17134189.jpg",
-      "foldScore": 0.2518590479721297,
-      "fromUrl": "/media/products/print-by-order-luxury-abstract-paint-dry-peeling-art-velvet-fabric-140cm-wide/01-83703145759098.jpg"
+      "slug": "luxury-teal-gold-pattern-plant-leaves-in-teal-blue-and-gold-",
+      "name": "Luxury Teal Gold Pattern Plant Leaves In Teal Blue And Gold Pattern",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-teal-gold-pattern-plant-leaves-in-teal-blue-and-gold-pattern-velvet-fabric-sold-by-meter-140-wide/01-83693324599674.jpg",
+      "foldScore": 92.777777777778,
+      "fromUrl": "/media/products/print-by-order-luxury-teal-gold-pattern-plant-leaves-in-teal-blue-and-gold-pattern-velvet-fabric-sold-by-meter-140-wide/01-83693324599674.jpg"
     },
     {
-      "slug": "abstract-paint-strokes-in-navy-blue-gold-teal-combination-ve",
-      "name": "Abstract Paint Strokes In Navy Blue Gold Teal Combination Velvet 140cm",
-      "source": "already_plan",
-      "textureImage": "/media/plan/abstract-paint-strokes-in-navy-blue-gold-teal-co-db7d4ac8.jpg",
+      "slug": "luxury-green-and-golden-yellow-marble-effect-velvet",
+      "name": "Luxury Green And Golden Yellow Marble Effect Velvet",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-green-and-golden-yellow-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/02-83692855067002.jpg",
       "foldScore": 0,
-      "fromUrl": "/media/plan/abstract-paint-strokes-in-navy-blue-gold-teal-co-db7d4ac8.jpg"
+      "fromUrl": "/media/products/print-by-order-luxury-green-and-golden-yellow-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/02-83692855067002.jpg"
     },
     {
-      "slug": "luxury-black-petrol-art-floral-plant-pattern-velvet-140-cm-w",
-      "name": "Luxury Black Petrol Art Floral Plant Pattern Velvet 140 Cm Wide",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-black-petrol-art-floral-plant-pattern-vel-7a4e00fe.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-black-petrol-art-floral-plant-pattern-vel-7a4e00fe.jpg"
+      "slug": "velvet-jade-green-petrol-art-floral-leaf-plant-print-velvet",
+      "name": "Velvet Jade Green Petrol Art Floral Leaf Plant Print Velvet",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-velvet-jade-green-petrol-art-floral-leaf-plant-print-velvet-fabric-sold-by-meter/01-83712724369786.jpg",
+      "foldScore": 94.8223607192807,
+      "fromUrl": "/media/products/print-by-order-velvet-jade-green-petrol-art-floral-leaf-plant-print-velvet-fabric-sold-by-meter/01-83712724369786.jpg"
     },
     {
-      "slug": "luxury-blue-space-light-geometric-art-print-velvet-on-black-",
-      "name": "Luxury Blue Space Light Geometric Art Print Velvet On Black Velvet",
-      "source": "derived_crop",
-      "textureImage": "/media/plan/luxury-blue-space-light-geometric-art-print-velv-f6b970e6.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/products/print-by-order-luxury-blue-space-light-geometric-art-print-velvet-on-black-velvet-fabric-150cm-wide/03-83703115448698.jpg"
+      "slug": "ivory-linen",
+      "name": "Ivory Linen",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-green-yellow-teal-blue-water-colour-abstract-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83692716818810.jpg",
+      "foldScore": 59.31712962962962,
+      "fromUrl": "/media/products/print-by-order-luxury-green-yellow-teal-blue-water-colour-abstract-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83692716818810.jpg"
+    },
+    {
+      "slug": "luxury-metal-oxidation-rusting-art-print-velvet",
+      "name": "Luxury Metal Oxidation Rusting Art Print Velvet",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-metal-oxidation-rusting-art-print-velvet-fabric-140cm-wide/03-83703221223802.jpg",
+      "foldScore": 131.66028159812635,
+      "fromUrl": "/media/products/print-by-order-luxury-metal-oxidation-rusting-art-print-velvet-fabric-140cm-wide/03-83703221223802.jpg"
+    },
+    {
+      "slug": "luxury-resin-wooden-marble-wave-turquoise-blue-velvet-per-me",
+      "name": "Luxury Resin Wooden Marble Wave Turquoise Blue Velvet Per Metre",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-resin-wooden-marble-wave-turquoise-blue-velvet-fabric-140cm-wide-per-metre/02-83702174613882.png",
+      "foldScore": 215.4123816972899,
+      "fromUrl": "/media/products/print-by-order-luxury-resin-wooden-marble-wave-turquoise-blue-velvet-fabric-140cm-wide-per-metre/02-83702174613882.png"
+    },
+    {
+      "slug": "luxury-digy-peacock-pattern-plant-leaves-in-teal-blue-and-go",
+      "name": "Luxury Digy Peacock Pattern Plant Leaves In Teal Blue And Gold Pattern",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-digy-peacock-pattern-plant-leaves-in-teal-blue-and-gold-pattern-velvet-fabric-sold-by-meter-140-wide/01-83693517209978.jpg",
+      "foldScore": 126.75925925925924,
+      "fromUrl": "/media/products/print-by-order-luxury-digy-peacock-pattern-plant-leaves-in-teal-blue-and-gold-pattern-velvet-fabric-sold-by-meter-140-wide/01-83693517209978.jpg"
     },
     {
       "slug": "luxury-blue-gold-wave-marble-effect-velvet",
       "name": "Luxury Blue Gold Wave Marble Effect Velvet",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-blue-gold-wave-marble-effect-velvet-fdb94e07.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-blue-gold-wave-marble-effect-velvet-fdb94e07.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-blue-gold-wave-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/02-83693124387194.jpg",
+      "foldScore": 98.15934120460793,
+      "fromUrl": "/media/products/print-by-order-luxury-blue-gold-wave-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/02-83693124387194.jpg"
     },
     {
       "slug": "black-gold-large-palm-leaf-print-velvet",
       "name": "Black Gold Large Palm Leaf Print Velvet",
-      "source": "already_plan",
-      "textureImage": "/media/plan/black-gold-large-palm-leaf-print-velvet-db0b5462.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/black-gold-large-palm-leaf-print-velvet-db0b5462.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-black-gold-large-palm-leaf-print-velvet-fabric-available-on-demand/01-83710697144698.jpg",
+      "foldScore": 60.81313657407409,
+      "fromUrl": "/media/products/print-by-order-black-gold-large-palm-leaf-print-velvet-fabric-available-on-demand/01-83710697144698.jpg"
     },
     {
       "slug": "luxury-floral-plants-large-multicoloured-leafs-plants-velvet",
       "name": "Luxury Floral Plants Large Multicoloured Leafs Plants Velvet Meter",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-floral-plants-large-multicoloured-leafs-p-8c75cc2e.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-floral-plants-large-multicoloured-leafs-p-8c75cc2e.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-floral-plants-large-multicoloured-leafs-plants-velvet-fabric-meter-140cm-wide/01-83695073591674.jpg",
+      "foldScore": 91.45833333333371,
+      "fromUrl": "/media/products/print-by-order-luxury-floral-plants-large-multicoloured-leafs-plants-velvet-fabric-meter-140cm-wide/01-83695073591674.jpg"
+    },
+    {
+      "slug": "luxury-green-yellow-teal-blue-water-colour-abstract-effect-v",
+      "name": "Luxury Green Yellow Teal Blue Water Colour Abstract Effect Velvet",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-green-yellow-teal-blue-water-colour-abstract-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83692716818810.jpg",
+      "foldScore": 59.31712962962962,
+      "fromUrl": "/media/products/print-by-order-luxury-green-yellow-teal-blue-water-colour-abstract-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83692716818810.jpg"
     },
     {
       "slug": "luxury-grey-teal-blue-wooden-geometric-cube-abstract-retro-d",
       "name": "Luxury Grey Teal Blue Wooden Geometric Cube Abstract Retro Design Velvet",
       "source": "already_plan",
-      "textureImage": "/media/plan/luxury-grey-teal-blue-wooden-geometric-cube-abst-ee6268c0.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-grey-teal-blue-wooden-geometric-cube-abst-ee6268c0.jpg"
+      "textureImage": "/media/products/print-by-order-luxury-grey-teal-blue-wooden-geometric-cube-abstract-retro-design-velvet-fabric-140cm-wide/02-83695106097530.jpg",
+      "foldScore": 40.83333333333371,
+      "fromUrl": "/media/products/print-by-order-luxury-grey-teal-blue-wooden-geometric-cube-abstract-retro-design-velvet-fabric-140cm-wide/02-83695106097530.jpg"
     },
     {
       "slug": "luxury-black-brown-grey-wooden-geometric-pattern-design-velv",
       "name": "Luxury Black Brown Grey Wooden Geometric Pattern Design Velvet",
       "source": "already_plan",
-      "textureImage": "/media/plan/luxury-black-brown-grey-wooden-geometric-pattern-ee68bbf8.jpg",
+      "textureImage": "/media/products/print-by-order-luxury-black-brown-grey-wooden-geometric-pattern-design-velvet-fabric-140cm-wide/01-83695035089274.jpg",
+      "foldScore": 39.884259259258954,
+      "fromUrl": "/media/products/print-by-order-luxury-black-brown-grey-wooden-geometric-pattern-design-velvet-fabric-140cm-wide/01-83695035089274.jpg"
+    },
+    {
+      "slug": "luxury-blue-space-light-geometric-art-print-velvet-on-black-",
+      "name": "Luxury Blue Space Light Geometric Art Print Velvet On Black Velvet",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-blue-space-light-geometric-art-print-velvet-on-black-velvet-fabric-150cm-wide/02-83703114924410.jpg",
       "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-black-brown-grey-wooden-geometric-pattern-ee68bbf8.jpg"
+      "fromUrl": "/media/products/print-by-order-luxury-blue-space-light-geometric-art-print-velvet-on-black-velvet-fabric-150cm-wide/02-83703114924410.jpg"
     },
     {
-      "slug": "luxury-green-yellow-teal-blue-water-colour-abstract-effect-v",
-      "name": "Luxury Green Yellow Teal Blue Water Colour Abstract Effect Velvet",
-      "source": "derived_crop",
-      "textureImage": "/media/plan/luxury-green-yellow-teal-blue-water-colour-abstr-af6d0e94.jpg",
-      "foldScore": 686.7249553915892,
-      "fromUrl": "/media/products/print-by-order-luxury-green-yellow-teal-blue-water-colour-abstract-effect-velvet-fabric-140cm-wide-sold-by-meter/03-83692731924858.jpg"
-    },
-    {
-      "slug": "luxury-purple-pink-floral-plant-pattern-on-velvet-140-cm-wid",
-      "name": "Luxury Purple Pink Floral Plant Pattern On Velvet 140 Cm Wide",
+      "slug": "abstract-paint-strokes-in-navy-blue-gold-teal-combination-ve",
+      "name": "Abstract Paint Strokes In Navy Blue Gold Teal Combination Velvet 140cm",
       "source": "already_plan",
-      "textureImage": "/media/plan/luxury-purple-pink-floral-plant-pattern-on-velve-757ab71a.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-purple-pink-floral-plant-pattern-on-velve-757ab71a.jpg"
+      "textureImage": "/media/products/print-by-order-abstract-paint-strokes-in-navy-blue-gold-teal-combination-velvet-fabric-140cm/03-84071788052858.jpg",
+      "foldScore": 38.27980079179939,
+      "fromUrl": "/media/products/print-by-order-abstract-paint-strokes-in-navy-blue-gold-teal-combination-velvet-fabric-140cm/03-84071788052858.jpg"
     },
     {
-      "slug": "luxury-teal-blue-jade-and-gold-geometric-design-abstract-art",
-      "name": "Luxury Teal Blue Jade And Gold Geometric Design Abstract Art Print",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-teal-blue-jade-and-gold-geometric-design--bb4851a4.jpg",
+      "slug": "luxury-black-petrol-art-floral-plant-pattern-velvet-140-cm-w",
+      "name": "Luxury Black Petrol Art Floral Plant Pattern Velvet 140 Cm Wide",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-black-petrol-art-floral-plant-pattern-velvet-fabric-140-cm-wide-sold-by-meter/01-83693654573434.jpg",
       "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-teal-blue-jade-and-gold-geometric-design--bb4851a4.jpg"
+      "fromUrl": "/media/products/print-by-order-luxury-black-petrol-art-floral-plant-pattern-velvet-fabric-140-cm-wide-sold-by-meter/01-83693654573434.jpg"
     },
     {
-      "slug": "silver-grey-cream-teal-wave-effect-print-velvet",
-      "name": "Silver Grey Cream Teal Wave Effect Print Velvet",
+      "slug": "luxury-abstract-paint-dry-peeling-art-velvet",
+      "name": "Luxury Abstract Paint Dry Peeling Art Velvet",
       "source": "already_plan",
-      "textureImage": "/media/plan/silver-grey-cream-teal-wave-effect-print-velvet-cad65535.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/silver-grey-cream-teal-wave-effect-print-velvet-cad65535.jpg"
+      "textureImage": "/media/products/print-by-order-luxury-abstract-paint-dry-peeling-art-velvet-fabric-140cm-wide/01-83703145759098.jpg",
+      "foldScore": 46.70223610960406,
+      "fromUrl": "/media/products/print-by-order-luxury-abstract-paint-dry-peeling-art-velvet-fabric-140cm-wide/01-83703145759098.jpg"
     },
     {
       "slug": "luxury-white-grey-gold-marble-effect-velvet",
       "name": "Luxury White Grey Gold Marble Effect Velvet",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-white-grey-gold-marble-effect-velvet-44fb0349.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-white-grey-gold-marble-effect-velvet-44fb0349.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-white-grey-gold-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83702109995386.jpg",
+      "foldScore": 73.36232458043926,
+      "fromUrl": "/media/products/print-by-order-luxury-white-grey-gold-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83702109995386.jpg"
     },
     {
       "slug": "luxury-bottle-green-crocodile-skin-print-velvet-soft-fabric",
       "name": "Luxury Bottle Green Crocodile Skin Print Velvet Soft Fabric",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-bottle-green-crocodile-skin-print-velvet-soft-clean.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-bottle-green-crocodile-skin-print-velvet-soft-clean.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-bottle-green-crocodile-skin-print-velvet-soft-fabric-140cm-wide/01-83694989869434.jpg",
+      "foldScore": 73.75,
+      "fromUrl": "/media/products/print-by-order-luxury-bottle-green-crocodile-skin-print-velvet-soft-fabric-140cm-wide/01-83694989869434.jpg"
     },
     {
       "slug": "teal-blue-orange-tulip-floral-petrol-art-pattern-velvet-140-",
       "name": "Teal Blue Orange Tulip Floral Petrol Art Pattern Velvet 140 Cm Wide",
-      "source": "already_plan",
-      "textureImage": "/media/plan/teal-blue-orange-tulip-floral-petrol-art-pattern-c3bdd04f.jpg",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-teal-blue-orange-tulip-floral-petrol-art-pattern-velvet-fabric-140-cm-wide-sold-by-meter/02-83694968996218.jpg",
       "foldScore": 0,
-      "fromUrl": "/media/plan/teal-blue-orange-tulip-floral-petrol-art-pattern-c3bdd04f.jpg"
+      "fromUrl": "/media/products/print-by-order-teal-blue-orange-tulip-floral-petrol-art-pattern-velvet-fabric-140-cm-wide-sold-by-meter/02-83694968996218.jpg"
+    },
+    {
+      "slug": "luxury-velvet-monstera-large-multicoloured-leafs-plants-prin",
+      "name": "Luxury Velvet Monstera Large Multicoloured Leafs Plants Print Velvet By",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-velvet-monstera-large-multicoloured-leafs-plants-print-velvet-by-meter/02-83710782046586.jpg",
+      "foldScore": 183.54744466145814,
+      "fromUrl": "/media/products/print-by-order-luxury-velvet-monstera-large-multicoloured-leafs-plants-print-velvet-by-meter/02-83710782046586.jpg"
     },
     {
       "slug": "luxury-zigzag-geometric-multicolour-pattern-velvet",
       "name": "Luxury Zigzag Geometric Multicolour Pattern Velvet",
-      "source": "derived_crop",
-      "textureImage": "/media/plan/luxury-zigzag-geometric-multicolour-pattern-velv-0b38c762.jpg",
-      "foldScore": 53.407561087902685,
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-zigzag-geometric-multicolour-pattern-velvet-fabric-sold-by-meter-140cm-wide/01-83712757006714.jpg",
+      "foldScore": 0,
       "fromUrl": "/media/products/print-by-order-luxury-zigzag-geometric-multicolour-pattern-velvet-fabric-sold-by-meter-140cm-wide/01-83712757006714.jpg"
     },
     {
@@ -222,28 +206,44 @@
       "fromUrl": "/media/products/print-by-order-zigzag-chevron-geometric-multicoloured-velvet-fabric-on-demand/01-83693078446458.jpg"
     },
     {
-      "slug": "luxury-velvet-monstera-large-multicoloured-leafs-plants-prin",
-      "name": "Luxury Velvet Monstera Large Multicoloured Leafs Plants Print Velvet By",
-      "source": "already_plan",
-      "textureImage": "/media/plan/luxury-velvet-monstera-large-multicoloured-leafs-7c831fa5.jpg",
+      "slug": "luxury-purple-pink-floral-plant-pattern-on-velvet-140-cm-wid",
+      "name": "Luxury Purple Pink Floral Plant Pattern On Velvet 140 Cm Wide",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-purple-pink-floral-plant-pattern-on-velvet-fabric-140-cm-wide/01-83693603488122.jpg",
+      "foldScore": 149.1782407407402,
+      "fromUrl": "/media/products/print-by-order-luxury-purple-pink-floral-plant-pattern-on-velvet-fabric-140-cm-wide/01-83693603488122.jpg"
+    },
+    {
+      "slug": "luxury-teal-blue-jade-and-gold-geometric-design-abstract-art",
+      "name": "Luxury Teal Blue Jade And Gold Geometric Design Abstract Art Print",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-teal-blue-jade-and-gold-geometric-design-abstract-art-print-velvet-fabric-140cm-wide/01-83702097314170.jpg",
+      "foldScore": 158.8078703703701,
+      "fromUrl": "/media/products/print-by-order-luxury-teal-blue-jade-and-gold-geometric-design-abstract-art-print-velvet-fabric-140cm-wide/01-83702097314170.jpg"
+    },
+    {
+      "slug": "silver-grey-cream-teal-wave-effect-print-velvet",
+      "name": "Silver Grey Cream Teal Wave Effect Print Velvet",
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-silver-grey-cream-teal-wave-effect-print-velvet-fabric-available-on-demand-140cm-wide/03-83702155673978.png",
       "foldScore": 0,
-      "fromUrl": "/media/plan/luxury-velvet-monstera-large-multicoloured-leafs-7c831fa5.jpg"
+      "fromUrl": "/media/products/print-by-order-silver-grey-cream-teal-wave-effect-print-velvet-fabric-available-on-demand-140cm-wide/03-83702155673978.png"
     },
     {
       "slug": "stone-herringbone",
       "name": "Stone Herringbone",
-      "source": "already_plan",
-      "textureImage": "/media/plan/stone-herringbone-1bafd090.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/stone-herringbone-1bafd090.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-green-and-golden-yellow-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83692851462522.jpg",
+      "foldScore": 456.86710879478886,
+      "fromUrl": "/media/products/print-by-order-luxury-green-and-golden-yellow-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83692851462522.jpg"
     },
     {
       "slug": "sage-velvet",
       "name": "Sage Velvet",
-      "source": "already_plan",
-      "textureImage": "/media/plan/sage-velvet-4b56a3c2.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/sage-velvet-4b56a3c2.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-teal-blue-jade-and-gold-geometric-design-abstract-art-print-velvet-fabric-140cm-wide/01-83702097314170.jpg",
+      "foldScore": 158.8078703703701,
+      "fromUrl": "/media/products/print-by-order-luxury-teal-blue-jade-and-gold-geometric-design-abstract-art-print-velvet-fabric-140cm-wide/01-83702097314170.jpg"
     },
     {
       "slug": "champagne-silk",
@@ -256,34 +256,34 @@
     {
       "slug": "charcoal-tweed",
       "name": "Charcoal Tweed",
-      "source": "already_plan",
-      "textureImage": "/media/plan/charcoal-tweed-c1607df4.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/charcoal-tweed-c1607df4.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-blue-gold-wave-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83693123174778.jpg",
+      "foldScore": 503.98137056327175,
+      "fromUrl": "/media/products/print-by-order-luxury-blue-gold-wave-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83693123174778.jpg"
     },
     {
       "slug": "botanical-print",
       "name": "Botanical Print",
-      "source": "already_plan",
-      "textureImage": "/media/plan/botanical-print-04436ba5.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/botanical-print-04436ba5.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-white-grey-gold-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83702109995386.jpg",
+      "foldScore": 73.36232458043926,
+      "fromUrl": "/media/products/print-by-order-luxury-white-grey-gold-marble-effect-velvet-fabric-140cm-wide-sold-by-meter/01-83702109995386.jpg"
     },
     {
       "slug": "blush-damask",
       "name": "Blush Damask",
-      "source": "already_plan",
-      "textureImage": "/media/plan/blush-damask-4e4ec173.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/blush-damask-4e4ec173.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-teal-gold-pattern-plant-leaves-in-teal-blue-and-gold-pattern-velvet-fabric-sold-by-meter-140-wide/01-83693324599674.jpg",
+      "foldScore": 92.777777777778,
+      "fromUrl": "/media/products/print-by-order-luxury-teal-gold-pattern-plant-leaves-in-teal-blue-and-gold-pattern-velvet-fabric-sold-by-meter-140-wide/01-83693324599674.jpg"
     },
     {
       "slug": "navy-moire",
       "name": "Navy Moiré",
-      "source": "already_plan",
-      "textureImage": "/media/plan/navy-moire-59a465b2.jpg",
-      "foldScore": 0,
-      "fromUrl": "/media/plan/navy-moire-59a465b2.jpg"
+      "source": "gallery_plan",
+      "textureImage": "/media/products/print-by-order-luxury-digy-peacock-pattern-plant-leaves-in-teal-blue-and-gold-pattern-velvet-fabric-sold-by-meter-140-wide/01-83693517209978.jpg",
+      "foldScore": 126.75925925925924,
+      "fromUrl": "/media/products/print-by-order-luxury-digy-peacock-pattern-plant-leaves-in-teal-blue-and-gold-pattern-velvet-fabric-sold-by-meter-140-wide/01-83693517209978.jpg"
     }
   ]
 }
