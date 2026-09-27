@@ -54,8 +54,9 @@ const catalog: ConfigCatalog = {
       heightCm: 25,
       widthCm: null,
       depthCm: null,
-      topDiameterCm: null,
-      bottomDiameterCm: null,
+      // Confirmed taper fields so empire remains orderable in fixtures
+      topDiameterCm: 30,
+      bottomDiameterCm: 40,
       shapeKey: null,
       eligibleShapeKeys: ["drum", "empire"],
     },

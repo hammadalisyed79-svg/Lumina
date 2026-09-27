@@ -21,6 +21,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:phase3": "tsx scripts/phase3-selftest.ts",
+    "repair:eligibility": "tsx scripts/repair-configurator-eligibility.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {

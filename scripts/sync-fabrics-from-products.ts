@@ -56,7 +56,7 @@ async function main() {
       while (await prisma.fabric.findUnique({ where: { slug: unique } })) {
         unique = `${slug}-${n++}`.slice(0, 72);
       }
-      await prisma.fabric.create({
+      const fabric = await prisma.fabric.create({
         data: {
           slug: unique,
           name: p.title,
@@ -74,6 +74,22 @@ async function main() {
           active: true,
         },
       });
+      // Link new fabrics to all active shapes so Design Your Shade stays orderable
+      const shapes = await prisma.shape.findMany({
+        where: { active: true },
+        select: { id: true },
+      });
+      if (shapes.length) {
+        await prisma.shapeFabric.createMany({
+          data: shapes.map((shape) => ({
+            shapeId: shape.id,
+            fabricId: fabric.id,
+            needsReview: false,
+            source: "sync_fabric_product",
+          })),
+          skipDuplicates: true,
+        });
+      }
       created++;
     }
   }

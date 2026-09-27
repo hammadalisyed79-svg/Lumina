@@ -1,7 +1,9 @@
 /**
  * Seed explicit Shape↔Size/Fabric/Lining/Fitting eligibility from current catalogue.
- * High-confidence links from Size.shapeId; remainder marked needsReview.
- * Does not invent fake product rules — open fabric/lining links are flagged for review.
+ * High-confidence links from Size.shapeId; unscoped sizes confirmed by dimension
+ * kind for non-taper shapes. Empire/Coolie size links stay needsReview until
+ * top/bottom diameters exist. Open fabric×shape matrix is storefront-confirmed
+ * (admins can restrict in Compatibility).
  *
  * Usage: npx tsx scripts/seed-configurator-eligibility.ts
  */
@@ -165,7 +167,10 @@ async function main() {
       continue;
     }
 
-    // Unscoped sizes — propose by dimension kind, mark NEEDS_REVIEW
+    // Unscoped sizes — link by dimension kind.
+    // Non-taper shapes are storefront-confirmed (empty eligibility = deny).
+    // Empire/Coolie stay needsReview until real top/bottom diameters exist.
+    const taperKeys = new Set(["empire", "coolie"]);
     for (const shape of shapes) {
       const roundKeys = new Set(["drum", "empire", "coolie", "oval", "tiered"]);
       const rectKeys = new Set(["rectangular", "square"]);
@@ -178,6 +183,14 @@ async function main() {
         ok = true;
       if (!ok) continue;
 
+      const taperAwaiting =
+        taperKeys.has(shape.key) &&
+        (size.topDiameterCm == null || size.bottomDiameterCm == null);
+      const needsReview = taperAwaiting;
+      const source = taperAwaiting
+        ? "seed_taper_awaiting_diameters"
+        : "seed_dim_confirmed";
+
       await prisma.shapeSize.upsert({
         where: {
           shapeId_sizeId: { shapeId: shape.id, sizeId: size.id },
@@ -185,22 +198,25 @@ async function main() {
         create: {
           shapeId: shape.id,
           sizeId: size.id,
-          needsReview: true,
-          source: "seed_dim_heuristic",
+          needsReview,
+          source,
         },
-        update: { needsReview: true, source: "seed_dim_heuristic" },
+        update: { needsReview, source },
       });
       report.push({
         relationship: `ShapeSize:${shape.key}:${size.slug}`,
-        source: "seed_dim_heuristic",
-        confidence: "low",
-        needsReview: true,
-        detail: `${size.name} — NEEDS_REVIEW (was unscoped)`,
+        source,
+        confidence: taperAwaiting ? "low" : "medium",
+        needsReview,
+        detail: taperAwaiting
+          ? `${size.name} — NEEDS_REVIEW (Empire/Coolie missing top/bottom diameters)`
+          : `${size.name} — confirmed by dimension kind for storefront`,
       });
     }
   }
 
-  // Fabrics: link all active fabrics to all shapes (open catalogue), mark review
+  // Fabrics: link all active fabrics to all shapes (open catalogue).
+  // Confirmed for storefront — admins can restrict per shape in Compatibility.
   for (const shape of shapes) {
     for (const fabric of fabrics) {
       await prisma.shapeFabric.upsert({
@@ -210,18 +226,18 @@ async function main() {
         create: {
           shapeId: shape.id,
           fabricId: fabric.id,
-          needsReview: true,
-          source: "seed_open_catalogue",
+          needsReview: false,
+          source: "seed_confirmed_catalogue",
         },
-        update: { needsReview: true, source: "seed_open_catalogue" },
+        update: { needsReview: false, source: "seed_confirmed_catalogue" },
       });
     }
   }
   report.push({
     relationship: "ShapeFabric:all×all",
-    source: "seed_open_catalogue",
-    confidence: "low",
-    needsReview: true,
+    source: "seed_confirmed_catalogue",
+    confidence: "medium",
+    needsReview: false,
     detail: `${shapes.length} shapes × ${fabrics.length} fabrics — restrict in admin if needed`,
   });
 

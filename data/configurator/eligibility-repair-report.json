@@ -1,0 +1,74 @@
+{
+  "generatedAt": "2026-09-27T04:41:34.059Z",
+  "shapeSizesConfirmed": 26,
+  "shapeSizesSkippedTaper": 8,
+  "shapeFabricsUpserted": 245,
+  "perShape": {
+    "oval": {
+      "sizesConfirmed": [
+        "20cm",
+        "30cm",
+        "45cm",
+        "40cm",
+        "45cm-x-45cm",
+        "60cm-x-60cm"
+      ],
+      "fabrics": 35,
+      "taperBlocked": false
+    },
+    "rectangular": {
+      "sizesConfirmed": [
+        "20cm",
+        "30cm",
+        "45cm",
+        "40cm",
+        "45cm-x-45cm",
+        "60cm-x-60cm"
+      ],
+      "fabrics": 35,
+      "taperBlocked": false
+    },
+    "empire": {
+      "sizesConfirmed": [],
+      "fabrics": 35,
+      "taperBlocked": true
+    },
+    "square": {
+      "sizesConfirmed": [
+        "20cm",
+        "30cm",
+        "45cm",
+        "40cm",
+        "45cm-x-45cm",
+        "60cm-x-60cm"
+      ],
+      "fabrics": 35,
+      "taperBlocked": false
+    },
+    "coolie": {
+      "sizesConfirmed": [],
+      "fabrics": 35,
+      "taperBlocked": true
+    },
+    "tiered": {
+      "sizesConfirmed": [
+        "20cm",
+        "30cm",
+        "45cm",
+        "40cm"
+      ],
+      "fabrics": 35,
+      "taperBlocked": false
+    },
+    "drum": {
+      "sizesConfirmed": [
+        "20cm",
+        "30cm",
+        "45cm",
+        "40cm"
+      ],
+      "fabrics": 35,
+      "taperBlocked": false
+    }
+  }
+}
