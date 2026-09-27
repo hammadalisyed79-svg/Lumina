@@ -1,12 +1,13 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { ShadeRenderer } from "@/components/configurator/ShadeRenderer";
 import type { ShadeDims } from "@/lib/configurator/geometry";
 import type {
   FabricRepeatMode,
   PreviewMode,
   RoomContext,
+  UseType,
 } from "@/lib/configurator/types";
 
 type Props = {
@@ -25,6 +26,7 @@ type Props = {
   reflectivityHint?: number | null;
   mode: PreviewMode;
   room: RoomContext;
+  useType?: UseType | null;
   showDimensions: boolean;
   onModeChange: (m: PreviewMode) => void;
   onRoomChange: (r: RoomContext) => void;
@@ -37,15 +39,15 @@ const MODES: { id: PreviewMode; label: string }[] = [
   { id: "exterior", label: "Exterior" },
   { id: "interior", label: "Interior" },
   { id: "light", label: "Light on" },
-  { id: "room", label: "Room" },
+  { id: "room", label: "In room" },
 ];
 
-const ROOMS: { id: RoomContext; label: string }[] = [
-  { id: "studio", label: "Studio" },
-  { id: "table", label: "Table" },
-  { id: "floor", label: "Floor" },
-  { id: "ceiling", label: "Ceiling" },
-];
+function roomFromUse(useType?: UseType | null): RoomContext {
+  if (useType === "ceiling") return "ceiling";
+  if (useType === "floor") return "floor";
+  if (useType === "table") return "table";
+  return "studio";
+}
 
 function ConfiguratorPreviewInner({
   shapeKey,
@@ -63,6 +65,7 @@ function ConfiguratorPreviewInner({
   reflectivityHint,
   mode,
   room,
+  useType,
   showDimensions,
   onModeChange,
   onRoomChange,
@@ -70,8 +73,22 @@ function ConfiguratorPreviewInner({
   onZoomFabric,
   compact = false,
 }: Props) {
+  useEffect(() => {
+    const next = roomFromUse(useType);
+    if (next !== "studio" && room !== next) onRoomChange(next);
+  }, [useType, room, onRoomChange]);
+
+  const sceneRoom: RoomContext =
+    mode === "room" ? (roomFromUse(useType) !== "studio" ? roomFromUse(useType) : room) : "studio";
   const effectiveMode = mode === "room" ? "exterior" : mode;
-  const effectiveRoom = mode === "room" ? room : "studio";
+  const roomLabel =
+    sceneRoom === "table"
+      ? "table lamp"
+      : sceneRoom === "floor"
+        ? "floor lamp"
+        : sceneRoom === "ceiling"
+          ? "ceiling pendant"
+          : "studio shade";
 
   return (
     <div className={`cfg-preview ${compact ? "cfg-preview--compact" : ""}`}>
@@ -91,8 +108,8 @@ function ConfiguratorPreviewInner({
           liningHex={liningHex}
           reflectivityHint={reflectivityHint}
           mode={effectiveMode}
-          room={effectiveRoom}
-          showDimensions={showDimensions}
+          room={sceneRoom}
+          showDimensions={showDimensions && mode !== "room"}
           className="cfg-preview-renderer"
         />
       </div>
@@ -111,7 +128,10 @@ function ConfiguratorPreviewInner({
                 role="radio"
                 aria-checked={mode === m.id}
                 className={`cfg-segment__btn ${mode === m.id ? "is-active" : ""}`}
-                onClick={() => onModeChange(m.id)}
+                onClick={() => {
+                  onModeChange(m.id);
+                  if (m.id === "room") onRoomChange(roomFromUse(useType));
+                }}
               >
                 {m.label}
               </button>
@@ -119,24 +139,9 @@ function ConfiguratorPreviewInner({
           </div>
 
           {mode === "room" && (
-            <div
-              className="cfg-segment"
-              role="radiogroup"
-              aria-label="Room context"
-            >
-              {ROOMS.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  role="radio"
-                  aria-checked={room === r.id}
-                  className={`cfg-segment__btn ${room === r.id ? "is-active" : ""}`}
-                  onClick={() => onRoomChange(r.id)}
-                >
-                  {r.label}
-                </button>
-              ))}
-            </div>
+            <p className="text-xs tracking-[0.08em] uppercase text-muted">
+              Complete {roomLabel} in setting
+            </p>
           )}
 
           <div className="cfg-preview-meta flex flex-wrap items-center gap-x-4 gap-y-2">
@@ -146,6 +151,7 @@ function ConfiguratorPreviewInner({
                 checked={showDimensions}
                 onChange={(e) => onShowDimensionsChange(e.target.checked)}
                 className="accent-[var(--bronze)]"
+                disabled={mode === "room"}
               />
               Show dimensions
             </label>

@@ -600,6 +600,7 @@ function DesignStudioInner() {
                     reflectivityHint={lining?.reflectivityHint}
                     mode={previewMode}
                     room={room}
+                    useType={selection.useType}
                     showDimensions={showDims}
                     onModeChange={setPreviewMode}
                     onRoomChange={setRoom}
@@ -676,6 +677,14 @@ function DesignStudioInner() {
                           className={`studio-option cfg-use-tile ${selected ? "is-selected" : ""}`}
                           onClick={() => {
                             updateSelection({ useType: u.id }, "useType");
+                            setRoom(
+                              u.id === "ceiling"
+                                ? "ceiling"
+                                : u.id === "floor"
+                                  ? "floor"
+                                  : "table"
+                            );
+                            setPreviewMode("room");
                             trackConfigurator("use_selected", { useType: u.id });
                             afterSelect("use", "shape");
                           }}
