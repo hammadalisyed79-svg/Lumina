@@ -87,7 +87,8 @@ function FabricBrowserInner({ fabrics, value, onChange, onViewFabric }: Props) {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {filtered.map((f) => {
-            const img = f.swatchUrl || f.imageUrl;
+            // Prefer plan/flat textureImage over wrinkled lifestyle primary
+            const img = f.textureImage || f.swatchUrl || f.imageUrl;
             const selected = value === f.id;
             return (
               <div key={f.id} className="relative">

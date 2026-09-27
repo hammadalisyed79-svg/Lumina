@@ -14,7 +14,8 @@ type Props = {
 export function FabricLightbox({ fabric, onClose, zoomOnShade, fabricUrl }: Props) {
   const titleId = useId();
   const open = Boolean(fabric) || zoomOnShade;
-  const img = fabric?.imageUrl || fabric?.swatchUrl || fabricUrl;
+  const img =
+    fabric?.textureImage || fabric?.swatchUrl || fabricUrl || fabric?.imageUrl;
 
   useEffect(() => {
     if (!open) return;

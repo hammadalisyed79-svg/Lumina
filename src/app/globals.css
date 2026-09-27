@@ -209,20 +209,32 @@ a {
 
 /* —— Design Your Shade · premium studio (visual only) —— */
 .cfg-page {
-  --cfg-cream: #f5f1e8;
+  --cfg-cream: #f3efe6;
   --cfg-taupe: #8a7f70;
-  --cfg-ease: 180ms var(--ease-out);
-  --cfg-ground: 0 28px 64px rgba(34, 30, 26, 0.12);
+  --cfg-ease: 200ms var(--ease-out);
+  --cfg-ground: 0 28px 64px rgba(34, 30, 26, 0.1);
   background: var(--ivory);
 }
 
 .cfg-page .studio-page-body {
-  padding-top: 1.25rem;
+  padding-top: 1.5rem;
 }
 
 @media (min-width: 1024px) {
   .cfg-page .studio-page-body {
-    padding-top: 1.75rem;
+    padding-top: 2rem;
+  }
+}
+
+.cfg-options-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2.75rem;
+}
+
+@media (min-width: 768px) {
+  .cfg-options-stack {
+    gap: 3.25rem;
   }
 }
 
@@ -260,9 +272,17 @@ a {
 
 .studio-option.is-disabled,
 .studio-option:disabled {
-  opacity: 0.45;
+  opacity: 1;
   cursor: not-allowed;
   box-shadow: none;
+  background: #f0ebe3;
+  border-color: rgba(221, 213, 198, 0.85);
+  color: var(--muted);
+}
+
+.studio-option.is-disabled:hover,
+.studio-option:disabled:hover {
+  border-color: rgba(221, 213, 198, 0.85);
 }
 
 .studio-layout {
@@ -296,6 +316,13 @@ a {
 .cfg-page .studio-preview-frame {
   background: #ebe4d8;
   border: 1px solid var(--line);
+  padding: 1.35rem 0.85rem 0.85rem;
+}
+
+@media (min-width: 1024px) {
+  .cfg-page .studio-preview-frame {
+    padding: 1.75rem 1.1rem 1.15rem;
+  }
 }
 
 .studio-preview-photo {
@@ -377,7 +404,7 @@ a {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 5 / 6;
+  aspect-ratio: 5 / 6.4;
 }
 
 .shade-renderer-note {
@@ -461,6 +488,15 @@ a {
   outline-offset: 2px;
 }
 
+/* Fabric grid copy — display weight for names */
+.cfg-page .cfg-options-stack .studio-option p.text-sm {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  font-weight: 400;
+}
+
 .cfg-skel {
   background: var(--stone);
   opacity: 0.85;
@@ -536,11 +572,11 @@ a {
 .studio-step-chips {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.25rem;
+  gap: 0.15rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 0.2rem;
-  margin-bottom: 0.25rem;
+  padding-bottom: 0.15rem;
+  margin-bottom: 0.5rem;
   scrollbar-width: none;
   border-bottom: 1px solid var(--line);
 }
@@ -551,9 +587,9 @@ a {
 
 .studio-step-chip {
   flex: 0 0 auto;
-  padding: 0.55rem 0.55rem 0.7rem;
+  padding: 0.65rem 0.65rem 0.8rem;
   font-size: 0.625rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
   border: none;
@@ -566,9 +602,10 @@ a {
 .studio-step-chip .cfg-step-num {
   display: block;
   font-size: 0.5625rem;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   color: var(--cfg-taupe);
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.2rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .studio-step-chip.is-done {
@@ -591,17 +628,17 @@ a {
 
 .cfg-section-title {
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.45rem, 2vw, 1.75rem);
+  font-size: clamp(1.5rem, 2.1vw, 1.85rem);
   letter-spacing: -0.02em;
-  line-height: 1.2;
-  margin-bottom: 0.35rem;
+  line-height: 1.18;
+  margin-bottom: 0.4rem;
 }
 
 .cfg-section-rule {
-  width: 2.5rem;
+  width: 2.75rem;
   height: 1px;
   background: var(--champagne);
-  margin-bottom: 1.1rem;
+  margin-bottom: 1.25rem;
 }
 
 /* Shape tiles with silhouette */
@@ -737,35 +774,65 @@ a {
 /* Fitting rows */
 .cfg-fitting-grid {
   display: grid;
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
 .cfg-fitting-tile {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.9rem;
+  gap: 1rem;
   align-items: start;
-  padding: 1rem 1.1rem;
+  padding: 1.15rem 1.25rem;
+}
+
+.cfg-fitting-tile.is-selected {
+  background: var(--cfg-cream);
+}
+
+.cfg-fitting-tile.is-disabled {
+  background: #efeae2;
+}
+
+.cfg-fitting-tile.is-disabled .cfg-fitting-glyph {
+  opacity: 0.4;
 }
 
 .cfg-fitting-glyph {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.35rem;
+  height: 2.35rem;
   color: var(--charcoal);
   flex-shrink: 0;
+  margin-top: 0.1rem;
 }
 
 .cfg-fitting-tile .cfg-fitting-name {
   display: block;
-  font-weight: 500;
-  margin-bottom: 0.2rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.25rem;
+  line-height: 1.25;
 }
 
 .cfg-fitting-tile .cfg-fitting-desc {
   display: block;
   font-size: 0.8125rem;
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.5;
+}
+
+.cfg-fitting-tile.is-disabled .cfg-fitting-name {
+  color: var(--muted);
+}
+
+.cfg-fitting-tile .cfg-fitting-unavailable {
+  display: block;
+  margin-top: 0.45rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--cfg-taupe);
+  line-height: 1.4;
 }
 
 /* Compact summary */
@@ -825,6 +892,68 @@ a {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.85rem 1.5rem;
+}
+
+.cfg-review-pending {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #f7f3ea 0%, var(--ivory) 100%);
+  padding: 1.35rem 1.4rem 1.5rem;
+  max-width: 32rem;
+}
+
+.cfg-review-pending-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.45rem;
+}
+
+.cfg-review-pending-body {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 1.1rem;
+}
+
+.cfg-review-pending-list {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border-top: 1px solid rgba(221, 213, 198, 0.85);
+}
+
+.cfg-review-pending-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(221, 213, 198, 0.7);
+  font-size: 0.8125rem;
+}
+
+.cfg-review-pending-list li span:first-child {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.625rem;
+  color: var(--muted);
+  padding-top: 0.15rem;
+}
+
+.cfg-review-pending-list li.is-set span:last-child {
+  font-weight: 500;
+  color: var(--ink);
+  text-align: right;
+}
+
+.cfg-review-pending-list li.is-open span:last-child {
+  color: var(--cfg-taupe);
+  font-style: italic;
+  text-align: right;
+}
+
+.cfg-review-pending-cta {
+  width: 100%;
+  max-width: 18rem;
 }
 
 .cfg-review-card dt {

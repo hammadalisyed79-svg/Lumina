@@ -70,8 +70,12 @@ export async function GET() {
 
   return NextResponse.json({
     fabrics: fabrics.map((f) => {
-      const swatch = catalogImageUrl(f.swatchUrl, f.imageUrl);
-      const texture = catalogImageUrl(f.textureImage, f.usableAsTexture ? swatch : null);
+      // Configurator swatches + textures prefer flat textureImage (plan crop)
+      const texture = catalogImageUrl(
+        f.textureImage,
+        f.usableAsTexture ? f.swatchUrl : null
+      );
+      const swatch = catalogImageUrl(f.textureImage, f.swatchUrl, f.imageUrl);
       return {
         id: f.id,
         slug: f.slug,

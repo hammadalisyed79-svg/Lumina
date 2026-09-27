@@ -84,7 +84,7 @@ export function ShadeRenderer({
   return (
     <div className={`shade-renderer ${className}`.trim()} data-mode={mode}>
       <svg
-        viewBox="0 0 100 120"
+        viewBox="0 -10 100 138"
         className="shade-renderer-svg"
         role="img"
         aria-label={`${shapeKey} shade${fabricName ? ` in ${fabricName}` : ""}${liningName ? `, ${liningName} lining` : ""}`}
@@ -95,7 +95,7 @@ export function ShadeRenderer({
             <stop offset="55%" stopColor={roomTone[1]} />
             <stop offset="100%" stopColor={roomTone[2]} />
           </linearGradient>
-          <radialGradient id={`${uid}-spot`} cx="50%" cy="22%" r="48%">
+          <radialGradient id={`${uid}-spot`} cx="50%" cy="28%" r="48%">
             <stop
               offset="0%"
               stopColor="#ffffff"
@@ -170,15 +170,15 @@ export function ShadeRenderer({
           </filter>
         </defs>
 
-        <rect width="100" height="120" fill={`url(#${uid}-bg)`} />
-        <rect width="100" height="120" fill={`url(#${uid}-spot)`} />
+        <rect x="0" y="-10" width="100" height="138" fill={`url(#${uid}-bg)`} />
+        <rect x="0" y="-10" width="100" height="138" fill={`url(#${uid}-spot)`} />
         {lightOn && (
-          <rect width="100" height="120" fill={`url(#${uid}-glow)`} />
+          <rect x="0" y="-10" width="100" height="138" fill={`url(#${uid}-glow)`} />
         )}
 
         <line
           x1="50"
-          y1="8"
+          y1={-2}
           x2="50"
           y2={body.cordTo}
           stroke={room === "ceiling" ? "#c4b8a8" : "#7a7268"}

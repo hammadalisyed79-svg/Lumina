@@ -345,11 +345,12 @@ export function recommendSizeRange(
   return null;
 }
 
-/** Texture URL for renderer — never lifestyle/product when unusable. */
+/** Texture URL for renderer — plan/flat texture only when marked usable. */
 export function fabricTextureUrl(fabric: FabricOpt | null | undefined): string | null {
   if (!fabric) return null;
   if (fabric.usableAsTexture) {
-    return fabric.textureImage || fabric.swatchUrl || fabric.imageUrl || null;
+    // textureImage is the dedicated plan crop; never fall back to wrinkled imageUrl
+    return fabric.textureImage || fabric.swatchUrl || null;
   }
-  return null;
+  return fabric.textureImage || null;
 }

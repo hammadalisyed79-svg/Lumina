@@ -41,9 +41,9 @@ async function main() {
           name: existing.name || p.title,
           material: p.material || existing.material,
           imageUrl: existing.imageUrl || imageUrl,
-          swatchUrl: existing.swatchUrl || imageUrl,
-          // Only fill texture if empty — preserve V2.1 admin calibration
+          // Only fill texture if empty — preserve plan crops / V2.1 admin calibration
           textureImage: existing.textureImage || imageUrl,
+          swatchUrl: existing.swatchUrl || existing.textureImage || imageUrl,
           active: true,
           priceMod: existing.priceMod,
         },

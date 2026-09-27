@@ -66,14 +66,36 @@ function guestKey(): string {
 
 function nextHint(missing: string[]): string | null {
   const map: Record<string, string> = {
-    use: "Choose where the shade will be used to continue",
-    shape: "Choose a shape to continue",
-    size: "Choose a size to continue",
-    fabric: "Choose a fabric to continue",
-    lining: "Choose a lining to continue",
-    fitting: "Choose a fitting to continue",
+    use: "Choose where the shade will be used",
+    shape: "Choose a shape",
+    size: "Choose a size",
+    fabric: "Choose a fabric",
+    lining: "Choose a lining",
+    fitting: "Choose a fitting",
   };
   return missing[0] ? map[missing[0]] || null : null;
+}
+
+function reviewGuideCopy(missing: string[]): { title: string; body: string; cta: string } {
+  const first = missing[0] || "use";
+  const labels: Record<string, string> = {
+    use: "where it will be used",
+    shape: "a shape",
+    size: "a size",
+    fabric: "a fabric",
+    lining: "a lining",
+    fitting: "a fitting",
+  };
+  const stepLabel = labels[first] || "the next option";
+  const remaining = missing.length;
+  return {
+    title: remaining === 1 ? "Almost there" : "Your shade is taking shape",
+    body:
+      remaining === 1
+        ? `Select ${stepLabel} to complete the specification and review price, lead time, and bag options.`
+        : `A few choices remain. Next: select ${stepLabel}. The summary below fills in as you go.`,
+    cta: nextHint(missing) || "Continue configuring",
+  };
 }
 
 function SkeletonFallback() {
@@ -601,7 +623,7 @@ function DesignStudioInner() {
                 </div>
               </div>
 
-              <div className="studio-options-col space-y-12 md:space-y-14">
+              <div className="studio-options-col cfg-options-stack">
                 <header className="cfg-panel-intro">
                   <p className="eyebrow">{COPY.designPage.eyebrow}</p>
                   <h1>{COPY.designPage.title}</h1>
@@ -906,7 +928,7 @@ function DesignStudioInner() {
                               <span className="cfg-fitting-desc">{option.description}</span>
                             )}
                             {!available && (
-                              <span className="block text-[11px] text-muted mt-1">{reason}</span>
+                              <span className="cfg-fitting-unavailable">{reason}</span>
                             )}
                           </span>
                         </button>
@@ -930,7 +952,50 @@ function DesignStudioInner() {
                   <div className="cfg-section-rule" />
 
                   {!validation.valid ? (
-                    <p className="prose-muted mt-2">{nextHint(validation.missing)}</p>
+                    <div className="cfg-review-pending mt-2">
+                      {(() => {
+                        const guide = reviewGuideCopy(validation.missing);
+                        const filled = [
+                          {
+                            label: "Use",
+                            value: USE_TYPES.find((u) => u.id === selection.useType)?.label,
+                          },
+                          { label: "Shape", value: shape?.name },
+                          { label: "Size", value: size?.name },
+                          { label: "Fabric", value: fabric?.name },
+                          { label: "Lining", value: lining?.name },
+                          { label: "Fitting", value: fitting?.name },
+                        ];
+                        return (
+                          <>
+                            <p className="cfg-review-pending-title">{guide.title}</p>
+                            <p className="cfg-review-pending-body">{guide.body}</p>
+                            <ul className="cfg-review-pending-list" aria-label="Progress so far">
+                              {filled.map((row) => (
+                                <li
+                                  key={row.label}
+                                  className={row.value ? "is-set" : "is-open"}
+                                >
+                                  <span>{row.label}</span>
+                                  <span>{row.value || "Pending"}</span>
+                                </li>
+                              ))}
+                            </ul>
+                            <button
+                              type="button"
+                              className="btn-secondary cfg-review-pending-cta"
+                              onClick={() =>
+                                goStep(
+                                  (validation.missing[0] as ConfigStepId) || "use"
+                                )
+                              }
+                            >
+                              {guide.cta}
+                            </button>
+                          </>
+                        );
+                      })()}
+                    </div>
                   ) : (
                     <div className="mt-4 space-y-6">
                       <div className="cfg-review-card">
