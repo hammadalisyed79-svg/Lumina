@@ -4,7 +4,7 @@
  *
  * Usage: npx tsx scripts/generate-fabric-plan-crops.ts
  */
-import { writeFileSync, mkdirSync } from "fs";
+import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { PrismaClient } from "@prisma/client";
 import { resolveFabricPlanTexture } from "../src/lib/fabric-plan";
@@ -71,17 +71,34 @@ async function main() {
       isPrimary: img.isPrimary,
     }));
 
-    // Prefer existing dedicated plan files if already written
+    // Prefer existing dedicated plan files if already written — do not regress to scissors flats
     const existingPlan =
       fabric.textureImage?.includes("/media/plan/") ? fabric.textureImage : null;
+
+    if (existingPlan && !process.argv.includes("--force")) {
+      const abs = join(process.cwd(), "public", existingPlan.replace(/^\//, ""));
+      if (existsSync(abs)) {
+        console.log(`${"keep_plan".padEnd(14)} ${fabric.slug.slice(0, 52)} → ${existingPlan}`);
+        alreadyPlan++;
+        rows.push({
+          slug: fabric.slug,
+          name: fabric.name,
+          source: "already_plan",
+          textureImage: existingPlan,
+          foldScore: 0,
+          fromUrl: existingPlan,
+        });
+        continue;
+      }
+    }
 
     const resolved = await resolveFabricPlanTexture({
       slug: fabric.slug,
       images,
       fallbackUrls: [
         existingPlan,
-        fabric.textureImage,
-        fabric.swatchUrl,
+        // Do NOT feed prior scissors lifestyle textureImage back into candidates
+        fabric.swatchUrl?.includes("/media/plan/") ? fabric.swatchUrl : null,
         fabric.imageUrl,
       ],
       writeDerived: true,

@@ -185,36 +185,137 @@ export async function flattenIllumination(
     .toBuffer();
 }
 
-/** Penalise dark corner blobs (scissors / props). */
-async function propPenalty(buf: Buffer): Promise<number> {
+/**
+ * Penalise scissors / props / tools in fabric photos.
+ * Detect elongated low-sat chrome blobs (blade-like), not fabric print colour.
+ */
+export async function propPenalty(buf: Buffer): Promise<number> {
   const sharp = (await import("sharp")).default;
   const { data, info } = await sharp(buf)
-    .resize(64, 64, { fit: "fill" })
-    .grayscale()
+    .resize(128, 128, { fit: "fill" })
+    .removeAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
   const w = info.width;
   const h = info.height;
-  const corners = [
-    [0, 0, 14, 14],
-    [w - 14, 0, w, 14],
-    [0, h - 14, 14, h],
-    [w - 14, h - 14, w, h],
-  ];
+  const ch = info.channels;
+  const N = w * h;
+  const mask = new Uint8Array(N);
+
+  for (let i = 0; i < N; i++) {
+    const p = i * ch;
+    const r = data[p];
+    const g = data[p + 1];
+    const b = data[p + 2];
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const sat = max === 0 ? 0 : (max - min) / max;
+    const val = max / 255;
+    const greyish =
+      Math.abs(r - g) < 22 && Math.abs(g - b) < 22 && Math.abs(r - b) < 22;
+    // Steel/chrome blade — not cream print lines (those are warmer / less grey-balanced)
+    mask[i] = sat < 0.12 && val > 0.58 && greyish ? 1 : 0;
+  }
+
+  const seen = new Uint8Array(N);
   let penalty = 0;
-  for (const [x0, y0, x1, y1] of corners) {
-    let dark = 0;
-    let n = 0;
-    for (let y = y0; y < y1; y++) {
-      for (let x = x0; x < x1; x++) {
-        const v = data[y * w + x];
-        n++;
-        if (v < 42) dark++;
+  let elongated = 0;
+  let chromePixels = 0;
+
+  for (let i = 0; i < N; i++) {
+    if (!mask[i] || seen[i]) continue;
+    const stack = [i];
+    seen[i] = 1;
+    let count = 0;
+    let minX = w;
+    let maxX = 0;
+    let minY = h;
+    let maxY = 0;
+    while (stack.length) {
+      const cur = stack.pop()!;
+      count++;
+      chromePixels++;
+      const x = cur % w;
+      const y = (cur / w) | 0;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ] as const) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        const ni = ny * w + nx;
+        if (!mask[ni] || seen[ni]) continue;
+        seen[ni] = 1;
+        stack.push(ni);
       }
     }
-    if (n && dark / n > 0.22) penalty += 80;
+    if (count < 18) continue;
+    const bw = maxX - minX + 1;
+    const bh = maxY - minY + 1;
+    const aspect = Math.max(bw, bh) / Math.max(1, Math.min(bw, bh));
+    const fill = count / (bw * bh);
+    if (aspect >= 2.4 && fill > 0.12 && count >= 28) {
+      elongated++;
+      penalty += 180 + Math.min(120, Math.floor(aspect * 20));
+    }
   }
+
+  if (elongated >= 1 && chromePixels / N > 0.008) penalty += 120;
+  if (elongated >= 2) penalty += 100;
+
+  if (elongated >= 1) {
+    let darkNear = 0;
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const i = y * w + x;
+        if (!mask[i]) continue;
+        for (const [dx, dy] of [
+          [2, 0],
+          [-2, 0],
+          [0, 2],
+          [0, -2],
+          [3, 3],
+          [-3, -3],
+        ] as const) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          const p = (ny * w + nx) * ch;
+          const r = data[p];
+          const g = data[p + 1];
+          const b = data[p + 2];
+          const max = Math.max(r, g, b);
+          const min = Math.min(r, g, b);
+          const sat = max === 0 ? 0 : (max - min) / max;
+          const val = max / 255;
+          if (sat < 0.25 && val < 0.2 && val > 0.03) darkNear++;
+        }
+      }
+    }
+    if (darkNear > 40) penalty += 100;
+  }
+
   return penalty;
+}
+
+/** True when the frame is unsafe to wrap as a shade texture (tools/props visible). */
+export async function hasUnsafeProps(url: string): Promise<boolean> {
+  const abs = localPublicPath(url);
+  if (!abs) return false;
+  try {
+    const sharp = (await import("sharp")).default;
+    const buf = await sharp(abs).jpeg().toBuffer();
+    return (await propPenalty(buf)) >= 100;
+  } catch {
+    return false;
+  }
 }
 
 export async function derivePlanCropBuffer(
@@ -263,33 +364,57 @@ export async function derivePlanCropBuffer(
  */
 export async function pickBestPlanSource(
   images: CardImage[]
-): Promise<{ url: string; stats: PlanVisionStats | null; tagged: boolean } | null> {
+): Promise<{
+  url: string;
+  stats: PlanVisionStats | null;
+  tagged: boolean;
+  propScore: number;
+} | null> {
   const web = images.filter((i) => isWebImageUrl(i.url));
   if (!web.length) return null;
 
-  const tagged = web.find((i) => textSuggestsPlan(i) === true);
-  if (tagged) {
-    const stats = await analyzeLocalFabricImage(tagged.url);
-    return { url: tagged.url, stats, tagged: true };
-  }
+  type Scored = {
+    url: string;
+    stats: PlanVisionStats | null;
+    tagged: boolean;
+    propScore: number;
+    rank: number;
+  };
+  const scored: Scored[] = [];
 
-  const scored: { url: string; stats: PlanVisionStats }[] = [];
   for (const img of web) {
     if (textSuggestsPlan(img) === false) continue;
+    const abs = localPublicPath(img.url);
+    let propScore = 0;
+    if (abs) {
+      try {
+        const sharp = (await import("sharp")).default;
+        const buf = await sharp(abs).jpeg().toBuffer();
+        propScore = await propPenalty(buf);
+      } catch {
+        propScore = 0;
+      }
+    }
     const stats = await analyzeLocalFabricImage(img.url);
-    if (!stats) continue;
-    scored.push({ url: img.url, stats });
-  }
-  if (!scored.length) {
-    return { url: web[0].url, stats: null, tagged: false };
+    const tagged = textSuggestsPlan(img) === true;
+    const fold = stats?.foldScore ?? 80;
+    // Prefer low fold + low props; heavily demote scissors/tools
+    const rank = fold + propScore * 0.85 + (tagged ? -8 : 0);
+    scored.push({ url: img.url, stats, tagged, propScore, rank });
   }
 
-  scored.sort(
-    (a, b) =>
-      a.stats.foldScore - b.stats.foldScore ||
-      a.stats.centerDarkBias - b.stats.centerDarkBias
-  );
-  return { url: scored[0].url, stats: scored[0].stats, tagged: false };
+  if (!scored.length) {
+    return { url: web[0].url, stats: null, tagged: false, propScore: 999 };
+  }
+
+  scored.sort((a, b) => a.rank - b.rank);
+  const best = scored[0];
+  return {
+    url: best.url,
+    stats: best.stats,
+    tagged: best.tagged,
+    propScore: best.propScore,
+  };
 }
 
 /**
@@ -319,7 +444,15 @@ export async function resolveFabricPlanTexture(opts: {
   if (!best) return null;
 
   const stats = best.stats;
-  if (stats && looksPlanFold(stats)) {
+  const propsUnsafe = best.propScore >= 100;
+  const galleryCount = images.filter((i) => !i.url.includes("/media/plan/")).length;
+  // Multi-image fabric packs often pair a flat swatch with scissors/props in-frame.
+  // Never wrap the full lifestyle flat — always derive a clean corner crop.
+  const mustDerive =
+    propsUnsafe ||
+    (opts.writeDerived && galleryCount >= 2 && !best.url.includes("/media/plan/"));
+
+  if (!mustDerive && stats && looksPlanFold(stats)) {
     return {
       url: best.url,
       source: best.tagged || stats.foldScore < 30 ? "gallery_plan" : "already_plan",
@@ -328,8 +461,12 @@ export async function resolveFabricPlanTexture(opts: {
     };
   }
 
-  // Already-flat digital patterns can have high colour variance but low bias
-  if (stats && stats.centerDarkBias < 4 && stats.foldScore < DERIVE_FOLD_MIN) {
+  if (
+    !mustDerive &&
+    stats &&
+    stats.centerDarkBias < 4 &&
+    stats.foldScore < DERIVE_FOLD_MIN
+  ) {
     return {
       url: best.url,
       source: "already_plan",
@@ -339,6 +476,22 @@ export async function resolveFabricPlanTexture(opts: {
   }
 
   if (!opts.writeDerived) {
+    if (propsUnsafe) {
+      for (const img of images) {
+        if (img.url === best.url) continue;
+        if (!(await hasUnsafeProps(img.url))) {
+          const s = await analyzeLocalFabricImage(img.url);
+          if (s && looksPlanFold(s)) {
+            return {
+              url: img.url,
+              source: "gallery_plan",
+              foldScore: s.foldScore,
+              fromUrl: img.url,
+            };
+          }
+        }
+      }
+    }
     return {
       url: best.url,
       source: "already_plan",
@@ -347,7 +500,23 @@ export async function resolveFabricPlanTexture(opts: {
     };
   }
 
-  const abs = localPublicPath(best.url);
+  // Prefer deriving from a prop-free wrinkled frame when scissors fill the flat shot.
+  // For multi-image flats, still derive from the flat frame but corner-crop away from centre props.
+  let deriveFrom = best.url;
+  if (propsUnsafe) {
+    for (const img of images) {
+      if (img.url === best.url) continue;
+      if (img.url.includes("/media/plan/")) continue;
+      if (!(await hasUnsafeProps(img.url))) {
+        deriveFrom = img.url;
+        break;
+      }
+    }
+  } else if (mustDerive && stats && looksPlanFold(stats)) {
+    deriveFrom = best.url;
+  }
+
+  const abs = localPublicPath(deriveFrom);
   if (!abs) {
     return {
       url: best.url,
@@ -371,7 +540,8 @@ export async function resolveFabricPlanTexture(opts: {
   mkdirSync(outDir, { recursive: true });
   const hash = createHash("sha1")
     .update(opts.slug)
-    .update(best.url)
+    .update(deriveFrom)
+    .update("no-props-v2")
     .digest("hex")
     .slice(0, 8);
   const fileName = `${opts.slug.slice(0, 48)}-${hash}.jpg`;
@@ -384,6 +554,6 @@ export async function resolveFabricPlanTexture(opts: {
     url,
     source: "derived_crop",
     foldScore: derived.foldScore,
-    fromUrl: best.url,
+    fromUrl: deriveFrom,
   };
 }
