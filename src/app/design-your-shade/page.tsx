@@ -611,7 +611,7 @@ function DesignStudioInner() {
                     }
                   />
                 </div>
-                <div className="mt-6 hidden lg:block">
+                <div className="cfg-preview-summary mt-6 hidden lg:block">
                   <SpecSummary
                     catalog={catalog}
                     selection={selection}

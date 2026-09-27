@@ -380,10 +380,7 @@ a {
     display: none;
   }
 
-  .cfg-page .cfg-preview-sticky {
-    max-height: 42vh;
-  }
-
+  /* Cap the shade only — keep mode/dimension controls fully in flow under it */
   .cfg-page .cfg-preview-frame {
     max-height: 38vh;
   }
@@ -392,6 +389,14 @@ a {
     max-height: 36vh;
     width: auto;
     margin-inline: auto;
+  }
+
+  .cfg-page .cfg-preview-controls {
+    position: relative;
+    z-index: 1;
+    margin-top: 0.85rem;
+    padding-top: 0.15rem;
+    background: var(--ivory);
   }
 }
 
@@ -523,25 +528,38 @@ a {
   box-shadow: var(--shadow-soft);
 }
 
+/* Mobile: stick preview + controls as one opaque block so option text cannot bleed through */
 .cfg-preview-sticky {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(248, 246, 241, 0.96);
-  backdrop-filter: blur(8px);
+  background: var(--ivory);
   margin-inline: -0.25rem;
   padding: 0.35rem 0.25rem 0.85rem;
   border-bottom: 1px solid var(--line);
 }
 
+/* Desktop: column is sticky — do not nest a second sticky or summary scrolls under controls */
 @media (min-width: 1024px) {
   .cfg-preview-sticky {
-    top: 6.25rem;
+    position: static;
+    top: auto;
+    z-index: auto;
     margin-inline: 0;
     padding: 0;
     border-bottom: none;
     background: transparent;
-    backdrop-filter: none;
+  }
+
+  .cfg-page .studio-preview-col {
+    background: var(--ivory);
+  }
+
+  .cfg-page .cfg-preview-summary {
+    position: relative;
+    z-index: 0;
+    margin-top: 1.5rem;
+    padding-top: 0.25rem;
   }
 }
 

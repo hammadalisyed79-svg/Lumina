@@ -139,7 +139,7 @@ function ConfiguratorPreviewInner({
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="cfg-preview-meta flex flex-wrap items-center gap-x-4 gap-y-2">
             <label className="inline-flex items-center gap-2 text-xs tracking-[0.08em] uppercase text-muted cursor-pointer">
               <input
                 type="checkbox"
